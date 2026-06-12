@@ -5,10 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "tsc && vp build",
+    "build": "vp build && tsc --noEmit",
     "preview": "vp preview"
   },
+  "dependencies": {
+    "@fontsource-variable/geist": "catalog:",
+    "@fontsource-variable/geist-mono": "catalog:",
+    "@tabler/icons-react": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "@vercel/analytics": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
   "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "~6.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -1,0 +1,88 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --font-geist-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.gradient {
+  background:
+    conic-gradient(
+      from 45deg,
+      #151515 0%,
+      #151515 20%,
+      #3a3a3a 30%,
+      #151515 40%,
+      #151515 60%,
+      #2a2a2a 70%,
+      #151515 80%,
+      #151515 100%
+    ),
+    linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #353535 50%, #1a1a1a 75%, #0f0f0f 100%);
+  background-size:
+    200% 200%,
+    400% 400%;
+  animation: metallic 12s ease-in-out infinite;
+  background-clip: padding-box;
+
+  -webkit-text-fill-color: transparent;
+}
+
+.mask {
+  -webkit-mask-image: url(/logo.svg);
+  mask-image: url(/logo.svg);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+}
+
+@keyframes metallic {
+  0% {
+    background-position:
+      0% 0%,
+      0% 50%;
+  }
+  25% {
+    background-position:
+      50% 25%,
+      25% 25%;
+  }
+  50% {
+    background-position:
+      100% 50%,
+      50% 0%;
+  }
+  75% {
+    background-position:
+      50% 75%,
+      75% 75%;
+  }
+  100% {
+    background-position:
+      0% 0%,
+      0% 50%;
+  }
+}

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# TanStack Start build artifacts
+.tanstack
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
