@@ -488,6 +488,7 @@ function UkReplicationSection() {
     );
   }
   const { h4, comparison, meta } = ukResults;
+  const partialBand = h4.bands.find((band) => band.label.startsWith("partial"));
 
   return (
     <Section
@@ -535,6 +536,23 @@ function UkReplicationSection() {
           getRowKey={(row) => row.label}
         />
       </div>
+      {partialBand && partialBand.irr > 1 ? (
+        <Prose>
+          <p>
+            One band breaks the pattern, and it is the one the pre-registration flagged as the
+            riskiest: <strong>partial</strong> adoption (score 25–49) shows IRR{" "}
+            {fmtIrr(partialBand)} — <em>more</em> violations than the none band. This is the
+            &ldquo;council CMS noise&rdquo; stratum: platforms that embed fragments of
+            govuk-frontend styling without its components land here, disproportionately local
+            authorities and parish-council CMS products whose underlying templates differ from
+            genuine adopters in every other way too. The dose–response claim in the UK is carried by
+            the likely and definite bands — sites where detection is unambiguous — exactly as the
+            structural score construction intends. We report the reversal rather than smooth it; it
+            is the clearest single illustration of why band-level detection noise is listed as a
+            limitation.
+          </p>
+        </Prose>
+      ) : null}
     </Section>
   );
 }
@@ -727,7 +745,7 @@ export function Paper01Stats() {
       />
       <Stat
         value={usStrong ? pctChange(usStrong.irr) : "—"}
-        label="US violations, strong adoption vs none (adjusted)"
+        label="US violations under strong adoption (adjusted)"
       />
       <Stat
         value={ukStrong ? pctChange(ukStrong.irr) : "—"}

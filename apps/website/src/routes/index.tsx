@@ -204,15 +204,17 @@ function Home() {
                 artifact.
               </p>
               <p className="text-gray-400 text-sm leading-relaxed">
-                Current study:{" "}
+                First study, published:{" "}
                 <a
                   href="https://research.wasimarif.com/papers/design-systems-accessibility"
                   className="text-gray-300 hover:text-white transition-colors duration-200 underline underline-offset-2"
                 >
                   Do design systems deliver accessibility at scale?
                 </a>{" "}
-                — 12,000+ US federal websites, USWDS adoption signals × axe-core violations, with a
-                UK public-sector replication.
+                — across 12,252 US federal websites, strong design-system adoption predicts ~50%
+                fewer detected accessibility violations; the pre-registered specification then
+                replicated on 6,295 UK public-sector sites scanned for the paper (IRR 0.56 vs 0.50,
+                within the locked ±0.20 window).
               </p>
             </div>
           </div>

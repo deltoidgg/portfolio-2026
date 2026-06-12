@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-12T18:48:07.571658+00:00",
+    "artifact": "data/processed/govuk_a11y.parquet",
+    "artifactSha256": "d121adc8f2471b817f56c1944535eade8172ad56c8fc550807cf46c122641e2f",
+    "nAnalysis": 6295,
+    "nClusters": 6179,
+    "pyfixestVersion": "0.60.0"
+  },
+  "h4": {
+    "strongVsNone": {
+      "label": "strong (>=50) vs below-50",
+      "beta": -0.574700435239196,
+      "se": 0.09111376435396074,
+      "irr": 0.5628734606072034,
+      "ciLow": 0.4708196665399094,
+      "ciHigh": 0.672925442949977,
+      "pOneSided": 1.4178558327415658e-10,
+      "pTwoSided": 2.8357116654831316e-10,
+      "n": 6294,
+      "nClusters": 6178
+    },
+    "continuous": {
+      "label": "ln(1 + govuk_count)",
+      "beta": -0.08175301629670265,
+      "se": 0.024023492589773706,
+      "irr": 0.9214995259579972,
+      "ciLow": 0.8791161980673589,
+      "ciHigh": 0.9659262088533942,
+      "pOneSided": 0.0003331970298352527,
+      "pTwoSided": 0.0006663940596705054,
+      "n": 6294,
+      "nClusters": 6178
+    },
+    "bands": [
+      {
+        "label": "trace vs none",
+        "beta": -0.030799067463566854,
+        "se": 0.4345833597862246,
+        "irr": 0.9696703918339922,
+        "ciLow": 0.4137196117436365,
+        "ciHigh": 2.2727002590878516,
+        "pOneSided": 0.47175047737582954,
+        "pTwoSided": 0.9435009547516591,
+        "n": 6294,
+        "nClusters": 6178
+      },
+      {
+        "label": "partial vs none",
+        "beta": 1.3978894728292546,
+        "se": 0.27742031626254865,
+        "irr": 4.046650382370561,
+        "ciLow": 2.349389822344418,
+        "ciHigh": 6.970056293509897,
+        "pOneSided": 0.999999765875916,
+        "pTwoSided": 4.6824816801738223e-7,
+        "n": 6294,
+        "nClusters": 6178
+      },
+      {
+        "label": "likely vs none",
+        "beta": -0.6176807665715865,
+        "se": 0.20480780049578587,
+        "irr": 0.539193504195603,
+        "ciLow": 0.3609208202131593,
+        "ciHigh": 0.8055219280368177,
+        "pOneSided": 0.001281069723897743,
+        "pTwoSided": 0.002562139447795486,
+        "n": 6294,
+        "nClusters": 6178
+      },
+      {
+        "label": "definite vs none",
+        "beta": -0.560702911469614,
+        "se": 0.0969932009372278,
+        "irr": 0.5708076955260127,
+        "ciLow": 0.47198593524427584,
+        "ciHigh": 0.6903202001201342,
+        "pOneSided": 3.716260188468823e-9,
+        "pTwoSided": 7.432520376937646e-9,
+        "n": 6294,
+        "nClusters": 6178
+      }
+    ],
+    "directionSupported": true
+  },
+  "comparison": {
+    "usIrr": 0.49666318990899355,
+    "ukIrr": 0.5628734606072034,
+    "absDiff": 0.0662102706982099,
+    "window": 0.2,
+    "withinWindow": true
+  },
+  "supported": true
+}

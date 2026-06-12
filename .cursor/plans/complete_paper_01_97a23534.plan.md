@@ -19,7 +19,7 @@ todos:
     status: completed
   - id: uk-etl
     content: Build tools/etl govuk pipeline + packages/datasets govuk schemas/GOVUK_BANDS; emit Parquet/JSON artifacts + app copies; write DATA_FREEZE.md and tag paper-01-uk-data
-    status: in_progress
+    status: completed
   - id: analysis-pkg
     content: Scaffold tools/analysis (uv + pyfixest + duckdb), results JSON Zod schemas in packages/datasets, vp run wiring, synthetic-data smoke test
     status: completed
@@ -28,16 +28,16 @@ todos:
     status: completed
   - id: analysis-uk
     content: Run UK replication H4 (org-type FE PPML) + US-vs-UK IRR comparison; emit results artifacts
-    status: pending
+    status: completed
   - id: uk-explorer
     content: Generalize the explorer to band-config-driven and register /explore/govuk-a11y for the UK dataset
     status: in_progress
   - id: paper-writeup
     content: "Build full paper page: results figures (forest plot, gradients, category dot plot, US-vs-UK), methods, diagnostics, deviations appendix, downloads section"
-    status: in_progress
+    status: completed
   - id: publish-flip
     content: Rewrite abstract from confirmatory results, flip status to published, update portfolio blurb, final vp check/builds and browser verification
-    status: pending
+    status: in_progress
   - id: http-archive
     content: "Optional: HTTP Archive BigQuery extract for exploratory commercial-web triangulation section"
     status: pending
