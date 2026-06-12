@@ -56,3 +56,22 @@ no detector change:
 
 A lesson recorded for the paper: "non-adoption" among UK arm's-length bodies is rarer than
 assumed — partial govuk-frontend uptake extends well beyond GDS properties.
+
+## D2 — www fallback for apex connection failures (2026-06-12, ~50 sites into the full scan, before any UK analysis)
+
+The recipe (§3) declared navigation to `https://<domain>/`. The first minutes of the full scan
+showed a systematic failure mode: some estates (disproportionately local authorities) do not
+serve the apex host at all — e.g. `bracknell-forest.gov.uk` and `middevon.gov.uk` refuse or
+reset connections on the apex while `https://www.<domain>/` serves 200. Treating these as
+non-live would create _differential_ nonresponse by organisation type, biasing the local
+stratum. GSA does not face this because federal registrations resolve apex or redirect.
+
+**Change:** when navigation to the apex fails with a connection-level status
+(`dns_resolution_error` / `connection_refused` / `connection_reset` / `ssl_error` / `timeout`)
+and the hostname does not already start with `www.`, the scanner retries once at
+`https://www.<domain>/`. Only a _completed_ fallback replaces the failed row, and such rows are
+flagged `usedWwwFallback: true` so the analysis can check sensitivity to their inclusion. No
+detection, outcome, or banding logic changed.
+
+The scan was restarted from zero after ~50 sites (all statuses re-collected under the unified
+rule), so the frozen raw file contains no mixed-rule rows.

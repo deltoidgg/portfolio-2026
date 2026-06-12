@@ -30,6 +30,8 @@ export interface ScanRow extends GovukDetection {
   nation: string;
   scannedAt: string;
   scanDurationMs: number;
+  /** Deviation D2: scanned at https://www.<domain>/ after a connection-level failure on the apex. */
+  usedWwwFallback: boolean;
   status: ScanStatus;
   error: string | null;
   httpStatus: number | null;
@@ -261,6 +263,7 @@ function baseRow(site: UniverseSite, startedAt: number): ScanRow {
     nation: site.nation,
     scannedAt: new Date(startedAt).toISOString(),
     scanDurationMs: 0,
+    usedWwwFallback: false,
     status: "other_error",
     error: null,
     httpStatus: null,
@@ -450,7 +453,15 @@ async function scanSiteInner(browser: Browser, site: UniverseSite): Promise<Scan
   }
 }
 
-export async function scanSite(browser: Browser, site: UniverseSite): Promise<ScanRow> {
+const CONNECTION_LEVEL_FAILURES: ReadonlySet<ScanStatus> = new Set([
+  "dns_resolution_error",
+  "connection_refused",
+  "connection_reset",
+  "ssl_error",
+  "timeout",
+]);
+
+async function scanSiteCapped(browser: Browser, site: UniverseSite): Promise<ScanRow> {
   const capped = new Promise<ScanRow>((resolve) => {
     setTimeout(() => {
       const row = baseRow(site, Date.now());
@@ -460,4 +471,21 @@ export async function scanSite(browser: Browser, site: UniverseSite): Promise<Sc
     }, SITE_CAP_MS);
   });
   return Promise.race([scanSiteInner(browser, site), capped]);
+}
+
+export async function scanSite(browser: Browser, site: UniverseSite): Promise<ScanRow> {
+  const row = await scanSiteCapped(browser, site);
+  // Deviation D2: one www fallback when the apex fails at connection level, mirroring the
+  // redirect-following GSA behaviour for estates that only serve the www host.
+  if (CONNECTION_LEVEL_FAILURES.has(row.status) && !site.hostname.startsWith("www.")) {
+    const wwwRow = await scanSiteCapped(browser, {
+      ...site,
+      url: `https://www.${site.hostname}/`,
+    });
+    if (wwwRow.status === "completed") {
+      wwwRow.usedWwwFallback = true;
+      return wwwRow;
+    }
+  }
+  return row;
 }
