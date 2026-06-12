@@ -1,0 +1,58 @@
+# Deviations from pre-registration — running log
+
+Every departure from [PREREGISTRATION.md](./PREREGISTRATION.md) (locked 2026-06-12, tag
+`paper-01-prereg`) or [UK_SCAN_RECIPE.md](./UK_SCAN_RECIPE.md) is logged here as it happens and
+reproduced in the paper's "Deviations from pre-registration" appendix.
+
+## D1 — Calibration-list repair (2026-06-12, before the full UK scan)
+
+The first calibration run (recipe §8) failed 8/12 + 8/12 — but every failure was a defect of the
+calibration _list_, not of the detector. On the 17 sites that actually loaded, detection was
+correct for 16 (the one miss being a mislabelled entry, see below). Repairs, verified by
+independent fetches before re-running:
+
+**Expected adopters**
+
+- `check-mot.service.gov.uk` — does not resolve (service moved behind www/gov.uk routing).
+  Replaced with `www.trade-tariff.service.gov.uk` (verified govuk-template in served HTML).
+- `viewdrivingrecord.service.gov.uk` — apex does not resolve; corrected to
+  `www.viewdrivingrecord.service.gov.uk` (verified).
+- `www.account.gov.uk` — does not resolve unauthenticated (sign-in gated). Replaced with
+  `www.apply-for-teacher-training.service.gov.uk` (verified).
+- `petition.parliament.uk` — **mislabelled by the analyst**: source inspection shows the
+  petitions app uses custom classes (`back-to-parliament`, `banner`…), not govuk-frontend. The
+  detector scoring it 0 was correct. Replaced with
+  `www.get-information-schools.service.gov.uk` (verified).
+
+**Expected non-adopters**
+
+- `www.parliament.uk`, `www.bankofengland.co.uk`, `www.met.police.uk` — WAF challenge pages
+  (recorded as `blocked_waf`; cannot validate detection either way). Replaced with
+  `www.judiciary.uk`, `www.nao.org.uk`, `www.nhsinform.scot` (all load, all independently
+  expected non-adopters).
+- `www.senedd.wales` — returns a non-2xx response; replaced with its canonical host
+  `www.senedd.cymru`.
+
+No detector weight, threshold, or band was changed (recipe §8 forbids that). The repaired list
+replaces `data/inputs/uk-domains/calibration.csv`; calibration sites remain excluded from the
+analysis sample.
+
+### D1 second round (same day)
+
+The repaired list surfaced four more list defects, again fixed with independent verification and
+no detector change:
+
+- `www.trade-tariff.service.gov.uk` and `www.apply-for-teacher-training.service.gov.uk` publish
+  `Disallow: /` for all agents in robots.txt — the scanner honours robots (recipe §3) so they can
+  never complete. Replaced with `www.notifications.service.gov.uk` and
+  `www.payments.service.gov.uk` (verified govuk-template, robots-allowed).
+- `www.get-information-schools.service.gov.uk` rejects the headless browser (non-2xx). Replaced
+  with `data.gov.uk` (verified).
+- `www.judiciary.uk` (54 govuk- classes in served HTML) and `www.nao.org.uk` (71) were
+  **analyst mislabels**: both genuinely embed govuk-frontend styling — the detector scoring them
+  76/88 ("likely") was correct. Replaced as non-adopters by `www.tfl.gov.uk` and
+  `www.scotcourts.gov.uk` (verified zero govuk- classes); `www.senedd.cymru` (non-2xx to the
+  scanner) replaced by `ico.org.uk` (verified).
+
+A lesson recorded for the paper: "non-adoption" among UK arm's-length bodies is rarer than
+assumed — partial govuk-frontend uptake extends well beyond GDS properties.

@@ -13,10 +13,10 @@ todos:
     status: completed
   - id: prereg-lock
     content: Lock PREREGISTRATION.md (final priors, LOCKED status, hashes, recipe commit ref), tag paper-01-prereg, flip paper status to preregistered
-    status: in_progress
+    status: completed
   - id: uk-scan-run
     content: Run 50-site calibration check, then full UK scan (~2.5-4k sites) to data/raw/uk-scan/
-    status: pending
+    status: in_progress
   - id: uk-etl
     content: Build tools/etl govuk pipeline + packages/datasets govuk schemas/GOVUK_BANDS; emit Parquet/JSON artifacts + app copies; write DATA_FREEZE.md and tag paper-01-uk-data
     status: pending
