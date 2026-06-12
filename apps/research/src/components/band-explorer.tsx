@@ -1,31 +1,34 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { DataTable, type DataTableColumn } from "ui";
-import type { AgencyOption, BandStat } from "../lib/uswds-queries";
+import type { ExplorerConfig } from "../content/explorers";
+import type { BandStat, GroupOption } from "../lib/explorer-queries";
 
 type PlotModule = typeof import("@observablehq/plot");
 
-const bandColumns: Array<DataTableColumn<BandStat>> = [
-  { id: "label", header: "USWDS adoption", render: (row) => row.label },
-  { id: "sites", header: "Sites", align: "right", render: (row) => row.sites.toLocaleString() },
-  {
-    id: "mean",
-    header: "Mean violations",
-    align: "right",
-    render: (row) => row.meanViolations.toFixed(2),
-  },
-  {
-    id: "median",
-    header: "Median",
-    align: "right",
-    render: (row) => row.medianViolations.toFixed(0),
-  },
-  {
-    id: "zero",
-    header: "Violation-free",
-    align: "right",
-    render: (row) => `${(row.zeroShare * 100).toFixed(1)}%`,
-  },
-];
+function bandColumns(config: ExplorerConfig): Array<DataTableColumn<BandStat>> {
+  return [
+    { id: "label", header: config.scoreNoun, render: (row) => row.label },
+    { id: "sites", header: "Sites", align: "right", render: (row) => row.sites.toLocaleString() },
+    {
+      id: "mean",
+      header: "Mean violations",
+      align: "right",
+      render: (row) => row.meanViolations.toFixed(2),
+    },
+    {
+      id: "median",
+      header: "Median",
+      align: "right",
+      render: (row) => row.medianViolations.toFixed(0),
+    },
+    {
+      id: "zero",
+      header: "Violation-free",
+      align: "right",
+      render: (row) => `${(row.zeroShare * 100).toFixed(1)}%`,
+    },
+  ];
+}
 
 function renderCharts(
   Plot: PlotModule,
@@ -69,9 +72,9 @@ function renderCharts(
   );
 }
 
-export function UswdsExplorer() {
-  const [agencies, setAgencies] = useState<AgencyOption[]>([]);
-  const [agency, setAgency] = useState("");
+export function BandExplorer({ config }: { config: ExplorerConfig }) {
+  const [groups, setGroups] = useState<GroupOption[]>([]);
+  const [group, setGroup] = useState("");
   const [bands, setBands] = useState<BandStat[] | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,13 +87,13 @@ export function UswdsExplorer() {
     setBusy(true);
     void (async () => {
       try {
-        const api = await import("../lib/uswds-queries");
-        const [agencyList, bandStats] = await Promise.all([
-          api.loadAgencies(),
-          api.loadBandStats(agency === "" ? null : agency),
+        const api = await import("../lib/explorer-queries");
+        const [groupList, bandStats] = await Promise.all([
+          api.loadGroups(config),
+          api.loadBandStats(config, group === "" ? null : group),
         ]);
         if (cancelled) return;
-        setAgencies(agencyList);
+        setGroups(groupList);
         setBands(bandStats);
         setError(null);
       } catch (cause) {
@@ -102,7 +105,7 @@ export function UswdsExplorer() {
     return () => {
       cancelled = true;
     };
-  }, [agency]);
+  }, [config, group]);
 
   useEffect(() => {
     if (!bands) return;
@@ -123,9 +126,11 @@ export function UswdsExplorer() {
   }, [bands]);
 
   const totalSites = bands?.reduce((sum, band) => sum + band.sites, 0) ?? 0;
+  const selectedGroupLabel =
+    group === "" ? null : (groups.find((option) => option.value === group)?.label ?? group);
   const chartLabel = (metric: string) =>
     bands
-      ? `${metric} by USWDS adoption band: ${bands
+      ? `${metric} by ${config.scoreNoun} band: ${bands
           .map(
             (band) =>
               `${band.label}: ${
@@ -150,19 +155,19 @@ export function UswdsExplorer() {
       <div className="flex flex-wrap items-end gap-4 mb-8">
         <div className="flex flex-col gap-1.5">
           <label htmlFor={selectId} className="text-xs text-ink-subtle">
-            Agency
+            {config.groupLabel}
           </label>
           <select
             id={selectId}
-            value={agency}
-            onChange={(event) => setAgency(event.target.value)}
-            disabled={busy && agencies.length === 0}
+            value={group}
+            onChange={(event) => setGroup(event.target.value)}
+            disabled={busy && groups.length === 0}
             className="bg-surface-raised border border-edge rounded px-3 py-1.5 text-sm text-ink max-w-72"
           >
-            <option value="">All agencies</option>
-            {agencies.map((option) => (
-              <option key={option.agency} value={option.agency}>
-                {option.agency} ({option.sites.toLocaleString()})
+            <option value="">{config.groupAllLabel}</option>
+            {groups.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label} ({option.sites.toLocaleString()})
               </option>
             ))}
           </select>
@@ -195,11 +200,11 @@ export function UswdsExplorer() {
           </div>
           <DataTable
             caption={
-              agency === ""
-                ? "Violation statistics by USWDS adoption band, all agencies."
-                : `Violation statistics by USWDS adoption band, ${agency}.`
+              selectedGroupLabel === null
+                ? `Violation statistics by ${config.scoreNoun} band, ${config.groupAllLabel.toLowerCase()}.`
+                : `Violation statistics by ${config.scoreNoun} band, ${selectedGroupLabel}.`
             }
-            columns={bandColumns}
+            columns={bandColumns(config)}
             rows={bands}
             getRowKey={(row) => row.band}
           />

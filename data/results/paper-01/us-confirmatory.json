@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-12T16:47:03.634641+00:00",
+    "artifact": "data/processed/uswds_a11y.parquet",
+    "artifactSha256": "f7090ce7e272fb4935a4fabb06c848c0c1c49faf5df01cc185a1082f79c19260",
+    "nAnalysis": 12252,
+    "nClusters": 130,
+    "pyfixestVersion": "0.60.0",
+    "bootstrapDraws": 2000,
+    "seed": 20260612
+  },
+  "h1": {
+    "continuous": {
+      "label": "ln(1 + uswds_count)",
+      "beta": -0.13194891995293467,
+      "se": 0.034519798304643,
+      "irr": 0.8763857597619286,
+      "ciLow": 0.8190530022724894,
+      "ciHigh": 0.937731743589862,
+      "pOneSided": 6.607610064834901e-5,
+      "pTwoSided": 0.00013215220129669802,
+      "n": 12207,
+      "nClusters": 91
+    },
+    "strongVsNone": {
+      "label": "strong (>=50) vs below-50",
+      "beta": -0.6998431689184778,
+      "se": 0.1396123357726172,
+      "irr": 0.49666318990899355,
+      "ciLow": 0.3777667569835188,
+      "ciHigh": 0.6529804956377856,
+      "pOneSided": 2.6827364874026927e-7,
+      "pTwoSided": 5.365472974805385e-7,
+      "n": 12207,
+      "nClusters": 91
+    },
+    "bands": [
+      {
+        "label": "trace vs none",
+        "beta": -0.14846524903986402,
+        "se": 0.2952696846275532,
+        "irr": 0.8620299630188794,
+        "ciLow": 0.48326834657560885,
+        "ciHigh": 1.53764603539179,
+        "pOneSided": 0.3075480989432582,
+        "pTwoSided": 0.6150961978865164,
+        "n": 12207,
+        "nClusters": 91
+      },
+      {
+        "label": "partial vs none",
+        "beta": -0.24419851228836867,
+        "se": 0.23027030813233304,
+        "irr": 0.783332117776154,
+        "ciLow": 0.49881498529419405,
+        "ciHigh": 1.230133866924179,
+        "pOneSided": 0.14446170454066354,
+        "pTwoSided": 0.2889234090813271,
+        "n": 12207,
+        "nClusters": 91
+      },
+      {
+        "label": "likely vs none",
+        "beta": -0.78465396917846,
+        "se": 0.24534561003606203,
+        "irr": 0.45627756057119623,
+        "ciLow": 0.2820918565563077,
+        "ciHigh": 0.7380192211938079,
+        "pOneSided": 0.000691542944499246,
+        "pTwoSided": 0.001383085888998492,
+        "n": 12207,
+        "nClusters": 91
+      },
+      {
+        "label": "definite vs none",
+        "beta": -0.7121927181127805,
+        "se": 0.1810947829827113,
+        "irr": 0.4905673413765311,
+        "ciLow": 0.34399368802315017,
+        "ciHigh": 0.6995951519001192,
+        "pOneSided": 4.199729993825674e-5,
+        "pTwoSided": 8.399459987651348e-5,
+        "n": 12207,
+        "nClusters": 91
+      }
+    ],
+    "monotoneNoneToLikely": true,
+    "supported": true
+  },
+  "h2": {
+    "v3VsV2": {
+      "label": "USWDS v3 vs v2",
+      "beta": 0.4043691042255307,
+      "se": 0.23459589624825472,
+      "irr": 1.498356894765386,
+      "ciLow": 0.9460778652369131,
+      "ciHigh": 2.3730323545079113,
+      "pOneSided": 0.9576175133987933,
+      "pTwoSided": 0.08476497320241339,
+      "n": 877,
+      "nClusters": 22
+    },
+    "supported": false
+  },
+  "h3": {
+    "categories": [
+      {
+        "category": "contrast",
+        "mechanism": "component",
+        "betaStd": -0.5178270193550326,
+        "se": 0.12671839836372756,
+        "irr": 0.7836934476519957,
+        "n": 12140
+      },
+      {
+        "category": "aria",
+        "mechanism": "component",
+        "betaStd": -0.5272169700198572,
+        "se": 0.18633070854656716,
+        "irr": 0.7802373380504221,
+        "n": 12000
+      },
+      {
+        "category": "form-names",
+        "mechanism": "component",
+        "betaStd": -0.2724519188791028,
+        "se": 0.1584014542767937,
+        "irr": 0.8796412704028993,
+        "n": 11189
+      },
+      {
+        "category": "user-control-name",
+        "mechanism": "component",
+        "betaStd": 0.2761188194368524,
+        "se": 0.11782485078077382,
+        "irr": 1.1387908992288471,
+        "n": 11786
+      },
+      {
+        "category": "link-purpose",
+        "mechanism": "component",
+        "betaStd": 0.30790535135983504,
+        "se": 0.10530887582043234,
+        "irr": 1.1559572287097148,
+        "n": 11977
+      },
+      {
+        "category": "keyboard-access",
+        "mechanism": "component",
+        "betaStd": -0.35305697017301535,
+        "se": 0.2934023042967427,
+        "irr": 0.8468926760842974,
+        "n": 10611
+      },
+      {
+        "category": "language",
+        "mechanism": "template",
+        "betaStd": -0.4949950360774872,
+        "se": 0.11340210398506999,
+        "irr": 0.7921610988704866,
+        "n": 12099
+      },
+      {
+        "category": "page-titled",
+        "mechanism": "template",
+        "betaStd": -0.161578889256031,
+        "se": 0.11639891476339628,
+        "irr": 0.9267661715303512,
+        "n": 11823
+      },
+      {
+        "category": "images",
+        "mechanism": "template",
+        "betaStd": -0.5508688195584094,
+        "se": 0.167166237370899,
+        "irr": 0.7715993220586137,
+        "n": 12058
+      },
+      {
+        "category": "lists",
+        "mechanism": "template",
+        "betaStd": 0.004306419430334272,
+        "se": 0.10240030150829027,
+        "irr": 1.0020290555082487,
+        "n": 11503
+      },
+      {
+        "category": "frames-iframes",
+        "mechanism": "template",
+        "betaStd": -0.13911625050430107,
+        "se": 0.15395197130434,
+        "irr": 0.9366168520896794,
+        "n": 10832
+      }
+    ],
+    "meanComponentBetaStd": -0.18108811793838672,
+    "meanTemplateBetaStd": -0.2684505151931789,
+    "diff": 0.0873623972547922,
+    "pOneSided": 0.767,
+    "supported": false
+  },
+  "diagnostics": {
+    "adoptionOnMaturity": {
+      "terms": [
+        {
+          "term": "dap",
+          "coef": 0.18182824986947566,
+          "se": 0.03645591101762271,
+          "pTwoSided": 2.7906113113651543e-6
+        },
+        {
+          "term": "hygiene",
+          "coef": 0.013560302916561082,
+          "se": 0.01780177010942694,
+          "pTwoSided": 0.4481227544713231
+        },
+        {
+          "term": "viewport_meta_tag",
+          "coef": 0.09640257160803858,
+          "se": 0.030003982976653115,
+          "pTwoSided": 0.0017997697802463186
+        },
+        {
+          "term": "asinh_tp",
+          "coef": 0.011863450540620886,
+          "se": 0.015518689092196373,
+          "pTwoSided": 0.44650670816594884
+        }
+      ],
+      "r2Within": 0.23406043324130288
+    },
+    "placebos": {
+      "a11yBetaStd": -0.19686875574000842,
+      "clsBetaStd": 0.09199180405376783,
+      "lcpBetaStd": -0.06619562413187745,
+      "exceedsCls": true,
+      "exceedsLcp": true,
+      "pVsCls": 0.028,
+      "pVsLcp": 0.0505
+    },
+    "attenuation": {
+      "pooledIrr": 0.3688026036322943,
+      "feIrr": 0.49666318990899355,
+      "shrinkagePct": 20.256830432521898,
+      "collapsed": false
+    },
+    "oster": {
+      "betaControlled": -0.09439952829451025,
+      "betaUncontrolled": -0.09225862336643534,
+      "r2Controlled": 0.20544492387075985,
+      "r2Uncontrolled": 0.03665707223429515,
+      "rmax": 0.2670784010319878,
+      "delta": 1.0,
+      "betaStar": -0.09518128725233538,
+      "boundsExcludeZero": true
+    },
+    "dapSubset": {
+      "label": "ln(1+uswds), DAP subset",
+      "beta": -0.13916344447046297,
+      "se": 0.043126440434085145,
+      "irr": 0.870085806122002,
+      "ciLow": 0.7995631887451944,
+      "ciHigh": 0.9468286192653015,
+      "pOneSided": 0.000625760133512121,
+      "pTwoSided": 0.001251520267024242,
+      "n": 5909,
+      "nClusters": 53
+    },
+    "functionalForm": {
+      "negbinStrongVsNone": {
+        "label": "strong vs below-50 (NB2, no FE)",
+        "beta": -1.047109177255964,
+        "se": 0.03918319331348934,
+        "irr": 0.3509508207149918,
+        "ciLow": 0.32500710474080513,
+        "ciHigh": 0.37896549571970806,
+        "pOneSided": 1.2576305954280576e-157,
+        "pTwoSided": 2.5152611908561153e-157,
+        "n": 12252,
+        "nClusters": null
+      },
+      "winsorizedContinuous": {
+        "label": "ln(1+uswds), winsorized p99",
+        "beta": -0.13684160704764622,
+        "se": 0.027398730696913832,
+        "irr": 0.8721083510093058,
+        "ciLow": 0.8265109340766656,
+        "ciHigh": 0.9202213117117956,
+        "pOneSided": 2.9501745346660613e-7,
+        "pTwoSided": 5.900349069332123e-7,
+        "n": 12207,
+        "nClusters": 91
+      },
+      "bandedConsistentWithContinuous": true
+    }
+  }
+}

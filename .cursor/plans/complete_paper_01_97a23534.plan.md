@@ -16,25 +16,25 @@ todos:
     status: completed
   - id: uk-scan-run
     content: Run 50-site calibration check, then full UK scan (~2.5-4k sites) to data/raw/uk-scan/
-    status: in_progress
+    status: completed
   - id: uk-etl
     content: Build tools/etl govuk pipeline + packages/datasets govuk schemas/GOVUK_BANDS; emit Parquet/JSON artifacts + app copies; write DATA_FREEZE.md and tag paper-01-uk-data
-    status: pending
+    status: in_progress
   - id: analysis-pkg
     content: Scaffold tools/analysis (uv + pyfixest + duckdb), results JSON Zod schemas in packages/datasets, vp run wiring, synthetic-data smoke test
-    status: pending
+    status: completed
   - id: analysis-us
     content: "Run US confirmatory: H1 PPML agency-FE IRRs, H2 version contrast, H3 category bootstrap, diagnostics 1-6 (placebos, Oster bounds, attenuation, DAP subset); emit results artifacts"
-    status: pending
+    status: completed
   - id: analysis-uk
     content: Run UK replication H4 (org-type FE PPML) + US-vs-UK IRR comparison; emit results artifacts
     status: pending
   - id: uk-explorer
     content: Generalize the explorer to band-config-driven and register /explore/govuk-a11y for the UK dataset
-    status: pending
+    status: in_progress
   - id: paper-writeup
     content: "Build full paper page: results figures (forest plot, gradients, category dot plot, US-vs-UK), methods, diagnostics, deviations appendix, downloads section"
-    status: pending
+    status: in_progress
   - id: publish-flip
     content: Rewrite abstract from confirmatory results, flip status to published, update portfolio blurb, final vp check/builds and browser verification
     status: pending

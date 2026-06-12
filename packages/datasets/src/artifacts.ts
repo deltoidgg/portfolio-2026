@@ -15,7 +15,16 @@ export const ARTIFACTS = {
     /** Copy imported by the research app at build time. */
     webSummary: "apps/research/src/generated/uswds-a11y.json",
   },
+  govuk: {
+    /** Raw scan JSONL directory (gitignored; hashed in DATA_FREEZE.md). */
+    raw: "data/raw/uk-scan",
+    parquet: "data/processed/govuk_a11y.parquet",
+    summary: "data/summaries/govuk-a11y.json",
+    webParquet: "apps/research/public/data/govuk_a11y.parquet",
+    webSummary: "apps/research/src/generated/govuk-a11y.json",
+  },
 } as const;
 
 /** Public URL of the Parquet artifact within the research app. */
 export const GSA_PARQUET_URL = "/data/uswds_a11y.parquet";
+export const GOVUK_PARQUET_URL = "/data/govuk_a11y.parquet";

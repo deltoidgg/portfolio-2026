@@ -1,0 +1,18 @@
+[project]
+name = "analysis"
+version = "0.0.0"
+description = "Confirmatory analysis for Paper 01 (PPML with fixed effects via pyfixest), per the locked pre-registration."
+requires-python = ">=3.12"
+dependencies = [
+  "pyfixest>=0.30",
+  "pandas>=2.2",
+  "pyarrow>=17",
+  "duckdb>=1.1",
+  "numpy>=2.0",
+  "scipy>=1.14",
+  "statsmodels>=0.14",
+  "joblib>=1.4",
+]
+
+[tool.uv]
+package = false

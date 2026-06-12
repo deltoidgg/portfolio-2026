@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-12T18:46:11.291Z",
+    "scanWindow": "2026-06-12T16:07:13Z – 2026-06-12T18:35:40Z",
+    "source": "tools/scanner (Playwright + axe-core), per UK_SCAN_RECIPE.md",
+    "scannedSites": 8136,
+    "analysedSites": 6295,
+    "axeVersion": "4.11.4"
+  },
+  "statuses": [
+    {
+      "status": "completed",
+      "sites": 6474
+    },
+    {
+      "status": "dns_resolution_error",
+      "sites": 714
+    },
+    {
+      "status": "ssl_error",
+      "sites": 319
+    },
+    {
+      "status": "timeout",
+      "sites": 214
+    },
+    {
+      "status": "invalid_response",
+      "sites": 208
+    },
+    {
+      "status": "blocked_waf",
+      "sites": 98
+    },
+    {
+      "status": "other_error",
+      "sites": 42
+    },
+    {
+      "status": "connection_reset",
+      "sites": 27
+    },
+    {
+      "status": "connection_refused",
+      "sites": 21
+    },
+    {
+      "status": "blocked_robots",
+      "sites": 19
+    }
+  ],
+  "bands": [
+    {
+      "band": "none",
+      "label": "No signal (0)",
+      "order": 0,
+      "sites": 4919,
+      "meanViolations": 4.789997967066477,
+      "medianViolations": 1,
+      "zeroShare": 0.32852205732872536
+    },
+    {
+      "band": "trace",
+      "label": "Trace (1-24)",
+      "order": 1,
+      "sites": 177,
+      "meanViolations": 3.225988700564972,
+      "medianViolations": 1,
+      "zeroShare": 0.3615819209039548
+    },
+    {
+      "band": "partial",
+      "label": "Partial (25-49)",
+      "order": 2,
+      "sites": 39,
+      "meanViolations": 16.28205128205128,
+      "medianViolations": 0,
+      "zeroShare": 0.5128205128205128
+    },
+    {
+      "band": "likely",
+      "label": "Likely (50-99)",
+      "order": 3,
+      "sites": 46,
+      "meanViolations": 1.9782608695652173,
+      "medianViolations": 1,
+      "zeroShare": 0.43478260869565216
+    },
+    {
+      "band": "definite",
+      "label": "Definite (100+)",
+      "order": 4,
+      "sites": 1114,
+      "meanViolations": 2.1696588868940756,
+      "medianViolations": 1,
+      "zeroShare": 0.46947935368043087
+    }
+  ],
+  "orgTypes": [
+    {
+      "orgType": "parish",
+      "label": "Parish & town councils",
+      "sites": 5041,
+      "strongShare": 0.2005554453481452,
+      "meanViolations": 4.441579051775442
+    },
+    {
+      "orgType": "central",
+      "label": "Central & national bodies",
+      "sites": 744,
+      "strongShare": 0.16801075268817203,
+      "meanViolations": 4.099462365591398
+    },
+    {
+      "orgType": "local",
+      "label": "Local authorities",
+      "sites": 326,
+      "strongShare": 0.0736196319018405,
+      "meanViolations": 4.217791411042945
+    },
+    {
+      "orgType": "nhs",
+      "label": "NHS",
+      "sites": 183,
+      "strongShare": 0,
+      "meanViolations": 2.519125683060109
+    },
+    {
+      "orgType": "devolved",
+      "label": "Devolved",
+      "sites": 1,
+      "strongShare": 0,
+      "meanViolations": 0
+    }
+  ],
+  "versions": [
+    {
+      "version": "4",
+      "sites": 10,
+      "meanViolations": 1.8,
+      "medianViolations": 1,
+      "zeroShare": 0.3
+    },
+    {
+      "version": "5",
+      "sites": 530,
+      "meanViolations": 0.3264150943396226,
+      "medianViolations": 0,
+      "zeroShare": 0.8679245283018868
+    },
+    {
+      "version": "none",
+      "sites": 5746,
+      "meanViolations": 4.7117995127044905,
+      "medianViolations": 1,
+      "zeroShare": 0.3089105464671075
+    }
+  ],
+  "categories": [
+    {
+      "category": "contrast",
+      "sitesWith": 1781,
+      "totalViolations": 15273
+    },
+    {
+      "category": "link-purpose",
+      "sitesWith": 1388,
+      "totalViolations": 5235
+    },
+    {
+      "category": "lists",
+      "sitesWith": 1118,
+      "totalViolations": 1752
+    },
+    {
+      "category": "other",
+      "sitesWith": 714,
+      "totalViolations": 1761
+    },
+    {
+      "category": "aria",
+      "sitesWith": 519,
+      "totalViolations": 1329
+    },
+    {
+      "category": "images",
+      "sitesWith": 280,
+      "totalViolations": 784
+    },
+    {
+      "category": "language",
+      "sitesWith": 201,
+      "totalViolations": 201
+    },
+    {
+      "category": "user-control-name",
+      "sitesWith": 195,
+      "totalViolations": 572
+    },
+    {
+      "category": "frames-iframes",
+      "sitesWith": 167,
+      "totalViolations": 184
+    },
+    {
+      "category": "form-names",
+      "sitesWith": 75,
+      "totalViolations": 103
+    },
+    {
+      "category": "page-titled",
+      "sitesWith": 46,
+      "totalViolations": 46
+    },
+    {
+      "category": "keyboard-access",
+      "sitesWith": 25,
+      "totalViolations": 26
+    },
+    {
+      "category": "auto-updating",
+      "sitesWith": 7,
+      "totalViolations": 7
+    },
+    {
+      "category": "flash",
+      "sitesWith": 2,
+      "totalViolations": 3
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
 import { Badge } from "ui";
-import { UswdsExplorer } from "../components/uswds-explorer";
+import { BandExplorer } from "../components/band-explorer";
 import { datasetById } from "../content/datasets";
+import { explorerConfigs } from "../content/explorers";
 
 export const Route = createFileRoute("/explore/$dataset")({
   loader: ({ params }) => {
@@ -65,7 +66,7 @@ function ExplorePage() {
         </p>
       </header>
 
-      {dataset.id === "uswds-a11y" ? <UswdsExplorer /> : null}
+      {explorerConfigs[dataset.id] ? <BandExplorer config={explorerConfigs[dataset.id]} /> : null}
     </div>
   );
 }

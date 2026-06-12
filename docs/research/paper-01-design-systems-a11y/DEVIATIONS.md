@@ -75,3 +75,20 @@ detection, outcome, or banding logic changed.
 
 The scan was restarted from zero after ~50 sites (all statuses re-collected under the unified
 rule), so the frozen raw file contains no mixed-rule rows.
+
+## D3 — Operationalization of the "strong vs none" headline contrast (2026-06-12, after the US run, before any UK estimation)
+
+The prereg's banded H1 form says "IRR(strong vs none) < 1" with strong = likely ∪ definite
+(score ≥ 50). The analysis script operationalized the headline single-number contrast as a
+binary `strong` dummy on the full sample — whose reference group is every site **below 50**
+(none ∪ trace ∪ partial), i.e. "strong vs not-strong", not literally "strong vs the none band".
+The pre-registered banded model (estimated alongside, none as reference) gives the none-referenced
+IRRs directly: likely 0.456, definite 0.491 — bracketing the strong-dummy estimate of 0.497, so
+nothing of substance turns on the choice (trace ∪ partial is ~19% of the reference mass and its
+band IRRs are close to 1).
+
+**Change:** estimate labels corrected from "strong (>=50) vs none" to "strong (>=50) vs
+below-50" in both analysis scripts; paper prose describes the contrast accurately. No model,
+sample, or decision rule changed; the US script re-run reproduces identical estimates (seeded).
+The UK script (not yet run at the time of this entry) uses the same construction, keeping the
+pre-registered US-vs-UK comparison window apples-to-apples.

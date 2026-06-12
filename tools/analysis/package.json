@@ -1,0 +1,13 @@
+{
+  "name": "analysis",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Thin wrapper so vp can drive the Python analysis (uv).",
+  "type": "module",
+  "scripts": {
+    "setup": "uv sync",
+    "us": "uv run python us_confirmatory.py",
+    "uk": "uv run python uk_confirmatory.py",
+    "test": "uv run python smoke_test.py"
+  }
+}

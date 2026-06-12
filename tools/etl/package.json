@@ -7,7 +7,9 @@
   "scripts": {
     "gsa": "node src/gsa.ts build",
     "gsa:fetch": "node src/gsa.ts build --fetch",
-    "gsa:inspect": "node src/gsa.ts inspect"
+    "gsa:inspect": "node src/gsa.ts inspect",
+    "govuk": "node src/govuk.ts build",
+    "govuk:inspect": "node src/govuk.ts inspect"
   },
   "dependencies": {
     "@duckdb/node-api": "catalog:",
