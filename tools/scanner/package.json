@@ -1,0 +1,25 @@
+{
+  "name": "scanner",
+  "version": "0.0.0",
+  "private": true,
+  "description": "UK public-sector accessibility scanner: Playwright + axe-core + govuk-frontend detection, per the frozen recipe in docs/research/paper-01-design-systems-a11y/UK_SCAN_RECIPE.md.",
+  "type": "module",
+  "scripts": {
+    "fetch-domains": "node src/fetch-domains.ts",
+    "calibrate": "node src/run-scan.ts --calibration",
+    "scan": "node src/run-scan.ts --full",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "axe-core": "^4.11.0",
+    "datasets": "workspace:*",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:",
+    "vitest": "catalog:"
+  }
+}

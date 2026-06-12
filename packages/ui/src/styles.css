@@ -1,0 +1,59 @@
+/*
+ * Design tokens for the shared design system.
+ *
+ * Raw values live on :root as --ui-* custom properties; the @theme block maps
+ * them to Tailwind v4 color/font names so utilities like `bg-surface` and
+ * `text-ink-muted` are generated for every consuming app.
+ *
+ * Consuming apps must also register this package as a Tailwind source, e.g.:
+ *   @import "tailwindcss";
+ *   @import "ui/styles.css";
+ *   @source "../../../packages/ui/src";
+ */
+
+:root {
+  /* Surfaces */
+  --ui-canvas: #000000;
+  --ui-surface: #0a0a0a;
+  --ui-surface-raised: #141414;
+  --ui-edge: #262626;
+  --ui-edge-strong: #404040;
+
+  /* Ink */
+  --ui-ink: #ffffff;
+  --ui-ink-muted: #9ca3af;
+  --ui-ink-subtle: #6b7280;
+
+  /* Accent (emerald, matching the portfolio's live-status language) */
+  --ui-accent: #10b981;
+  --ui-accent-soft: rgb(16 185 129 / 0.1);
+  --ui-accent-edge: rgb(16 185 129 / 0.3);
+  --ui-accent-ink: #34d399;
+
+  /* Signal colours for data/status */
+  --ui-warn: #f59e0b;
+  --ui-danger: #ef4444;
+
+  /* Type */
+  --ui-font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --ui-font-mono: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+@theme inline {
+  --color-canvas: var(--ui-canvas);
+  --color-surface: var(--ui-surface);
+  --color-surface-raised: var(--ui-surface-raised);
+  --color-edge: var(--ui-edge);
+  --color-edge-strong: var(--ui-edge-strong);
+  --color-ink: var(--ui-ink);
+  --color-ink-muted: var(--ui-ink-muted);
+  --color-ink-subtle: var(--ui-ink-subtle);
+  --color-accent: var(--ui-accent);
+  --color-accent-soft: var(--ui-accent-soft);
+  --color-accent-edge: var(--ui-accent-edge);
+  --color-accent-ink: var(--ui-accent-ink);
+  --color-warn: var(--ui-warn);
+  --color-danger: var(--ui-danger);
+  --font-sans: var(--ui-font-sans);
+  --font-mono: var(--ui-font-mono);
+}

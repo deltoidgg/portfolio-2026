@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "ui/styles.css";
+
+/* Generate utilities for classes used inside the shared ui package */
+@source "../../../packages/ui/src";
+
+body {
+  background: var(--ui-canvas);
+  color: var(--ui-ink);
+  font-family: var(--ui-font-sans);
+}

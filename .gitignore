@@ -25,3 +25,7 @@ dist-ssr
 
 # AI agent worktrees
 .claude/worktrees/
+
+# Research data: raw downloads are regenerable via tools/etl; processed
+# artifacts and summaries are committed for reproducibility
+data/raw/

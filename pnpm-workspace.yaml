@@ -24,6 +24,10 @@ catalog:
   "@types/react-dom": 19.2.3
   tailwindcss: 4.3.0
   "@tailwindcss/vite": ^4.3.0
+  zod: ^4.4.3
+  "@duckdb/duckdb-wasm": 1.33.1-dev45.0
+  "@duckdb/node-api": 1.5.3-r.3
+  "@observablehq/plot": ^0.6.17
 overrides:
   vite: "catalog:"
   vitest: "catalog:"

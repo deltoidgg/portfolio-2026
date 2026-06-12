@@ -6,6 +6,7 @@ import {
   IconMail,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { Badge, StatusDot } from "ui";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -176,6 +177,42 @@ function Home() {
                 platform that unifies fragmented player metrics from multiple APIs into clean
                 analytics dashboards, turning fragmented player data into actionable insights for
                 event planning and sponsor presentations.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Research Section */}
+        <section className="mb-20">
+          <h2 className="text-lg font-medium mb-8 text-white">Research</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-base font-medium mb-2 flex items-center gap-2">
+                <StatusDot tone="live" className="mr-2" />
+                <a
+                  href="https://research.wasimarif.com"
+                  className="hover:text-gray-300 transition-colors duration-200 cursor-pointer"
+                >
+                  Research Lab
+                </a>
+                <Badge tone="accent">Open data</Badge>
+              </h3>
+              <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                Open, pre-registered research on how design systems, accessibility, and AI coding
+                agents shape the quality of the web — with every dataset explorable in the browser.
+                Hypotheses are locked before estimation and every figure traces to a versioned data
+                artifact.
+              </p>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Current study:{" "}
+                <a
+                  href="https://research.wasimarif.com/papers/design-systems-accessibility"
+                  className="text-gray-300 hover:text-white transition-colors duration-200 underline underline-offset-2"
+                >
+                  Do design systems deliver accessibility at scale?
+                </a>{" "}
+                — 12,000+ US federal websites, USWDS adoption signals × axe-core violations, with a
+                UK public-sector replication.
               </p>
             </div>
           </div>

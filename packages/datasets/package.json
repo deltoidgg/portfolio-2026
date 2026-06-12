@@ -1,0 +1,21 @@
+{
+  "name": "datasets",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Typed access layer for research data artifacts: Zod schemas, artifact paths, and shared metric definitions.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "check": "vp check"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

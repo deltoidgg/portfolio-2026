@@ -1,5 +1,5 @@
 {
-  "name": "website",
+  "name": "research",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,12 +9,15 @@
     "preview": "vp preview"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "catalog:",
     "@fontsource-variable/geist": "catalog:",
     "@fontsource-variable/geist-mono": "catalog:",
+    "@observablehq/plot": "catalog:",
     "@tabler/icons-react": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
     "@vercel/analytics": "catalog:",
+    "datasets": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
     "ui": "workspace:*"

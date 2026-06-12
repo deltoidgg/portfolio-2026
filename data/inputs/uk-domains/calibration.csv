@@ -1,0 +1,25 @@
+hostname,expected,note
+www.gov.uk,adopter,GOV.UK itself
+design-system.service.gov.uk,adopter,Design System docs
+find-and-update.company-information.service.gov.uk,adopter,Companies House
+www.registertovote.service.gov.uk,adopter,Register to vote
+check-mot.service.gov.uk,adopter,DVSA check MOT
+vehicleenquiry.service.gov.uk,adopter,DVLA vehicle enquiry
+viewdrivingrecord.service.gov.uk,adopter,DVLA driving record
+www.find-government-grants.service.gov.uk,adopter,Find a grant
+petition.parliament.uk,adopter,Petitions (govuk-frontend)
+www.account.gov.uk,adopter,GOV.UK One Login
+www.tax.service.gov.uk,adopter,HMRC services
+coronavirus.data.gov.uk,adopter,UKHSA dashboard (archived)
+www.nhs.uk,non-adopter,"NHS.UK frontend, not govuk"
+www.england.nhs.uk,non-adopter,NHS England
+digital.nhs.uk,non-adopter,NHS England Digital
+www.gov.scot,non-adopter,Scottish DS
+www.mygov.scot,non-adopter,Scottish DS
+www.gov.wales,non-adopter,Welsh Government DS
+www.nidirect.gov.uk,non-adopter,nidirect DS
+www.parliament.uk,non-adopter,Parliament DS
+www.parliament.scot,non-adopter,Scottish Parliament
+www.senedd.wales,non-adopter,Senedd
+www.met.police.uk,non-adopter,Met Police
+www.bankofengland.co.uk,non-adopter,Bank of England
