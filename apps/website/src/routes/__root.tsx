@@ -1,6 +1,8 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
+import { SiteFooter } from "../components/site-footer";
+import { SiteHeader } from "../components/site-header";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -12,7 +14,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "London-based design engineer specialising in TypeScript, React, interaction design, accessibility, and data visualisation. Explore my work including Rewriter and other projects.",
+          "London-based design engineer working in TypeScript, React, interaction design, accessibility, and data visualisation. Projects, research, and writing.",
       },
     ],
     links: [
@@ -38,7 +40,11 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body className="antialiased">
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <SiteHeader />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </div>
         <Analytics />
         <Scripts />
       </body>

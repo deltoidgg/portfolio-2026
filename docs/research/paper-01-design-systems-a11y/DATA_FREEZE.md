@@ -51,7 +51,7 @@ its fixed-effect cell is dropped as a singleton by the estimator.
 The raw JSONL (10.2 MB, gitignored like all `data/raw/`) retains the auditable per-rule axe node
 counts and every raw govuk-frontend detection signal per site; its hash above makes the committed
 Parquet verifiable against it. The Parquet and summary JSON are committed, and byte-identical
-copies ship with the research app (`apps/research/public/data/govuk_a11y.parquet`,
-`apps/research/src/generated/govuk-a11y.json`).
+copies ship with the apps (`apps/research/public/data/govuk_a11y.parquet`,
+`packages/datasets/artifacts/govuk-a11y.json`).
 
 Git tag for this freeze: `paper-01-uk-data`.

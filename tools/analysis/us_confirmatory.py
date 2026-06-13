@@ -3,7 +3,7 @@
 Usage: uv run python us_confirmatory.py [--draws 2000] [--jobs -1]
        [--artifact ../../data/processed/uswds_a11y.parquet] [--out us-confirmatory.json]
 
-Emits data/results/paper-01/us-confirmatory.json (+ a copy in apps/research/src/generated/).
+Emits data/results/paper-01/us-confirmatory.json (+ a copy in packages/datasets/artifacts/).
 """
 
 from __future__ import annotations

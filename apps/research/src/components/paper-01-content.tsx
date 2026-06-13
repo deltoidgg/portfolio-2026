@@ -3,14 +3,8 @@ import { IconExternalLink } from "@tabler/icons-react";
 import { DataTable, Prose, Section, Stat, type DataTableColumn } from "ui";
 import type { Estimate } from "datasets";
 import { uswdsSummary } from "../content/papers";
-import { govukSummary, ukResults, usResults } from "../content/paper-01-results";
-import {
-  BandGradient,
-  CategoryDotPlot,
-  ForestPlot,
-  UsUkComparison,
-  type GradientPoint,
-} from "./paper-figures";
+import { govukSummary, ukResults, usResults } from "datasets/artifacts";
+import { BandGradient, CategoryDotPlot, ForestPlot, UsUkComparison, type GradientPoint } from "viz";
 
 const GITHUB = "https://github.com/deltoidgg/portfolio-2026/blob/main";
 const PAPER_DOCS = `${GITHUB}/docs/research/paper-01-design-systems-a11y`;
@@ -48,15 +42,6 @@ function ExternalA({ href, children }: { href: string; children: React.ReactNode
     <a href={href} target="_blank" rel="noreferrer">
       {children}
     </a>
-  );
-}
-
-function PendingNote({ what }: { what: string }) {
-  return (
-    <p className="text-sm text-ink-subtle border border-dashed border-edge-strong rounded-md px-4 py-3">
-      {what} has not been run yet. This section fills in automatically once the corresponding frozen
-      artifact is written.
-    </p>
   );
 }
 
@@ -169,7 +154,7 @@ const usBandColumns: Array<DataTableColumn<(typeof uswdsSummary.bands)[number]>>
 ];
 
 function DataSection() {
-  const govukBandRows = govukSummary?.bands;
+  const govukBandRows = govukSummary.bands;
   return (
     <Section title="2. Data">
       <Prose>
@@ -213,27 +198,21 @@ function DataSection() {
           GSA&rsquo;s category names. Detection correctness was verified against a pre-declared
           24-site calibration set, excluded from analysis.
         </p>
-        {govukSummary ? (
-          <p>
-            The frozen UK artifact covers{" "}
-            <strong>{govukSummary.meta.analysedSites.toLocaleString()}</strong> completed,
-            deduplicated sites (of {govukSummary.meta.scannedSites.toLocaleString()} scan attempts),
-            scanned {govukSummary.meta.scanWindow}.
-          </p>
-        ) : null}
+        <p>
+          The frozen UK artifact covers{" "}
+          <strong>{govukSummary.meta.analysedSites.toLocaleString()}</strong> completed,
+          deduplicated sites (of {govukSummary.meta.scannedSites.toLocaleString()} scan attempts),
+          scanned {govukSummary.meta.scanWindow}.
+        </p>
       </Prose>
-      {govukBandRows ? (
-        <div className="my-6">
-          <DataTable
-            caption={`govuk-frontend adoption vs detected accessibility violations, ${govukSummary?.meta.analysedSites.toLocaleString()} UK public-sector websites. Unadjusted means.`}
-            columns={usBandColumns as Array<DataTableColumn<(typeof govukBandRows)[number]>>}
-            rows={[...govukBandRows]}
-            getRowKey={(row) => row.band}
-          />
-        </div>
-      ) : (
-        <PendingNote what="The UK scan" />
-      )}
+      <div className="my-6">
+        <DataTable
+          caption={`govuk-frontend adoption vs detected accessibility violations, ${govukSummary.meta.analysedSites.toLocaleString()} UK public-sector websites. Unadjusted means.`}
+          columns={usBandColumns as Array<DataTableColumn<(typeof govukBandRows)[number]>>}
+          rows={[...govukBandRows]}
+          getRowKey={(row) => row.band}
+        />
+      </div>
     </Section>
   );
 }
@@ -289,14 +268,6 @@ function MethodsSection() {
 }
 
 function UsResultsSection() {
-  if (!usResults) {
-    return (
-      <Section title="4. Results — United States">
-        <PendingNote what="The US confirmatory analysis" />
-      </Section>
-    );
-  }
-
   const { h1, h2, h3, meta } = usResults;
   const bandIrrById = new Map(
     h1.bands.map((estimate) => [estimate.label.split(" ")[0] ?? "", estimate]),
@@ -391,13 +362,6 @@ function UsResultsSection() {
 }
 
 function DiagnosticsSection() {
-  if (!usResults) {
-    return (
-      <Section title="5. Diagnostics & robustness">
-        <PendingNote what="The US confirmatory analysis" />
-      </Section>
-    );
-  }
   const d = usResults.diagnostics;
   const negbin = d.functionalForm.negbinStrongVsNone;
 
@@ -480,13 +444,6 @@ function DiagnosticsSection() {
 }
 
 function UkReplicationSection() {
-  if (!ukResults || !usResults) {
-    return (
-      <Section title="6. The held-out UK replication">
-        <PendingNote what="The UK replication analysis" />
-      </Section>
-    );
-  }
   const { h4, comparison, meta } = ukResults;
   const partialBand = h4.bands.find((band) => band.label.startsWith("partial"));
 
@@ -650,9 +607,7 @@ function DownloadsSection() {
     {
       label: "UK dataset (Parquet)",
       href: "/data/govuk_a11y.parquet",
-      note: govukSummary
-        ? `${govukSummary.meta.analysedSites.toLocaleString()} UK public-sector websites, collected for this paper`
-        : "UK public-sector scan, collected for this paper",
+      note: `${govukSummary.meta.analysedSites.toLocaleString()} UK public-sector websites, collected for this paper`,
     },
     {
       label: "US confirmatory results (JSON)",
@@ -729,10 +684,8 @@ function DownloadsSection() {
   );
 }
 
-/** Headline stats for the paper header, computed from whichever artifacts exist. */
+/** Headline stats for the paper header, computed from the frozen artifacts. */
 export function Paper01Stats() {
-  const usStrong = usResults?.h1.strongVsNone;
-  const ukStrong = ukResults?.h4.strongVsNone;
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 border-y border-edge py-6 mb-12">
       <Stat
@@ -740,15 +693,15 @@ export function Paper01Stats() {
         label="US federal websites analysed"
       />
       <Stat
-        value={govukSummary ? govukSummary.meta.analysedSites.toLocaleString() : "—"}
+        value={govukSummary.meta.analysedSites.toLocaleString()}
         label="UK public-sector websites scanned"
       />
       <Stat
-        value={usStrong ? pctChange(usStrong.irr) : "—"}
+        value={pctChange(usResults.h1.strongVsNone.irr)}
         label="US violations under strong adoption (adjusted)"
       />
       <Stat
-        value={ukStrong ? pctChange(ukStrong.irr) : "—"}
+        value={pctChange(ukResults.h4.strongVsNone.irr)}
         label="UK replication, same contrast (adjusted)"
       />
     </div>

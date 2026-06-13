@@ -7,7 +7,7 @@ import { z } from "zod";
  * primary-set websites with a completed accessibility scan, and emits:
  *   - data/processed/uswds_a11y.parquet  (analysis-grade, one row per site)
  *   - data/summaries/uswds-a11y.json     (figure-grade aggregates)
- * plus copies for the research app (public/ and src/generated/).
+ * plus shared copies (apps/research/public/ and packages/datasets/artifacts/).
  *
  * Outcome coding: `accessibility_violations` in the snapshot is a JSON object
  * of per-category axe-core violation counts; a NULL payload on a completed

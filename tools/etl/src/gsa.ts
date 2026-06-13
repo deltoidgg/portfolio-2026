@@ -10,7 +10,7 @@
  *   data/processed/uswds_a11y.parquet           analysis-grade artifact
  *   data/summaries/uswds-a11y.json              figure-grade summary
  *   apps/research/public/data/uswds_a11y.parquet   web copy (DuckDB-WASM)
- *   apps/research/src/generated/uswds-a11y.json    web copy (build-time import)
+ *   packages/datasets/artifacts/uswds-a11y.json    shared copy (build-time import via datasets/artifacts)
  */
 
 import { DuckDBInstance } from "@duckdb/node-api";
@@ -33,7 +33,7 @@ const rawPath = path.join(REPO_ROOT, ARTIFACTS.gsa.raw);
 const parquetPath = path.join(REPO_ROOT, ARTIFACTS.gsa.parquet);
 const summaryPath = path.join(REPO_ROOT, ARTIFACTS.gsa.summary);
 const webParquetPath = path.join(REPO_ROOT, ARTIFACTS.gsa.webParquet);
-const webSummaryPath = path.join(REPO_ROOT, ARTIFACTS.gsa.webSummary);
+const sharedSummaryPath = path.join(REPO_ROOT, ARTIFACTS.gsa.sharedSummary);
 
 function num(value: unknown): number {
   if (typeof value === "number") return value;
@@ -333,14 +333,14 @@ async function build(): Promise<void> {
 
   await mkdir(path.dirname(webParquetPath), { recursive: true });
   await copyFile(parquetPath, webParquetPath);
-  await mkdir(path.dirname(webSummaryPath), { recursive: true });
-  await writeFile(webSummaryPath, `${summaryJson}\n`);
+  await mkdir(path.dirname(sharedSummaryPath), { recursive: true });
+  await writeFile(sharedSummaryPath, `${summaryJson}\n`);
 
   console.log(`Snapshot date: ${snapshotDate}`);
   console.log(`Sites in raw snapshot: ${totalSites}; analysed: ${analysedSites}`);
   console.log(`Parquet:  ${parquetPath}`);
   console.log(`Summary:  ${summaryPath}`);
-  console.log(`Web copies: ${webParquetPath}, ${webSummaryPath}`);
+  console.log(`Web copies: ${webParquetPath}, ${sharedSummaryPath}`);
 }
 
 const [mode = "build", ...flags] = process.argv.slice(2);

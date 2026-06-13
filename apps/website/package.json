@@ -15,9 +15,11 @@
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
     "@vercel/analytics": "catalog:",
+    "datasets": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "ui": "workspace:*"
+    "ui": "workspace:*",
+    "viz": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",

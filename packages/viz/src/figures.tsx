@@ -1,48 +1,18 @@
-import { useEffect, useRef } from "react";
-import type { Estimate } from "datasets";
+import { PLOT_STYLE, PlotBox, plotWidth } from "./plot-box";
 
-type PlotModule = typeof import("@observablehq/plot");
-
-/** Client-only Observable Plot container (Plot is dynamically imported, never SSR'd). */
-function PlotBox({
-  label,
-  render,
-}: {
+/**
+ * Generic research figures. Estimates are passed structurally (label + IRR +
+ * CI bounds) so this package stays decoupled from the datasets schemas.
+ */
+export interface FigureEstimate {
   label: string;
-  render: (Plot: PlotModule, node: HTMLElement) => void;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-    let disposed = false;
-    void (async () => {
-      const Plot = await import("@observablehq/plot");
-      if (disposed || !ref.current) return;
-      render(Plot, ref.current);
-    })();
-    return () => {
-      disposed = true;
-      node.replaceChildren();
-    };
-  }, [render]);
-
-  return <div ref={ref} role="img" aria-label={label} />;
-}
-
-const PLOT_STYLE = {
-  background: "transparent",
-  fontFamily: "inherit",
-  fontSize: "11px",
-} as const;
-
-function width(node: HTMLElement, max = 680): number {
-  return Math.max(300, Math.min(node.clientWidth, max));
+  irr: number;
+  ciLow: number;
+  ciHigh: number;
 }
 
 /** Forest plot of IRR estimates (log-scale x axis, 95% CIs, reference line at 1). */
-export function ForestPlot({ estimates, title }: { estimates: Estimate[]; title: string }) {
+export function ForestPlot({ estimates, title }: { estimates: FigureEstimate[]; title: string }) {
   const rows = estimates.map((estimate) => ({
     label: estimate.label,
     irr: estimate.irr,
@@ -62,7 +32,7 @@ export function ForestPlot({ estimates, title }: { estimates: Estimate[]; title:
       render={(Plot, node) => {
         node.replaceChildren(
           Plot.plot({
-            width: width(node),
+            width: plotWidth(node),
             height: 60 + rows.length * 44,
             marginLeft: 170,
             marginRight: 44,
@@ -128,7 +98,7 @@ export function BandGradient({ points }: { points: GradientPoint[] }) {
     <PlotBox
       label={ariaLabel}
       render={(Plot, node) => {
-        const w = width(node);
+        const w = plotWidth(node);
         const domain = points.map((point) => point.band);
         const unadjusted = Plot.plot({
           width: w,
@@ -201,7 +171,7 @@ export function CategoryDotPlot({ points }: { points: CategoryPoint[] }) {
       render={(Plot, node) => {
         node.replaceChildren(
           Plot.plot({
-            width: width(node),
+            width: plotWidth(node),
             height: 60 + sorted.length * 34,
             marginLeft: 150,
             marginRight: 20,
@@ -241,20 +211,24 @@ export function UsUkComparison({
   usIrr,
   ukEstimate,
   window: comparisonWindow,
+  usLabel = "US (H1, agency FE)",
+  ukLabel = "UK (H4, org-type FE)",
 }: {
   usIrr: number;
-  ukEstimate: Estimate;
+  ukEstimate: FigureEstimate;
   window: number;
+  usLabel?: string;
+  ukLabel?: string;
 }) {
   const rows = [
     {
-      label: "US (H1, agency FE)",
+      label: usLabel,
       irr: usIrr,
       low: null as number | null,
       high: null as number | null,
     },
     {
-      label: "UK (H4, org-type FE)",
+      label: ukLabel,
       irr: ukEstimate.irr,
       low: ukEstimate.ciLow,
       high: ukEstimate.ciHigh,
@@ -268,7 +242,7 @@ export function UsUkComparison({
       render={(Plot, node) => {
         node.replaceChildren(
           Plot.plot({
-            width: width(node),
+            width: plotWidth(node),
             height: 170,
             marginLeft: 150,
             marginRight: 24,

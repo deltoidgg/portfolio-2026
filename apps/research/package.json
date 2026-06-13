@@ -20,7 +20,8 @@
     "datasets": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "ui": "workspace:*"
+    "ui": "workspace:*",
+    "viz": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",

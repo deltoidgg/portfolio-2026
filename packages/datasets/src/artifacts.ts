@@ -12,8 +12,8 @@ export const ARTIFACTS = {
     summary: "data/summaries/uswds-a11y.json",
     /** Copy served by the research app for in-browser DuckDB queries. */
     webParquet: "apps/research/public/data/uswds_a11y.parquet",
-    /** Copy imported by the research app at build time. */
-    webSummary: "apps/research/src/generated/uswds-a11y.json",
+    /** Copy imported by apps at build time via the datasets/artifacts export. */
+    sharedSummary: "packages/datasets/artifacts/uswds-a11y.json",
   },
   govuk: {
     /** Raw scan JSONL directory (gitignored; hashed in DATA_FREEZE.md). */
@@ -21,7 +21,7 @@ export const ARTIFACTS = {
     parquet: "data/processed/govuk_a11y.parquet",
     summary: "data/summaries/govuk-a11y.json",
     webParquet: "apps/research/public/data/govuk_a11y.parquet",
-    webSummary: "apps/research/src/generated/govuk-a11y.json",
+    sharedSummary: "packages/datasets/artifacts/govuk-a11y.json",
   },
 } as const;
 

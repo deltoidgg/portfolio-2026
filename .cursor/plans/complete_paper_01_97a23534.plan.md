@@ -31,16 +31,16 @@ todos:
     status: completed
   - id: uk-explorer
     content: Generalize the explorer to band-config-driven and register /explore/govuk-a11y for the UK dataset
-    status: in_progress
+    status: completed
   - id: paper-writeup
     content: "Build full paper page: results figures (forest plot, gradients, category dot plot, US-vs-UK), methods, diagnostics, deviations appendix, downloads section"
     status: completed
   - id: publish-flip
     content: Rewrite abstract from confirmatory results, flip status to published, update portfolio blurb, final vp check/builds and browser verification
-    status: in_progress
+    status: completed
   - id: http-archive
     content: "Optional: HTTP Archive BigQuery extract for exploratory commercial-web triangulation section"
-    status: pending
+    status: cancelled
 isProject: false
 ---
 

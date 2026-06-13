@@ -20,7 +20,7 @@ from scipy import stats
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RESULTS_DIR = REPO_ROOT / "data" / "results" / "paper-01"
-GENERATED_DIR = REPO_ROOT / "apps" / "research" / "src" / "generated"
+GENERATED_DIR = REPO_ROOT / "packages" / "datasets" / "artifacts"
 
 Z95 = 1.959963984540054
 
