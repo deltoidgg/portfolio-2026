@@ -4,16 +4,25 @@ import { Badge } from "ui";
 import { BandExplorer } from "../components/band-explorer";
 import { datasetById } from "../content/datasets";
 import { explorerConfigs } from "../content/explorers";
+import { buildResearchMetadata } from "../lib/metadata";
 
 export const Route = createFileRoute("/explore/$dataset")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    group: typeof search.group === "string" && search.group.length > 0 ? search.group : undefined,
+  }),
   loader: ({ params }) => {
     const dataset = datasetById(params.dataset);
     if (!dataset) throw notFound();
     return { dataset };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData ? [{ title: `${loaderData.dataset.name} — Research — Wasim Arif` }] : [],
-  }),
+  head: ({ loaderData }) =>
+    loaderData
+      ? buildResearchMetadata({
+          title: loaderData.dataset.name,
+          description: loaderData.dataset.description,
+          path: `/explore/${loaderData.dataset.id}`,
+        })
+      : { meta: [] },
   component: ExplorePage,
   notFoundComponent: () => (
     <div className="max-w-3xl mx-auto px-6 py-16 sm:px-8">
@@ -29,6 +38,8 @@ export const Route = createFileRoute("/explore/$dataset")({
 
 function ExplorePage() {
   const { dataset } = Route.useLoaderData();
+  const { group } = Route.useSearch();
+  const navigate = Route.useNavigate();
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-16 sm:px-8 sm:py-20">
@@ -66,7 +77,15 @@ function ExplorePage() {
         </p>
       </header>
 
-      {explorerConfigs[dataset.id] ? <BandExplorer config={explorerConfigs[dataset.id]} /> : null}
+      {explorerConfigs[dataset.id] ? (
+        <BandExplorer
+          config={explorerConfigs[dataset.id]}
+          group={group ?? ""}
+          onGroupChange={(nextGroup) =>
+            void navigate({ search: { group: nextGroup || undefined }, replace: true })
+          }
+        />
+      ) : null}
     </div>
   );
 }

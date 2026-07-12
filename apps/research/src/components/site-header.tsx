@@ -1,32 +1,43 @@
 import { Link } from "@tanstack/react-router";
+import { ThemeToggle } from "ui";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-edge">
+    <header className="sticky top-0 z-50 border-b border-edge bg-canvas/85 backdrop-blur-md">
       <nav
         aria-label="Primary"
-        className="max-w-3xl mx-auto px-6 sm:px-8 h-14 flex items-center justify-between"
+        className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3 sm:px-8"
       >
         <Link
           to="/"
-          className="text-sm font-medium text-ink hover:text-ink-muted transition-colors"
+          aria-label="Wasim Arif research, home"
+          className="inline-flex min-h-10 items-center rounded-md px-2 text-sm font-medium text-ink transition-colors hover:bg-surface hover:text-ink-muted"
         >
-          Wasim Arif <span className="text-ink-subtle font-normal">/ Research</span>
+          WA <span className="ml-1 hidden font-normal text-ink-subtle sm:inline">/ Research</span>
         </Link>
-        <div className="flex items-center gap-5 text-sm">
+        <div className="flex items-center text-[0.8125rem] sm:gap-0.5 sm:text-sm">
           <Link
-            to="/explore/$dataset"
-            params={{ dataset: "uswds-a11y" }}
-            className="text-ink-muted hover:text-ink transition-colors"
+            to="/papers/$slug"
+            params={{ slug: "design-systems-accessibility" }}
+            className="inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+            activeProps={{ className: "!text-ink bg-surface" }}
+          >
+            Paper
+          </Link>
+          <Link
+            to="/"
+            hash="data-explorers"
+            className="inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
             Data
           </Link>
           <a
             href="https://wasimarif.com"
-            className="text-ink-muted hover:text-ink transition-colors"
+            className="inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink"
           >
             Portfolio
           </a>
+          <ThemeToggle />
         </div>
       </nav>
     </header>

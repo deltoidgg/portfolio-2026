@@ -8,9 +8,9 @@ catalogMode: prefer
 catalog:
   "@types/node": ^24
   typescript: ^5
-  vite: npm:@voidzero-dev/vite-plus-core@latest
-  vitest: npm:@voidzero-dev/vite-plus-test@latest
-  vite-plus: latest
+  vite: npm:@voidzero-dev/vite-plus-core@0.1.24
+  vitest: npm:@voidzero-dev/vite-plus-test@0.1.24
+  vite-plus: 0.1.24
   "@tanstack/react-start": ^1.168.25
   "@tanstack/react-router": ^1.170.15
   react: 19.2.6
@@ -28,6 +28,7 @@ catalog:
   "@duckdb/duckdb-wasm": 1.33.1-dev45.0
   "@duckdb/node-api": 1.5.3-r.3
   "@observablehq/plot": ^0.6.17
+  nitro: 3.0.260610-beta
 overrides:
   vite: "catalog:"
   vitest: "catalog:"

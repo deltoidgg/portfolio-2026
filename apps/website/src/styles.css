@@ -6,26 +6,60 @@
 /* Generate utilities for classes used inside the shared ui package */
 @source "../../../packages/ui/src";
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
 body {
   background: var(--ui-canvas);
   color: var(--ui-ink);
   font-family: var(--ui-font-sans);
+  min-width: 320px;
+  overflow-x: clip;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+a,
+button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--ui-accent-soft);
+  color: var(--ui-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .gradient {
   background:
     conic-gradient(
       from 45deg,
-      #151515 0%,
-      #151515 20%,
-      #3a3a3a 30%,
-      #151515 40%,
-      #151515 60%,
-      #2a2a2a 70%,
-      #151515 80%,
-      #151515 100%
+      var(--mark-base) 0%,
+      var(--mark-base) 20%,
+      var(--mark-shine) 30%,
+      var(--mark-base) 40%,
+      var(--mark-base) 60%,
+      var(--mark-mid) 70%,
+      var(--mark-base) 80%,
+      var(--mark-base) 100%
     ),
-    linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 25%, #353535 50%, #1a1a1a 75%, #0f0f0f 100%);
+    linear-gradient(
+      135deg,
+      var(--mark-base) 0%,
+      var(--mark-mid) 25%,
+      var(--mark-shine) 50%,
+      var(--mark-mid) 75%,
+      var(--mark-base) 100%
+    );
   background-size:
     200% 200%,
     400% 400%;
@@ -33,6 +67,18 @@ body {
   background-clip: padding-box;
 
   -webkit-text-fill-color: transparent;
+}
+
+:root {
+  --mark-base: #f5f7fa;
+  --mark-mid: #8993a1;
+  --mark-shine: #ffffff;
+}
+
+:root[data-theme="light"] {
+  --mark-base: #111418;
+  --mark-mid: #5f6875;
+  --mark-shine: #8993a1;
 }
 
 .mask {
@@ -67,5 +113,178 @@ body {
     background-position:
       0% 0%,
       0% 50%;
+  }
+}
+
+.proof-trail {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--ui-edge);
+  border-radius: 0.75rem;
+  background: var(--ui-edge);
+  gap: 1px;
+}
+
+.proof-trail__item {
+  background: var(--ui-surface);
+  padding: 1.25rem;
+}
+
+.project-prose {
+  color: var(--ui-ink-muted);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.project-prose section + section {
+  margin-top: 4rem;
+}
+
+.project-prose h2 {
+  margin-bottom: 1rem;
+  color: var(--ui-ink);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.project-prose p {
+  margin-bottom: 1.35rem;
+  text-wrap: pretty;
+}
+
+.project-prose ul,
+.project-prose ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.25rem;
+}
+
+.project-prose ul {
+  list-style: disc;
+}
+
+.project-prose ol {
+  list-style: decimal;
+}
+
+.project-prose li {
+  margin-block: 0.45rem;
+  padding-left: 0.25rem;
+}
+
+.project-prose li::marker {
+  color: var(--ui-accent-ink);
+}
+
+.decision-panel {
+  margin-block: 2rem;
+  border-left: 2px solid var(--ui-accent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: var(--ui-surface);
+  padding: 1.25rem 1.25rem 0.1rem;
+}
+
+.decision-panel__label {
+  margin-bottom: 0.5rem !important;
+  color: var(--ui-accent-ink);
+  font-family: var(--ui-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.project-figure {
+  margin-block: 2.5rem;
+}
+
+.project-figure figcaption {
+  margin-top: 0.75rem;
+  color: var(--ui-ink-subtle);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.research-evidence {
+  min-width: 0;
+}
+
+.research-evidence__plot {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--ui-edge);
+  border-radius: 0.75rem;
+  background: var(--ui-canvas);
+}
+
+.research-evidence__plot::before,
+.research-evidence__plot::after {
+  color: var(--ui-ink-subtle);
+  font-family: var(--ui-font-mono);
+  font-size: 0.6875rem;
+}
+
+.research-evidence__plot::before {
+  content: "US · strong adoption";
+}
+
+.research-evidence__plot::after {
+  content: "UK · held-out replication";
+  grid-row: 3;
+}
+
+.research-evidence__plot span {
+  display: block;
+  height: 0.65rem;
+  border-radius: 999px;
+  background: var(--ui-accent);
+}
+
+.research-evidence__plot span:nth-of-type(2) {
+  grid-row: 4;
+  background: var(--ui-accent-ink);
+}
+
+.research-evidence__plot i {
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 100%;
+  border-left: 1px dashed var(--ui-edge-strong);
+  transform: translateX(-1.5rem);
+}
+
+@media (min-width: 40rem) {
+  .proof-trail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    transition: none;
+  }
+
+  .gradient {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

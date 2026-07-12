@@ -7,6 +7,7 @@ export interface Paper {
   slug: string;
   title: string;
   status: PaperStatus;
+  publishedAt?: string;
   question: string;
   abstract: string[];
   datasetId: string;
@@ -18,6 +19,7 @@ export const papers: Paper[] = [
     slug: "design-systems-accessibility",
     title: "Do design systems deliver accessibility at scale?",
     status: "published",
+    publishedAt: "2026-06-30",
     question:
       "Is graded adoption of a design system associated with fewer automatically detectable accessibility violations on real production websites?",
     abstract: [

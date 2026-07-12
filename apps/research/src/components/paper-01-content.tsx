@@ -85,7 +85,7 @@ export function Paper01Content() {
 
 function IntroductionSection() {
   return (
-    <Section title="1. Introduction">
+    <Section id="introduction" title="1. Introduction">
       <Prose>
         <p>
           Design systems are the largest coordinated investment in front-end quality that
@@ -156,7 +156,7 @@ const usBandColumns: Array<DataTableColumn<(typeof uswdsSummary.bands)[number]>>
 function DataSection() {
   const govukBandRows = govukSummary.bands;
   return (
-    <Section title="2. Data">
+    <Section id="data" title="2. Data">
       <Prose>
         <h3>2.1 United States — GSA Site Scanning</h3>
         <p>
@@ -219,7 +219,7 @@ function DataSection() {
 
 function MethodsSection() {
   return (
-    <Section title="3. Methods">
+    <Section id="methods" title="3. Methods">
       <Prose>
         <p>
           All confirmatory models are Poisson quasi-maximum-likelihood (PPML) regressions of
@@ -286,6 +286,7 @@ function UsResultsSection() {
 
   return (
     <Section
+      id="us-results"
       title="4. Results — United States"
       description={`Confirmatory estimates from the frozen snapshot (${meta.nAnalysis.toLocaleString()} sites, ${meta.nClusters.toLocaleString()} agency clusters, ${meta.bootstrapDraws.toLocaleString()}-draw cluster bootstrap, seed ${meta.seed}).`}
     >
@@ -367,6 +368,7 @@ function DiagnosticsSection() {
 
   return (
     <Section
+      id="diagnostics"
       title="5. Diagnostics & robustness"
       description="Six diagnostics, all pre-registered, probing whether the association reflects adoption rather than the kind of team that adopts."
     >
@@ -449,6 +451,7 @@ function UkReplicationSection() {
 
   return (
     <Section
+      id="uk-replication"
       title="6. The held-out UK replication"
       description={`The frozen specification, applied exactly once to data that did not exist when it was locked (${meta.nAnalysis.toLocaleString()} sites, ${meta.nClusters.toLocaleString()} organisation clusters).`}
     >
@@ -516,7 +519,7 @@ function UkReplicationSection() {
 
 function LimitationsSection() {
   return (
-    <Section title="7. Limitations">
+    <Section id="limitations" title="7. Limitations">
       <Prose>
         <ul>
           <li>
@@ -556,6 +559,7 @@ function LimitationsSection() {
 function DeviationsSection() {
   return (
     <Section
+      id="deviations"
       title="Appendix — Deviations from the pre-registration"
       description="Every departure from the locked protocol, logged before the confirmatory analyses ran. Full log in the repository."
     >
@@ -643,6 +647,7 @@ function DownloadsSection() {
 
   return (
     <Section
+      id="downloads"
       title="Downloads & reproducibility"
       description="Every figure traces to a versioned artifact. The Parquet files are the same ones the in-browser explorers query."
     >
@@ -666,6 +671,7 @@ function DownloadsSection() {
         <Link
           to="/explore/$dataset"
           params={{ dataset: "uswds-a11y" }}
+          search={{ group: undefined }}
           className="text-accent-ink underline underline-offset-2 hover:text-accent"
         >
           US explorer
@@ -674,6 +680,7 @@ function DownloadsSection() {
         <Link
           to="/explore/$dataset"
           params={{ dataset: "govuk-a11y" }}
+          search={{ group: undefined }}
           className="text-accent-ink underline underline-offset-2 hover:text-accent"
         >
           UK explorer

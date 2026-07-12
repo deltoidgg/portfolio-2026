@@ -10,4 +10,43 @@ body {
   background: var(--ui-canvas);
   color: var(--ui-ink);
   font-family: var(--ui-font-sans);
+  min-width: 320px;
+  overflow-x: clip;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+a,
+button {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--ui-accent-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

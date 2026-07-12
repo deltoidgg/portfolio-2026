@@ -1,32 +1,39 @@
 import { Link } from "@tanstack/react-router";
+import { ThemeToggle } from "ui";
+
+const navClass =
+  "inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink";
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-edge">
+    <header className="sticky top-0 z-50 border-b border-edge bg-canvas/80 backdrop-blur-md">
       <nav
         aria-label="Primary"
-        className="max-w-2xl mx-auto px-6 sm:px-8 h-14 flex items-center justify-between"
+        className="mx-auto flex h-14 max-w-5xl items-center justify-between px-3 sm:px-8"
       >
         <Link
           to="/"
-          className="text-sm font-medium text-ink hover:text-ink-muted transition-colors"
+          aria-label="Wasim Arif, home"
+          className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-md"
         >
-          Wasim Arif
+          <span className="gradient mask block h-5 w-[31px]" role="img" aria-hidden="true" />
         </Link>
-        <div className="flex items-center gap-5 text-sm">
+        <div className="flex items-center text-[0.8125rem] sm:gap-0.5 sm:text-sm">
           <Link
-            to="/writing"
-            className="text-ink-muted hover:text-ink transition-colors"
-            activeProps={{ className: "text-ink" }}
+            to="/projects"
+            className={navClass}
+            activeProps={{ className: "!text-ink bg-surface" }}
           >
+            Work
+          </Link>
+          <Link to="/writing" className={navClass} activeProps={{ className: "!text-ink" }}>
             Writing
           </Link>
-          <a
-            href="https://research.wasimarif.com"
-            className="text-ink-muted hover:text-ink transition-colors"
-          >
+          <a href="https://research.wasimarif.com" className={navClass}>
             Research
+            <span className="sr-only"> (opens the research site)</span>
           </a>
+          <ThemeToggle />
         </div>
       </nav>
     </header>

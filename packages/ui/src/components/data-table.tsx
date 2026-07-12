@@ -15,6 +15,8 @@ interface DataTableProps<Row> {
   columns: Array<DataTableColumn<Row>>;
   rows: Row[];
   getRowKey: (row: Row) => string;
+  /** Accessible name for the keyboard-scrollable region; defaults to the caption. */
+  scrollLabel?: string;
   className?: string;
 }
 
@@ -25,10 +27,19 @@ export function DataTable<Row>({
   columns,
   rows,
   getRowKey,
+  scrollLabel,
   className,
 }: DataTableProps<Row>) {
   return (
-    <div className={cn("overflow-x-auto", className)}>
+    <div
+      role="region"
+      aria-label={scrollLabel ?? caption}
+      tabIndex={0}
+      className={cn(
+        "overflow-x-auto rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        className,
+      )}
+    >
       <table className="w-full text-sm border-collapse">
         <caption
           className={cn("text-left text-xs text-ink-subtle mb-3", captionHidden && "sr-only")}

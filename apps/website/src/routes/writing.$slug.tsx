@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { postComponentBySlug } from "../components/posts/post-registry";
 import { PostLayout } from "../components/posts/post-layout";
 import { postBySlug } from "../content/posts";
+import { buildMetadata } from "../lib/metadata";
 
 export const Route = createFileRoute("/writing/$slug")({
   loader: ({ params }) => {
@@ -11,18 +12,13 @@ export const Route = createFileRoute("/writing/$slug")({
   },
   head: ({ loaderData }) =>
     loaderData
-      ? {
-          meta: [
-            { title: `${loaderData.post.title} · Wasim Arif` },
-            { name: "description", content: loaderData.post.deck },
-            { property: "og:title", content: loaderData.post.title },
-            { property: "og:description", content: loaderData.post.deck },
-            { property: "og:type", content: "article" },
-            { property: "og:site_name", content: "Wasim Arif" },
-            { property: "article:published_time", content: loaderData.post.date },
-            { name: "twitter:card", content: "summary" },
-          ],
-        }
+      ? buildMetadata({
+          title: loaderData.post.title,
+          description: loaderData.post.deck,
+          path: `/writing/${loaderData.post.slug}`,
+          type: "article",
+          publishedTime: loaderData.post.date,
+        })
       : { meta: [] },
   component: PostPage,
   notFoundComponent: () => (

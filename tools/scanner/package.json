@@ -7,6 +7,7 @@
   "scripts": {
     "fetch-domains": "node src/fetch-domains.ts",
     "calibrate": "node src/run-scan.ts --calibration",
+    "generate-social": "node src/generate-social.ts",
     "scan": "node src/run-scan.ts --full",
     "test": "vp test"
   },

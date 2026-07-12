@@ -2,7 +2,7 @@
 
 **Status:** LOCKED. Confirmatory estimation may begin. Locked at the commit tagged `paper-01-prereg`, which pins this document, the frozen US artifact, the ETL transform, the UK scan recipe, and the scanner implementation together.
 **Date locked:** 2026-06-12
-**Author of record:** Wasim Arif (analysis executed with AI assistance; this document follows the structure of [docs/PREREGISTRATION.md](../../PREREGISTRATION.md), Mollick 2026)
+**Author of record:** Wasim Arif (analysis executed with AI assistance; this document follows a transparent pre-registration structure informed by Mollick 2026)
 **Discovery data:** GSA Site Scanning daily snapshot, frozen 2026-06-10 (downloaded 2026-06-12), processed to `data/processed/uswds_a11y.parquet` (SHA-256 `f7090ce7e272fb4935a4fabb06c848c0c1c49faf5df01cc185a1082f79c19260`), N = 12,252 live federal websites with a completed accessibility scan.
 **Held-out replication data:** UK public-sector scan to be collected by `tools/scanner` (Playwright + axe-core + govuk-frontend detection) under the binding protocol in [UK_SCAN_RECIPE.md](./UK_SCAN_RECIPE.md), committed together with this lock and **before any scanning**. Domain-list snapshots are frozen under `data/inputs/uk-domains/`. **No UK analysis data has been collected at lock time.**
 

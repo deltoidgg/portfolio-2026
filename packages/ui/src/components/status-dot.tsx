@@ -26,7 +26,7 @@ export function StatusDot({ tone = "live", label, className }: StatusDotProps) {
   return (
     <span
       className={cn(
-        "inline-block w-1.5 h-1.5 rounded-full animate-pulse [animation-duration:5s]",
+        "inline-block w-1.5 h-1.5 rounded-full animate-pulse [animation-duration:5s] motion-reduce:animate-none",
         toneClasses[tone],
         className,
       )}

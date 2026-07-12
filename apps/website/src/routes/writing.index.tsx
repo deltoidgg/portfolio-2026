@@ -1,17 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { formatPostDate, posts } from "../content/posts";
+import { Badge } from "ui";
+import { formatPostDate, sortedPosts } from "../content/posts";
+import { buildMetadata } from "../lib/metadata";
+
+const description =
+  "Write-ups, tutorials, and research retold for working engineers: accessibility, design systems, data, and product engineering.";
 
 export const Route = createFileRoute("/writing/")({
-  head: () => ({
-    meta: [
-      { title: "Writing · Wasim Arif" },
-      {
-        name: "description",
-        content:
-          "Write-ups, tutorials, and research retold for working engineers. Accessibility, design systems, data, and the occasional experiment.",
-      },
-    ],
-  }),
+  head: () => buildMetadata({ title: "Writing", description, path: "/writing" }),
   component: WritingIndex,
 });
 
@@ -32,26 +28,29 @@ function WritingIndex() {
         </p>
       </header>
 
-      <ul className="space-y-12">
-        {posts.map((post) => (
+      <ul className="-mt-2 divide-y divide-edge">
+        {sortedPosts.map((post) => (
           <li key={post.slug}>
-            <article>
-              <p className="mb-2 text-sm text-ink-subtle">
+            <Link to="/writing/$slug" params={{ slug: post.slug }} className="group block py-8">
+              <p className="mb-2 flex items-center gap-2 text-sm text-ink-subtle">
                 <time dateTime={post.date}>{formatPostDate(post.date)}</time>
-                <span aria-hidden="true"> · </span>
-                {post.readingTime}
+                <span aria-hidden="true">·</span>
+                <span>{post.readingTime}</span>
               </p>
-              <h2 className="mb-2 text-lg font-medium leading-snug">
-                <Link
-                  to="/writing/$slug"
-                  params={{ slug: post.slug }}
-                  className="text-ink transition-colors hover:text-accent-ink"
-                >
-                  {post.title}
-                </Link>
+              <h2 className="mb-2 text-xl font-medium leading-snug tracking-tight text-ink transition-colors group-hover:text-accent-ink text-balance">
+                {post.title}
               </h2>
-              <p className="text-sm leading-relaxed text-ink-muted">{post.deck}</p>
-            </article>
+              <p className="leading-relaxed text-ink-muted text-pretty">{post.deck}</p>
+              {post.tags.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <Badge key={tag} tone="neutral">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+            </Link>
           </li>
         ))}
       </ul>

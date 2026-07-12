@@ -1,0 +1,20 @@
+{
+  "name": "site-quality",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser-level accessibility, responsive-layout, and route smoke tests for both portfolio surfaces.",
+  "type": "module",
+  "scripts": {
+    "check-links": "node src/check-links.ts",
+    "install-browser": "playwright install --with-deps chromium",
+    "test": "node src/audit.ts"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "playwright": "^1.58.2"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

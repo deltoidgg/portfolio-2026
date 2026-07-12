@@ -7,6 +7,8 @@ export interface PostMeta {
   date: string;
   readingTime: string;
   tags: string[];
+  /** Pin to the top and feature on the homepage. */
+  featured?: boolean;
 }
 
 export const posts: PostMeta[] = [
@@ -20,8 +22,16 @@ export const posts: PostMeta[] = [
   },
 ];
 
+/** Newest first, used by the writing index page. */
+export const sortedPosts: PostMeta[] = [...posts].sort((a, b) => b.date.localeCompare(a.date));
+
 export function postBySlug(slug: string): PostMeta | undefined {
   return posts.find((post) => post.slug === slug);
+}
+
+/** The pinned post, falling back to the most recent one. */
+export function featuredPost(): PostMeta | undefined {
+  return posts.find((post) => post.featured) ?? sortedPosts[0];
 }
 
 export function formatPostDate(iso: string): string {

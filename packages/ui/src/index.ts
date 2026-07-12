@@ -6,3 +6,5 @@ export { Prose } from "./components/prose";
 export { Section } from "./components/section";
 export { Stat } from "./components/stat";
 export { StatusDot } from "./components/status-dot";
+export { ThemeToggle } from "./components/theme-toggle";
+export { themeScript, type Theme } from "./theme";

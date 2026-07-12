@@ -15,15 +15,48 @@ export function PlotBox({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    const container = node;
     let disposed = false;
-    void (async () => {
+    let frame = 0;
+    let previousWidth = 0;
+
+    function makeGeneratedPlotDecorative() {
+      const svgNodes = container.querySelectorAll("svg");
+      for (const svg of svgNodes) {
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+        for (const labelledNode of svg.querySelectorAll("[aria-label]")) {
+          labelledNode.removeAttribute("aria-label");
+        }
+      }
+    }
+
+    async function draw() {
       const Plot = await import("@observablehq/plot");
       if (disposed || !ref.current) return;
       render(Plot, ref.current);
+      makeGeneratedPlotDecorative();
+    }
+
+    void (async () => {
+      await draw();
+      previousWidth = container.clientWidth;
     })();
+
+    const observer = new ResizeObserver((entries) => {
+      const width = Math.round(entries[0]?.contentRect.width ?? 0);
+      if (!width || width === previousWidth) return;
+      previousWidth = width;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => void draw());
+    });
+    observer.observe(container);
+
     return () => {
       disposed = true;
-      node.replaceChildren();
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      container.replaceChildren();
     };
   }, [render]);
 
@@ -33,11 +66,12 @@ export function PlotBox({
 /** Base style applied to every plot; colours come from the ui token vars. */
 export const PLOT_STYLE = {
   background: "transparent",
+  color: "var(--ui-ink-muted)",
   fontFamily: "inherit",
   fontSize: "11px",
 } as const;
 
 /** Clamp a container-driven plot width into a sensible range. */
 export function plotWidth(node: HTMLElement, max = 680): number {
-  return Math.max(300, Math.min(node.clientWidth, max));
+  return Math.max(240, Math.min(node.clientWidth, max));
 }

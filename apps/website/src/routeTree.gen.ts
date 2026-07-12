@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as OpenfgcRouteImport } from './routes/openfgc'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WritingIndexRouteImport } from './routes/writing.index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects.index'
 import { Route as WritingSlugRouteImport } from './routes/writing.$slug'
+import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 
 const OpenfgcRoute = OpenfgcRouteImport.update({
   id: '/openfgc',
@@ -29,43 +31,80 @@ const WritingIndexRoute = WritingIndexRouteImport.update({
   path: '/writing/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WritingSlugRoute = WritingSlugRouteImport.update({
   id: '/writing/$slug',
   path: '/writing/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
+  id: '/projects/$slug',
+  path: '/projects/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/openfgc': typeof OpenfgcRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
   '/writing/$slug': typeof WritingSlugRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/writing/': typeof WritingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/openfgc': typeof OpenfgcRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
   '/writing/$slug': typeof WritingSlugRoute
+  '/projects': typeof ProjectsIndexRoute
   '/writing': typeof WritingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/openfgc': typeof OpenfgcRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
   '/writing/$slug': typeof WritingSlugRoute
+  '/projects/': typeof ProjectsIndexRoute
   '/writing/': typeof WritingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/openfgc' | '/writing/$slug' | '/writing/'
+  fullPaths:
+    | '/'
+    | '/openfgc'
+    | '/projects/$slug'
+    | '/writing/$slug'
+    | '/projects/'
+    | '/writing/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/openfgc' | '/writing/$slug' | '/writing'
-  id: '__root__' | '/' | '/openfgc' | '/writing/$slug' | '/writing/'
+  to:
+    | '/'
+    | '/openfgc'
+    | '/projects/$slug'
+    | '/writing/$slug'
+    | '/projects'
+    | '/writing'
+  id:
+    | '__root__'
+    | '/'
+    | '/openfgc'
+    | '/projects/$slug'
+    | '/writing/$slug'
+    | '/projects/'
+    | '/writing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OpenfgcRoute: typeof OpenfgcRoute
+  ProjectsSlugRoute: typeof ProjectsSlugRoute
   WritingSlugRoute: typeof WritingSlugRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
   WritingIndexRoute: typeof WritingIndexRoute
 }
 
@@ -92,11 +131,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WritingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/writing/$slug': {
       id: '/writing/$slug'
       path: '/writing/$slug'
       fullPath: '/writing/$slug'
       preLoaderRoute: typeof WritingSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$slug': {
+      id: '/projects/$slug'
+      path: '/projects/$slug'
+      fullPath: '/projects/$slug'
+      preLoaderRoute: typeof ProjectsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -105,7 +158,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OpenfgcRoute: OpenfgcRoute,
+  ProjectsSlugRoute: ProjectsSlugRoute,
   WritingSlugRoute: WritingSlugRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
   WritingIndexRoute: WritingIndexRoute,
 }
 export const routeTree = rootRouteImport

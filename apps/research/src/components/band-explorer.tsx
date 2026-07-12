@@ -36,7 +36,7 @@ function renderCharts(
   zeroNode: HTMLElement,
   bands: BandStat[],
 ) {
-  const width = Math.max(280, Math.min(meanNode.clientWidth, 640));
+  const width = Math.max(240, Math.min(meanNode.clientWidth, 640));
   const domain = bands.map((band) => band.label);
 
   meanNode.replaceChildren(
@@ -70,11 +70,28 @@ function renderCharts(
       ],
     }),
   );
+
+  for (const node of [meanNode, zeroNode]) {
+    for (const svg of node.querySelectorAll("svg")) {
+      svg.setAttribute("aria-hidden", "true");
+      svg.setAttribute("focusable", "false");
+      for (const labelledNode of svg.querySelectorAll("[aria-label]")) {
+        labelledNode.removeAttribute("aria-label");
+      }
+    }
+  }
 }
 
-export function BandExplorer({ config }: { config: ExplorerConfig }) {
+export function BandExplorer({
+  config,
+  group,
+  onGroupChange,
+}: {
+  config: ExplorerConfig;
+  group: string;
+  onGroupChange: (group: string) => void;
+}) {
   const [groups, setGroups] = useState<GroupOption[]>([]);
-  const [group, setGroup] = useState("");
   const [bands, setBands] = useState<BandStat[] | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,10 +105,11 @@ export function BandExplorer({ config }: { config: ExplorerConfig }) {
     void (async () => {
       try {
         const api = await import("../lib/explorer-queries");
-        const [groupList, bandStats] = await Promise.all([
-          api.loadGroups(config),
-          api.loadBandStats(config, group === "" ? null : group),
-        ]);
+        const groupList = await api.loadGroups(config);
+        const validGroup = group === "" || groupList.some((option) => option.value === group);
+        const bandStats = validGroup
+          ? await api.loadBandStats(config, group === "" ? null : group)
+          : [];
         if (cancelled) return;
         setGroups(groupList);
         setBands(bandStats);
@@ -109,19 +127,42 @@ export function BandExplorer({ config }: { config: ExplorerConfig }) {
 
   useEffect(() => {
     if (!bands) return;
+    const chartBands = bands;
     const meanNode = meanRef.current;
     const zeroNode = zeroRef.current;
     if (!meanNode || !zeroNode) return;
+    const meanChart = meanNode;
+    const zeroChart = zeroNode;
     let disposed = false;
-    void (async () => {
+    let frame = 0;
+    let previousWidth = 0;
+
+    async function draw() {
       const Plot = await import("@observablehq/plot");
       if (disposed) return;
-      renderCharts(Plot, meanNode, zeroNode, bands);
+      renderCharts(Plot, meanChart, zeroChart, chartBands);
+    }
+
+    void (async () => {
+      await draw();
+      previousWidth = meanChart.clientWidth;
     })();
+
+    const observer = new ResizeObserver((entries) => {
+      const width = Math.round(entries[0]?.contentRect.width ?? 0);
+      if (!width || width === previousWidth) return;
+      previousWidth = width;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => void draw());
+    });
+    observer.observe(meanChart);
+
     return () => {
       disposed = true;
-      meanNode.replaceChildren();
-      zeroNode.replaceChildren();
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      meanChart.replaceChildren();
+      zeroChart.replaceChildren();
     };
   }, [bands]);
 
@@ -144,9 +185,28 @@ export function BandExplorer({ config }: { config: ExplorerConfig }) {
 
   if (error) {
     return (
-      <p className="text-sm text-danger" role="alert">
-        The in-browser database failed to load: {error}
-      </p>
+      <div className="rounded-lg border border-danger/30 bg-danger/5 p-5" role="alert">
+        <p className="mb-2 text-sm font-medium text-danger">
+          The in-browser database failed to load.
+        </p>
+        <p className="mb-4 break-words text-sm text-ink-muted">{error}</p>
+        <div className="flex flex-wrap gap-4 text-sm font-medium">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="min-h-10 rounded-md bg-ink px-4 py-2 text-canvas"
+          >
+            Retry query
+          </button>
+          <a
+            href={config.parquetUrl}
+            download
+            className="inline-flex min-h-10 items-center text-ink underline underline-offset-2"
+          >
+            Download the Parquet artifact instead
+          </a>
+        </div>
+      </div>
     );
   }
 
@@ -160,7 +220,7 @@ export function BandExplorer({ config }: { config: ExplorerConfig }) {
           <select
             id={selectId}
             value={group}
-            onChange={(event) => setGroup(event.target.value)}
+            onChange={(event) => onGroupChange(event.target.value)}
             disabled={busy && groups.length === 0}
             className="bg-surface-raised border border-edge rounded px-3 py-1.5 text-sm text-ink max-w-72"
           >
@@ -182,6 +242,13 @@ export function BandExplorer({ config }: { config: ExplorerConfig }) {
           Loading the in-browser analytics engine (a one-time download of roughly 8&nbsp;MB, cached
           afterwards)…
         </p>
+      ) : bands.length === 0 ? (
+        <div className="rounded-lg border border-edge bg-surface p-5">
+          <p className="font-medium text-ink">No sites match this filter.</p>
+          <p className="mt-2 text-sm text-ink-muted">
+            Choose a broader group or download the dataset to run a custom query.
+          </p>
+        </div>
       ) : (
         <>
           <div className="grid sm:grid-cols-2 gap-8 mb-8">
