@@ -9,38 +9,65 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Archive202526Gw34RouteImport } from './routes/archive.2025-26.gw34'
 
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Archive202526Gw34Route = Archive202526Gw34RouteImport.update({
+  id: '/archive/2025-26/gw34',
+  path: '/archive/2025-26/gw34',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/opportunities': typeof OpportunitiesRoute
+  '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/opportunities' | '/archive/2025-26/gw34'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/opportunities' | '/archive/2025-26/gw34'
+  id: '__root__' | '/' | '/opportunities' | '/archive/2025-26/gw34'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
+  Archive202526Gw34Route: typeof Archive202526Gw34Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archive/2025-26/gw34': {
+      id: '/archive/2025-26/gw34'
+      path: '/archive/2025-26/gw34'
+      fullPath: '/archive/2025-26/gw34'
+      preLoaderRoute: typeof Archive202526Gw34RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
+  Archive202526Gw34Route: Archive202526Gw34Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

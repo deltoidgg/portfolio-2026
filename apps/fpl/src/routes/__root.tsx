@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
+import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
 import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
@@ -31,8 +32,10 @@ function NotFoundPage() {
     <div className="fpl-message">
       <p>404 / FPL Lab</p>
       <h1>Experiment not found</h1>
-      <span>This lab is still growing. Return to the current deadline experiment.</span>
-      <Link to="/">Open Deadline Intelligence</Link>
+      <span>This lab is still growing. Return to the current market experiment.</span>
+      <Link to="/opportunities" search={defaultOpportunitySearch}>
+        Open Opportunity Map
+      </Link>
     </div>
   );
 }
@@ -55,12 +58,24 @@ function RootComponent() {
     <RootDocument>
       <header className="fpl-site-header">
         <nav aria-label="Primary">
-          <Link to="/" aria-label="FPL Lab home" className="fpl-wordmark">
+          <Link
+            to="/opportunities"
+            search={defaultOpportunitySearch}
+            aria-label="FPL Lab home"
+            className="fpl-wordmark"
+          >
             WA <span>/ FPL Lab</span>
           </Link>
           <div>
-            <Link to="/" activeProps={{ "aria-current": "page" }}>
-              Deadline room
+            <Link
+              to="/opportunities"
+              search={defaultOpportunitySearch}
+              activeProps={{ "aria-current": "page" }}
+            >
+              Opportunity map
+            </Link>
+            <Link to="/archive/2025-26/gw34" activeProps={{ "aria-current": "page" }}>
+              Archive
             </Link>
             <a href="https://research.wasimarif.com">Research</a>
             <a href="https://wasimarif.com">Portfolio</a>

@@ -17,13 +17,21 @@
     "capture:fpl": "node src/neon/capture.ts fpl",
     "capture:odds": "node src/neon/capture.ts odds-api",
     "capture:deadline": "node src/neon/capture.ts deadline",
+    "capture:results": "node src/neon/results.ts",
+    "collector:tick": "node src/neon/collect.ts",
     "forecast:baseline": "node src/neon/forecast.ts",
+    "forecast:v2": "node src/neon/forecast-v2.ts",
+    "forecast:auto": "node src/neon/forecast-auto.ts",
+    "evaluate": "node src/neon/evaluate.ts",
     "check": "vp check",
     "db:migrate": "node src/neon/migrate.ts",
+    "db:backfill": "node src/neon/backfill.ts",
     "db:seed": "node src/neon/seed.ts",
+    "season:sync": "node src/neon/sync-season.ts",
     "test": "vp test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "catalog:",
     "@neondatabase/serverless": "catalog:",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"

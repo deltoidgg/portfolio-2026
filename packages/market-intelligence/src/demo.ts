@@ -10,12 +10,182 @@ import type {
 } from "./contracts.ts";
 import { createMarketIntelligence } from "./market-intelligence.ts";
 import { createMemoryStore } from "./memory-store.ts";
+import { opportunitySnapshotSchema, type OpportunitySnapshot } from "./opportunity-map.ts";
 
 export const demoRoomQuery = {
   competition: "EPL",
   season: "2025/26",
   gameweek: 34,
+  datasetKey: "demo-2025-26-gw34-v1",
 } as const;
+
+export const demoOpportunityQuery = {
+  datasetKey: "prelaunch-2026-27-v1",
+  seasonKey: "epl:2026-27",
+  fromGameweek: 1,
+  horizon: 3,
+} as const;
+
+const opportunityPlayers = [
+  ["David Raya", "ARS", "GKP", 14.2, 5.5, 26, 0.29, 0.9],
+  ["Jordan Pickford", "EVE", "GKP", 12.8, 5, 18, 0.23, 0.88],
+  ["Alisson", "LIV", "GKP", 12.1, 5.5, 12, 0.21, 0.86],
+  ["Dean Henderson", "CRY", "GKP", 11.7, 4.5, 8, 0.19, 0.83],
+  ["William Saliba", "ARS", "DEF", 16.8, 6, 31, 0.34, 0.93],
+  ["Virgil van Dijk", "LIV", "DEF", 16.1, 6.5, 25, 0.33, 0.91],
+  ["Joško Gvardiol", "MCI", "DEF", 15.4, 6, 21, 0.31, 0.84],
+  ["Daniel Muñoz", "CRY", "DEF", 15.1, 5.5, 11, 0.36, 0.79],
+  ["Micky van de Ven", "TOT", "DEF", 12.7, 5, 7, 0.24, 0.75],
+  ["Ezri Konsa", "AVL", "DEF", 11.9, 5, 9, 0.2, 0.8],
+  ["Leif Davis", "IPS", "DEF", 11.6, 4.5, 3, 0.25, 0.68],
+  ["Bukayo Saka", "ARS", "MID", 22.4, 10, 38, 0.49, 0.94],
+  ["Mohamed Salah", "LIV", "MID", 21.8, 13.5, 44, 0.51, 0.92],
+  ["Cole Palmer", "CHE", "MID", 20.1, 10.5, 36, 0.46, 0.87],
+  ["Bruno Fernandes", "MUN", "MID", 18.7, 9, 19, 0.41, 0.9],
+  ["Anthony Gordon", "NEW", "MID", 17.8, 7.5, 14, 0.39, 0.82],
+  ["Morgan Rogers", "AVL", "MID", 16.9, 7, 22, 0.34, 0.78],
+  ["Eberechi Eze", "CRY", "MID", 16.6, 7.5, 13, 0.38, 0.76],
+  ["Antoine Semenyo", "BOU", "MID", 15.5, 7, 8, 0.35, 0.72],
+  ["Omari Hutchinson", "IPS", "MID", 13.8, 5.5, 2, 0.28, 0.65],
+  ["Erling Haaland", "MCI", "FWD", 23.1, 14, 41, 0.57, 0.91],
+  ["Alexander Isak", "NEW", "FWD", 21.2, 11, 32, 0.54, 0.88],
+  ["Ollie Watkins", "AVL", "FWD", 18.4, 9, 24, 0.43, 0.85],
+  ["Jean-Philippe Mateta", "CRY", "FWD", 16.7, 7.5, 12, 0.4, 0.79],
+  ["Dominic Solanke", "TOT", "FWD", 15.9, 8, 15, 0.37, 0.74],
+  ["Liam Delap", "IPS", "FWD", 14.8, 6.5, 6, 0.36, 0.69],
+  ["Yoane Wissa", "BRE", "FWD", 14.5, 7, 9, 0.34, 0.73],
+  ["Viktor Gyökeres", "ARS", "FWD", 19.6, 10.5, 29, 0.5, 0.62],
+] as const;
+
+export function createDemoOpportunitySnapshot(): OpportunitySnapshot {
+  const observedAt = "2026-07-17T12:00:00.000Z";
+  const positionRanks = new Map<string, number>();
+  return opportunitySnapshotSchema.parse({
+    key: "prelaunch-2026-27-v1:gw1:h3",
+    datasetKey: demoOpportunityQuery.datasetKey,
+    season: {
+      key: demoOpportunityQuery.seasonKey,
+      label: "2026/27",
+      lifecycle: "prelaunch",
+      priceState: "unpublished",
+      rulesetKey: "fpl:2026-27:provisional-v1",
+      rulesetStatus: "provisional",
+    },
+    observedAt,
+    fromGameweek: 1,
+    horizon: 3,
+    sourceHealth: [
+      {
+        sourceKey: "premier-league-schedule",
+        label: "Premier League fixtures",
+        status: "fresh",
+        lastCapturedAt: observedAt,
+        coverage: 1,
+        detail: "All 380 fixtures imported; kick-off times remain subject to change.",
+      },
+      {
+        sourceKey: "fpl",
+        label: "FPL 2026/27",
+        status: "missing",
+        coverage: 0,
+        detail: "The new-season player list, prices, and ownership are not published yet.",
+      },
+      {
+        sourceKey: "odds-api",
+        label: "Market priors",
+        status: "partial",
+        lastCapturedAt: observedAt,
+        coverage: 0.38,
+        detail: "Early match prices are blended with prior-season player rates.",
+      },
+    ],
+    players: opportunityPlayers
+      .map(([name, team, position, expectedPoints, price, ownership, haul, agreement]) => ({
+        name,
+        team,
+        position,
+        expectedPoints,
+        price,
+        ownership,
+        haul,
+        agreement,
+      }))
+      .toSorted((left, right) => {
+        const position = left.position.localeCompare(right.position);
+        return position === 0 ? right.expectedPoints - left.expectedPoints : position;
+      })
+      .map((player, index) => {
+        const rank = (positionRanks.get(player.position) ?? 0) + 1;
+        positionRanks.set(player.position, rank);
+        const slug = player.name
+          .normalize("NFKD")
+          .toLocaleLowerCase()
+          .replaceAll(/[^a-z0-9]+/g, "-")
+          .replaceAll(/^-|-$/g, "");
+        return {
+          registrationKey: `epl:2026-27:registration:scenario-${slug}`,
+          playerKey: `epl:person:scenario:${slug}`,
+          name: player.name,
+          team: player.team,
+          position: player.position,
+          registrationStatus: "provisional",
+          price: {
+            status: "estimated",
+            low: player.price - 0.5,
+            midpoint: player.price,
+            high: player.price + 0.5,
+            method: "prior price, role, and promoted-club band",
+          },
+          ownership: { status: "provisional", value: player.ownership },
+          expectedPoints: player.expectedPoints,
+          p10: Math.max(2, Math.round(player.expectedPoints * 0.42)),
+          p50: Math.round(player.expectedPoints * 0.91),
+          p90: Math.round(player.expectedPoints * 1.68),
+          haulProbability: player.haul,
+          sixtyMinuteProbability: Math.max(0.58, 0.94 - (index % 7) * 0.035),
+          marketCoverage: Math.min(0.74, 0.32 + (index % 6) * 0.07),
+          sourceAgreement: player.agreement,
+          forecastRankWithinPosition: rank,
+          gameweeks: [1, 2, 3].map((gameweek, gameweekIndex) => {
+            const expected = Number(
+              ((player.expectedPoints / 3) * [1.06, 0.88, 1.06][gameweekIndex]!).toFixed(2),
+            );
+            return {
+              gameweek,
+              expectedPoints: expected,
+              p10: Math.max(0, Math.floor(expected * 0.25)),
+              p50: Math.round(expected * 0.88),
+              p90: Math.ceil(expected * 1.85),
+              fixtures: [`epl:2026-27:scenario:gw${gameweek}:${player.team.toLocaleLowerCase()}`],
+            };
+          }),
+          trail: [
+            {
+              observedAt: "2026-06-19T10:00:00.000Z",
+              expectedPoints: Number((player.expectedPoints * 0.92).toFixed(2)),
+              price: player.price,
+            },
+            {
+              observedAt: "2026-07-07T12:00:00.000Z",
+              expectedPoints: Number((player.expectedPoints * 0.97).toFixed(2)),
+              price: player.price,
+            },
+            { observedAt, expectedPoints: player.expectedPoints, price: player.price },
+          ],
+          provenance: {
+            seasonKey: demoOpportunityQuery.seasonKey,
+            rulesetKey: "fpl:2026-27:provisional-v1",
+            rulesetStatus: "provisional",
+            modelKey: "market-xp",
+            modelVersion: "2.0.0-prelaunch",
+            cutoffAt: observedAt,
+            codeVersion: "prelaunch-scenario-v1",
+            inputBatchIds: ["official-fixtures:2026-06-19", "prior-season:2025-26"],
+          },
+        };
+      }),
+  });
+}
 
 const deadlineAt = "2026-04-24T17:30:00.000Z";
 const observedTimes = [
@@ -409,6 +579,7 @@ function sourceBatch(source: Source, observedAt: string, index: number): Capture
     ],
     forecasts: [],
     annotations: [],
+    metadata: { datasetKey: demoRoomQuery.datasetKey, synthetic: true },
   };
 }
 
@@ -424,6 +595,7 @@ export function createDemoBatches(): CaptureBatch[] {
       observations: [],
       forecasts: forecastsAt(index),
       annotations: annotationsByPoint[index] ?? [],
+      metadata: { datasetKey: demoRoomQuery.datasetKey, synthetic: true },
     },
   ]);
 }

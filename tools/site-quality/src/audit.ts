@@ -42,7 +42,12 @@ const targets = [
     cwd: join(root, "apps/fpl"),
     origin: "http://127.0.0.1:4175",
     port: "4175",
-    routes: ["/", "/not-a-real-page"],
+    routes: [
+      "/",
+      "/opportunities?mode=forecast&view=auto&scenario=baseline&position=ALL&minSixty=0&snapshot=2",
+      "/archive/2025-26/gw34",
+      "/not-a-real-page",
+    ],
   },
 ] as const;
 
