@@ -104,49 +104,6 @@ function LabIndex() {
       </Section>
 
       <Section
-        id="experiments"
-        title="Live experiments"
-        description="Working systems that turn messy public data into inspectable decisions."
-      >
-        <Card className="overflow-hidden p-0">
-          <div className="grid gap-px bg-edge md:grid-cols-[1.3fr_0.7fr]">
-            <div className="bg-canvas p-5 sm:p-7">
-              <div className="mb-4 flex items-center gap-2">
-                <Badge tone="accent">Interactive prototype</Badge>
-                <span className="font-mono text-xs text-ink-subtle">FPL · Market data</span>
-              </div>
-              <h2 className="mb-3 text-2xl font-semibold tracking-tight text-ink">
-                Deadline Intelligence Room
-              </h2>
-              <p className="max-w-2xl text-sm leading-relaxed text-ink-muted">
-                Rewind the final 48 hours before an FPL deadline and watch cross-market movement
-                change player forecasts, ranking, and the evidence behind a decision.
-              </p>
-              <Link
-                to="/intelligence"
-                className="mt-5 inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-ink transition-colors hover:text-accent-ink"
-              >
-                Enter the room <IconArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 gap-px bg-edge">
-              {[
-                ["08", "snapshots"],
-                ["05", "players"],
-                ["05", "sources"],
-                ["48h", "replay"],
-              ].map(([value, label]) => (
-                <div className="grid place-content-center bg-surface p-5 text-center" key={label}>
-                  <strong className="font-mono text-2xl font-semibold text-ink">{value}</strong>
-                  <span className="mt-1 text-xs text-ink-subtle">{label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </Section>
-
-      <Section
         id="engineering"
         title="What I built"
         description="The study is also a software system: collection, transformation, estimation, publication, and exploration share versioned contracts."

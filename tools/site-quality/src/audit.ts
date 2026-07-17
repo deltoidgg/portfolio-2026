@@ -36,6 +36,13 @@ const targets = [
       "/not-a-real-page",
     ],
   },
+  {
+    name: "fpl",
+    cwd: join(root, "apps/fpl"),
+    origin: "http://127.0.0.1:4175",
+    port: "4175",
+    routes: ["/", "/not-a-real-page"],
+  },
 ] as const;
 
 const servers: ChildProcess[] = [];

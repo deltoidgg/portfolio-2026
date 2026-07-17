@@ -3,23 +3,23 @@ import { demoRoomQuery } from "market-intelligence/demo";
 import { DeadlineIntelligenceRoom } from "../components/deadline-intelligence-room.tsx";
 import "../deadline-room.css";
 import { getDeadlineRoom } from "../lib/market-intelligence.functions.ts";
-import { buildResearchMetadata } from "../lib/metadata.ts";
+import { buildFplMetadata } from "../lib/metadata.ts";
 
 const description =
   "Replay how market prices, availability, and source disagreement changed Fantasy Premier League forecasts before the deadline.";
 
-export const Route = createFileRoute("/intelligence")({
+export const Route = createFileRoute("/")({
   loader: () => getDeadlineRoom({ data: demoRoomQuery }),
   head: () =>
-    buildResearchMetadata({
-      title: "FPL Deadline Intelligence Room",
+    buildFplMetadata({
+      title: "Deadline Intelligence Room",
       description,
-      path: "/intelligence",
+      path: "/",
     }),
-  component: IntelligencePage,
+  component: DeadlineRoomPage,
 });
 
-function IntelligencePage() {
+function DeadlineRoomPage() {
   const room = Route.useLoaderData();
   return <DeadlineIntelligenceRoom initialRoom={room} query={demoRoomQuery} />;
 }

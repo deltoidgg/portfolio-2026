@@ -35,7 +35,7 @@ Copy the root `.env.example` to `.env.local`, replace `DATABASE_URL` with a Neon
 ```bash
 vp run market-intelligence#db:migrate
 vp run market-intelligence#db:seed
-vp run research#dev
+vp run fpl#dev
 ```
 
 The seed is idempotent and writes the complete eight-snapshot replay used by the room. Remove `MARKET_INTELLIGENCE_MODE=demo` (or set it to `neon`) to read those records from Neon.
@@ -62,8 +62,8 @@ Implement `MarketSourceAdapter<Request>` under `src/sources`, validate upstream 
 ## Validation
 
 ```bash
-vp check packages/market-intelligence apps/research
+vp check packages/market-intelligence apps/fpl
 vp run market-intelligence#test
-vp run research#test
-vp run research#build
+vp run fpl#test
+vp run fpl#build
 ```

@@ -1,5 +1,5 @@
 {
-  "name": "research",
+  "name": "fpl",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,19 +10,17 @@
     "test": "vp test"
   },
   "dependencies": {
-    "@duckdb/duckdb-wasm": "catalog:",
     "@fontsource-variable/geist": "catalog:",
     "@fontsource-variable/geist-mono": "catalog:",
-    "@observablehq/plot": "catalog:",
+    "@fontsource/barlow-condensed": "catalog:",
     "@tabler/icons-react": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
     "@vercel/analytics": "catalog:",
-    "datasets": "workspace:*",
+    "market-intelligence": "workspace:*",
+    "motion": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:",
-    "ui": "workspace:*",
-    "viz": "workspace:*"
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",

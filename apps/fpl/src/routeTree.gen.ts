@@ -10,53 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PapersSlugRouteImport } from './routes/papers.$slug'
-import { Route as ExploreDatasetRouteImport } from './routes/explore.$dataset'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PapersSlugRoute = PapersSlugRouteImport.update({
-  id: '/papers/$slug',
-  path: '/papers/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreDatasetRoute = ExploreDatasetRouteImport.update({
-  id: '/explore/$dataset',
-  path: '/explore/$dataset',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/explore/$dataset': typeof ExploreDatasetRoute
-  '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/explore/$dataset': typeof ExploreDatasetRoute
-  '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/explore/$dataset': typeof ExploreDatasetRoute
-  '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/explore/$dataset' | '/papers/$slug'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/explore/$dataset' | '/papers/$slug'
-  id: '__root__' | '/' | '/explore/$dataset' | '/papers/$slug'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ExploreDatasetRoute: typeof ExploreDatasetRoute
-  PapersSlugRoute: typeof PapersSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,27 +48,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/papers/$slug': {
-      id: '/papers/$slug'
-      path: '/papers/$slug'
-      fullPath: '/papers/$slug'
-      preLoaderRoute: typeof PapersSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore/$dataset': {
-      id: '/explore/$dataset'
-      path: '/explore/$dataset'
-      fullPath: '/explore/$dataset'
-      preLoaderRoute: typeof ExploreDatasetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ExploreDatasetRoute: ExploreDatasetRoute,
-  PapersSlugRoute: PapersSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

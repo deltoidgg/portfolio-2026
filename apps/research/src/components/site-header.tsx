@@ -25,13 +25,6 @@ export function SiteHeader() {
             Paper
           </Link>
           <Link
-            to="/intelligence"
-            className="inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink"
-            activeProps={{ className: "!text-ink bg-surface" }}
-          >
-            Intelligence
-          </Link>
-          <Link
             to="/"
             hash="data-explorers"
             className="inline-flex min-h-10 items-center rounded-md px-2 text-ink-muted transition-colors hover:bg-surface hover:text-ink"

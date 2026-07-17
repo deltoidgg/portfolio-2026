@@ -303,7 +303,7 @@ Recommended boundaries:
 
 ### Fit with this repository
 
-**Repository-specific recommendation:** this codebase can support the live-data spike directly. Its TanStack/React research app can host the experiment; `packages/viz` and `packages/datasets` provide natural seams for reusable visual components and typed artifacts; the existing browser DuckDB-WASM path can query static Parquet; `tools/analysis` is an appropriate home for collector support, offline Python forecast/simulation scripts, and replay generation; and Vite+ can validate the workspace.
+**Repository-specific recommendation:** this codebase can support the live-data spike directly through the dedicated TanStack/React app at `apps/fpl`, deployed independently at `fpl.wasimarif.com`. Keep canonical capture, entity resolution, Neon persistence, and forecast read models in `packages/market-intelligence`; keep FPL-specific interaction and serving code inside the FPL app. `packages/viz` remains available for genuinely reusable visual primitives, while `tools/analysis` is an appropriate home for offline Python forecast/simulation scripts and replay generation. Vite+ validates the complete workspace without coupling the experiment to the research publication site.
 
 Build the first vertical slice as:
 
