@@ -18,8 +18,15 @@ const cards = [
     output: join(websiteOutput, "projects.png"),
     eyebrow: "SELECTED WORK",
     title: "Products with\ninspectable decisions.",
-    detail: "MockPit · Rewriter · OpenFGC",
+    detail: "FPL Market Intelligence · MockPit · Rewriter · OpenFGC",
     accent: "#79e0c3",
+  },
+  {
+    output: join(websiteOutput, "fpl.png"),
+    eyebrow: "CASE STUDY · DATA EXPERIMENT",
+    title: "FPL Market\nIntelligence",
+    detail: "From market evidence to inspectable player forecasts",
+    accent: "#75e5d3",
   },
   {
     output: join(websiteOutput, "mockpit.png"),

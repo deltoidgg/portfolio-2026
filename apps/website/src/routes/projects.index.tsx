@@ -4,7 +4,7 @@ import { featuredProjects, sortedProjects } from "../content/projects";
 import { buildMetadata } from "../lib/metadata";
 
 const description =
-  "Selected independent product and design-engineering work: runtime provenance devtools, an AI-assisted reading product, and fighting-game analytics.";
+  "Selected independent product and design-engineering work: FPL market intelligence, runtime provenance devtools, an AI-assisted reading product, and fighting-game analytics.";
 
 export const Route = createFileRoute("/projects/")({
   head: () =>

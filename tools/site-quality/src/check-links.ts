@@ -5,6 +5,7 @@ const urls = [
   "https://wasimarif.com/projects",
   "https://research.wasimarif.com",
   "https://research.wasimarif.com/papers/design-systems-accessibility",
+  "https://fpl.wasimarif.com",
   "https://openfgc.wasimarif.com",
   "https://rewriter.wasimarif.com",
   "https://mockpit.wasimarif.com",

@@ -1,5 +1,5 @@
 export type ProjectLifecycle = "active" | "maintained" | "archived";
-export type ProjectKind = "tool" | "product" | "research";
+export type ProjectKind = "experiment" | "tool" | "product" | "research";
 export type ProjectActionKind =
   | "case-study"
   | "live"
@@ -41,6 +41,40 @@ export interface Project {
 }
 
 export const projects: Project[] = [
+  {
+    slug: "fpl",
+    name: "FPL Market Intelligence",
+    kind: "experiment",
+    summary:
+      "A point-in-time Fantasy Premier League decision room that turns FPL data and betting-market prices into inspectable player forecasts before the deadline.",
+    problem:
+      "Useful FPL signals are scattered across availability updates, bookmaker markets, exchanges, and player statistics—and a latest-value dashboard hides how confidence changed.",
+    decision:
+      "Preserve every source snapshot, resolve it into one gameweek model, then expose the forecast distribution, disagreement, and scoring recipe through a deadline replay.",
+    evidence:
+      "A deployed full-stack experiment, Neon-backed replay model, source adapters, deterministic forecast pipeline, and responsive browser-audited interface.",
+    timeframe: "2026–present",
+    role: "Independent creator",
+    lifecycle: "active",
+    featured: true,
+    date: "2026-07-17",
+    tags: ["TanStack Start", "TypeScript", "Neon", "Data modelling", "Visualisation"],
+    cover: {
+      src: "/projects/fpl.webp",
+      alt: "FPL Market Intelligence deadline room showing player forecasts, market evidence, and a replay timeline",
+      width: 1440,
+      height: 900,
+    },
+    actions: [
+      { kind: "case-study", label: "Read case study", href: "/projects/fpl" },
+      { kind: "live", label: "Open live experiment", href: "https://fpl.wasimarif.com" },
+      {
+        kind: "source",
+        label: "View source",
+        href: "https://github.com/deltoidgg/portfolio-2026/tree/main/apps/fpl",
+      },
+    ],
+  },
   {
     slug: "mockpit",
     name: "MockPit",

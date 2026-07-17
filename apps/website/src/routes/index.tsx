@@ -9,8 +9,9 @@ import {
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { govukSummary, ukResults, usResults, uswdsSummary } from "datasets/artifacts";
+import { FplSpotlight } from "../components/fpl-spotlight";
 import { ProjectCard } from "../components/project-card";
-import { featuredProjects } from "../content/projects";
+import { featuredProjects, projectBySlug } from "../content/projects";
 import { buildMetadata } from "../lib/metadata";
 
 const description =
@@ -32,6 +33,8 @@ function Home() {
   const usDrop = Math.round((1 - usResults.h1.strongVsNone.irr) * 100);
   const ukDrop = Math.round((1 - ukResults.h4.strongVsNone.irr) * 100);
   const totalSites = uswdsSummary.meta.analysedSites + govukSummary.meta.analysedSites;
+  const fplProject = projectBySlug("fpl");
+  const otherFeaturedProjects = featuredProjects.filter((project) => project.slug !== "fpl");
 
   return (
     <div>
@@ -113,8 +116,9 @@ function Home() {
               All work <IconArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            {featuredProjects.map((project, index) => (
+          {fplProject ? <FplSpotlight project={fplProject} /> : null}
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {otherFeaturedProjects.map((project, index) => (
               <ProjectCard key={project.slug} project={project} priority={index === 0} />
             ))}
           </div>

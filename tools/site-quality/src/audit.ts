@@ -14,6 +14,7 @@ const targets = [
     routes: [
       "/",
       "/projects",
+      "/projects/fpl",
       "/projects/mockpit",
       "/projects/rewriter",
       "/projects/openfgc",
