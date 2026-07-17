@@ -1,0 +1,41 @@
+{
+  "competition": "EPL",
+  "season": "2025/26",
+  "gameweek": 34,
+  "observedAt": "2026-04-24T16:45:00.000Z",
+  "deadlineAt": "2026-04-24T17:30:00.000Z",
+  "fixtures": [],
+  "players": [
+    {
+      "playerKey": "player:example",
+      "playerName": "Example Player",
+      "teamKey": "ARS",
+      "position": "MID",
+      "playProbability": 0.94,
+      "sixtyMinuteProbability": 0.82,
+      "ownershipPercent": 18.4,
+      "price": 8.5,
+      "market": {
+        "sourceKeys": ["smarkets", "bet365"],
+        "quotes": [
+          {
+            "sourceKey": "smarkets",
+            "label": "Smarkets",
+            "marketFamily": "goal",
+            "decimalOdds": 2.5
+          },
+          {
+            "sourceKey": "bet365",
+            "label": "bet365",
+            "marketFamily": "goal",
+            "decimalOdds": 2.7
+          }
+        ]
+      },
+      "history": {
+        "goalsPer90": 0.34,
+        "assistsPer90": 0.22
+      }
+    }
+  ]
+}

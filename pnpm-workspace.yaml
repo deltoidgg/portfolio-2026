@@ -29,6 +29,10 @@ catalog:
   "@duckdb/node-api": 1.5.3-r.3
   "@observablehq/plot": ^0.6.17
   nitro: 3.0.260610-beta
+  "@neondatabase/serverless": ^1.1.0
+  drizzle-orm: ^0.45.2
+  motion: ^12.42.2
+  "@fontsource/barlow-condensed": ^5.2.8
 overrides:
   vite: "catalog:"
   vitest: "catalog:"
@@ -42,5 +46,6 @@ peerDependencyRules:
 # sharp comes in transitively via next (old portfolio-2025 app) and is not
 # needed at runtime; unrs-resolver ships prebuilt platform binaries
 allowBuilds:
+  esbuild: true
   sharp: false
   unrs-resolver: false

@@ -13,6 +13,7 @@ apps/research      papers and DuckDB-WASM data explorers
 packages/ui        shared design tokens and accessible UI primitives
 packages/viz       accessible Observable Plot wrappers and figures
 packages/datasets  typed access to frozen research artifacts
+packages/market-intelligence canonical captures, Neon persistence, and forecast replay read models
 tools/scanner      Playwright + axe public-sector site scanner
 tools/site-quality browser accessibility, route, responsive, and public-link checks
 tools/etl          GSA and GOV.UK data pipelines

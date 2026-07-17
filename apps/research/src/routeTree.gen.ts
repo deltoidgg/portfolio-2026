@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IntelligenceRouteImport } from './routes/intelligence'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PapersSlugRouteImport } from './routes/papers.$slug'
 import { Route as ExploreDatasetRouteImport } from './routes/explore.$dataset'
 
+const IntelligenceRoute = IntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,36 +37,47 @@ const ExploreDatasetRoute = ExploreDatasetRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/intelligence': typeof IntelligenceRoute
   '/explore/$dataset': typeof ExploreDatasetRoute
   '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/intelligence': typeof IntelligenceRoute
   '/explore/$dataset': typeof ExploreDatasetRoute
   '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/intelligence': typeof IntelligenceRoute
   '/explore/$dataset': typeof ExploreDatasetRoute
   '/papers/$slug': typeof PapersSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/explore/$dataset' | '/papers/$slug'
+  fullPaths: '/' | '/intelligence' | '/explore/$dataset' | '/papers/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/explore/$dataset' | '/papers/$slug'
-  id: '__root__' | '/' | '/explore/$dataset' | '/papers/$slug'
+  to: '/' | '/intelligence' | '/explore/$dataset' | '/papers/$slug'
+  id: '__root__' | '/' | '/intelligence' | '/explore/$dataset' | '/papers/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  IntelligenceRoute: typeof IntelligenceRoute
   ExploreDatasetRoute: typeof ExploreDatasetRoute
   PapersSlugRoute: typeof PapersSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/intelligence': {
+      id: '/intelligence'
+      path: '/intelligence'
+      fullPath: '/intelligence'
+      preLoaderRoute: typeof IntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  IntelligenceRoute: IntelligenceRoute,
   ExploreDatasetRoute: ExploreDatasetRoute,
   PapersSlugRoute: PapersSlugRoute,
 }
