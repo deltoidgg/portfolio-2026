@@ -42,6 +42,7 @@ export const sourceEntityAliasSchema = z.object({
   confidence: z.number().min(0).max(1),
   effectiveFrom: isoDateTime,
   effectiveTo: isoDateTime.optional(),
+  seasonKey: z.string().min(1).optional(),
   metadata: jsonRecord.optional(),
 });
 
@@ -58,8 +59,14 @@ export const rawSnapshotSchema = z.object({
   key: z.string().min(1),
   endpoint: z.string().min(1),
   observedAt: isoDateTime,
-  payload: jsonValueSchema,
+  payload: jsonValueSchema.optional(),
   statusCode: z.number().int().optional(),
+  objectKey: z.string().min(1).optional(),
+  sha256: z.string().min(1).optional(),
+  compressedBytes: z.number().int().nonnegative().optional(),
+  uncompressedBytes: z.number().int().nonnegative().optional(),
+  contentEncoding: z.enum(["gzip", "identity"]).optional(),
+  contentType: z.string().min(1).optional(),
   metadata: jsonRecord.optional(),
 });
 
@@ -156,6 +163,10 @@ export const forecastSchema = gameweekScopeSchema.extend({
   components: forecastComponentsSchema,
   evidence: forecastEvidenceSchema,
   metadata: jsonRecord.optional(),
+  datasetKey: z.string().min(1).optional(),
+  registrationKey: z.string().min(1).optional(),
+  runId: z.string().min(1).optional(),
+  schemaVersion: z.number().int().min(1).optional(),
 });
 
 export const annotationSchema = z.object({
@@ -185,7 +196,9 @@ export const captureBatchSchema = z.object({
   metadata: jsonRecord.optional(),
 });
 
-export const deadlineRoomQuerySchema = gameweekScopeSchema;
+export const deadlineRoomQuerySchema = gameweekScopeSchema.extend({
+  datasetKey: z.string().min(1).optional(),
+});
 
 export type Source = z.infer<typeof sourceSchema>;
 export type Entity = z.infer<typeof entitySchema>;

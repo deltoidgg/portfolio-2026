@@ -46,12 +46,31 @@ export {
   type BaselineForecastInput,
 } from "./model/index.ts";
 export {
+  createMarketXpForecastRunner,
+  defaultFplRuleset,
+  scoreFplFixture,
+  type ForecastFixtureInput,
+  type ForecastInputBatch,
+  type ForecastPlayerInput,
+  type ForecastRunArtifact,
+  type ForecastRunRequest,
+  type FplFixtureEvent,
+  type FplPosition,
+  type FplRuleset,
+  type MarketXpForecastRunner,
+  type PlayerFixtureForecastArtifact,
+} from "./model/index.ts";
+export {
   createMarketIntelligence,
   type MarketIntelligence,
   type MarketSourceAdapter,
 } from "./market-intelligence.ts";
 export { createMemoryStore } from "./memory-store.ts";
-export { canonicalFixtureKey, resolvePremierLeagueTeam } from "./entity-resolution.ts";
+export {
+  canonicalFixtureKey,
+  canonicalSeasonFixtureKey,
+  resolvePremierLeagueTeam,
+} from "./entity-resolution.ts";
 export { sourceStatusAt } from "./deadline-room.ts";
 export {
   captureDeadlineIntelligence,
@@ -59,3 +78,104 @@ export {
   type DeadlineCaptureRun,
 } from "./pipeline.ts";
 export type { MarketIntelligenceStore } from "./store.ts";
+export {
+  createMemoryForecastRunStore,
+  type ForecastRunReceipt,
+  type ForecastRunStore,
+} from "./run-store.ts";
+export {
+  createCollectionOrchestrator,
+  collectionFromBatch,
+  createMemoryCaptureAttemptStore,
+  createMemorySnapshotStore,
+  type CaptureAttempt,
+  type CaptureAttemptStatus,
+  type CaptureAttemptStore,
+  type CollectionCapture,
+  type CollectionJob,
+  type CollectionOrchestrator,
+  type MemorySnapshotStore,
+  type SnapshotEnvelope,
+  type SnapshotStore,
+  type StoredSnapshot,
+} from "./collector.ts";
+export {
+  collectionSlot,
+  nextDeadlineContext,
+  type DeadlineContext,
+  type ScheduledSource,
+} from "./collection-policy.ts";
+export {
+  prepareAutomatedForecast,
+  type AutomatedForecastAttempt,
+  type AutomatedForecastBatch,
+  type AutomatedForecastFixture,
+  type AutomatedForecastInput,
+  type AutomatedForecastObservation,
+  type AutomatedForecastPreparation,
+  type AutomatedForecastRegistration,
+} from "./auto-forecast.ts";
+export {
+  createMemoryResultStore,
+  evaluateForecasts,
+  type EvaluationForecast,
+  type EvaluationResult,
+  type EvaluationRow,
+  type PlayerGameweekResult,
+  type ResultStore,
+} from "./evaluation.ts";
+export {
+  forecastProvenanceSchema,
+  opportunityGameweekSchema,
+  opportunityMapQuerySchema,
+  opportunityPlayerSchema,
+  opportunitySeasonContextSchema,
+  opportunitySnapshotSchema,
+  opportunityTrailPointSchema,
+  ownershipStateSchema,
+  priceStateSchema,
+  projectOpportunityMap,
+  sourceHealthSchema,
+  type ForecastProvenance,
+  type OpportunityGameweek,
+  type OpportunityMap,
+  type OpportunityMapQuery,
+  type OpportunityPlayer,
+  type OpportunitySeasonContext,
+  type OpportunitySnapshot,
+  type OpportunityTrailPoint,
+  type OwnershipState,
+  type PriceState,
+  type SourceHealth,
+} from "./opportunity-map.ts";
+export {
+  createFixtureReconciler,
+  createMemorySeasonCatalog,
+  laterPriceState,
+  laterSeasonLifecycle,
+  playerRegistrationInputSchema,
+  pricePublicationStateSchema,
+  seasonFixtureSchema,
+  seasonLifecycleSchema,
+  seasonManifestSchema,
+  seasonTeamSchema,
+  type FixtureLink,
+  type FixtureReconciler,
+  type MatchedFixtureEvent,
+  type ParsedSeasonManifest,
+  type PlayerRegistration,
+  type PlayerRegistrationInput,
+  type PricePublicationState,
+  type ProviderFixtureEvent,
+  type QuarantinedFixtureEvent,
+  type SeasonCatalog,
+  type SeasonFixture,
+  type SeasonLifecycle,
+  type SeasonManifest,
+  type SeasonTeam,
+} from "./season-domain.ts";
+export {
+  createPremierLeagueSeasonManifest,
+  parsePremierLeagueFixtureArticle,
+  PREMIER_LEAGUE_2026_27_FIXTURES_URL,
+} from "./season-schedule.ts";

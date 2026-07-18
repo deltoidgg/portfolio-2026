@@ -1,5 +1,5 @@
 import { Pool } from "@neondatabase/serverless";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import {
   annotationSchema,
@@ -11,6 +11,12 @@ import {
   type GameweekScope,
 } from "../contracts.ts";
 import { projectDeadlineRoom } from "../deadline-room.ts";
+import {
+  opportunityMapQuerySchema,
+  opportunitySnapshotSchema,
+  projectOpportunityMap,
+  type OpportunityMap,
+} from "../opportunity-map.ts";
 import { captureReceipt, type MarketIntelligenceStore } from "../store.ts";
 import {
   annotations,
@@ -23,6 +29,7 @@ import {
   rawSnapshots,
   sources,
   sourceEntityAliases,
+  opportunitySnapshots,
 } from "./schema.ts";
 import * as schema from "./schema.ts";
 
@@ -36,10 +43,17 @@ function scopedCaptures(batch: CaptureBatch) {
       gameweek: item.gameweek,
     });
   }
-  return [...scopes.values()].map((scope) => ({ batchId: batch.id, ...scope }));
+  const datasetKey =
+    typeof batch.metadata?.datasetKey === "string" ? batch.metadata.datasetKey : "live";
+  return [...scopes.values()].map((scope) => ({ batchId: batch.id, datasetKey, ...scope }));
 }
 
 export type NeonMarketIntelligenceStore = MarketIntelligenceStore & {
+  readLatestOpportunityMap(input: {
+    datasetKey: string;
+    seasonKey: string;
+    horizon: 1 | 3 | 5;
+  }): Promise<OpportunityMap | null>;
   close(): Promise<void>;
 };
 
@@ -121,6 +135,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
                 confidence: alias.confidence,
                 effectiveFrom: alias.effectiveFrom,
                 effectiveTo: alias.effectiveTo,
+                seasonKey: alias.seasonKey,
                 metadata: alias.metadata ?? {},
               })),
             )
@@ -135,6 +150,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
                 matchMethod: sql`excluded.match_method`,
                 confidence: sql`excluded.confidence`,
                 effectiveTo: sql`excluded.effective_to`,
+                seasonKey: sql`excluded.season_key`,
                 metadata: sql`excluded.metadata`,
               },
             });
@@ -165,7 +181,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
                   awayTeam: fixture.awayTeam,
                   kickoffAt: fixture.kickoffAt,
                   deadlineAt: fixture.deadlineAt,
-                  metadata: fixture.metadata ?? {},
+                  metadata: sql`${fixtures.metadata} || excluded.metadata`,
                 },
               });
           }
@@ -188,6 +204,12 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
                 observedAt: snapshot.observedAt,
                 payload: snapshot.payload,
                 statusCode: snapshot.statusCode,
+                objectKey: snapshot.objectKey,
+                sha256: snapshot.sha256,
+                compressedBytes: snapshot.compressedBytes,
+                uncompressedBytes: snapshot.uncompressedBytes,
+                contentEncoding: snapshot.contentEncoding,
+                contentType: snapshot.contentType,
                 metadata: snapshot.metadata ?? {},
               })),
             )
@@ -243,6 +265,10 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
                 components: forecast.components,
                 evidence: forecast.evidence,
                 metadata: forecast.metadata ?? {},
+                datasetKey: forecast.datasetKey ?? "live",
+                registrationKey: forecast.registrationKey,
+                runId: forecast.runId,
+                schemaVersion: forecast.schemaVersion ?? 1,
               })),
             )
             .onConflictDoNothing();
@@ -278,6 +304,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
         eq(forecasts.competition, query.competition),
         eq(forecasts.season, query.season),
         eq(forecasts.gameweek, query.gameweek),
+        eq(forecasts.datasetKey, query.datasetKey ?? "live"),
       );
       const [forecastRows, fixtureRows, sourceCaptureRows, annotationRows] = await Promise.all([
         db
@@ -312,6 +339,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
               eq(captureScopes.competition, query.competition),
               eq(captureScopes.season, query.season),
               eq(captureScopes.gameweek, query.gameweek),
+              eq(captureScopes.datasetKey, query.datasetKey ?? "live"),
             ),
           )
           .orderBy(asc(captureBatches.capturedAt)),
@@ -324,6 +352,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
               eq(captureScopes.competition, query.competition),
               eq(captureScopes.season, query.season),
               eq(captureScopes.gameweek, query.gameweek),
+              eq(captureScopes.datasetKey, query.datasetKey ?? "live"),
             ),
           )
           .orderBy(asc(annotations.observedAt)),
@@ -374,6 +403,61 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
         sourceCaptures,
         annotations: parsedAnnotations,
       });
+    },
+
+    async saveOpportunitySnapshot(snapshot) {
+      const parsed = opportunitySnapshotSchema.parse(snapshot);
+      await db
+        .insert(opportunitySnapshots)
+        .values({
+          snapshotKey: parsed.key,
+          datasetKey: parsed.datasetKey,
+          seasonKey: parsed.season.key,
+          fromGameweek: parsed.fromGameweek,
+          horizon: parsed.horizon,
+          observedAt: parsed.observedAt,
+          payload: parsed,
+        })
+        .onConflictDoUpdate({
+          target: opportunitySnapshots.snapshotKey,
+          set: { payload: parsed, observedAt: parsed.observedAt },
+        });
+    },
+
+    async readOpportunityMap(untrustedQuery) {
+      const query = opportunityMapQuerySchema.parse(untrustedQuery);
+      const filters = [
+        eq(opportunitySnapshots.datasetKey, query.datasetKey),
+        eq(opportunitySnapshots.seasonKey, query.seasonKey),
+        eq(opportunitySnapshots.fromGameweek, query.fromGameweek),
+        eq(opportunitySnapshots.horizon, query.horizon),
+      ];
+      if (query.snapshotAt) {
+        filters.push(sql`${opportunitySnapshots.observedAt} <= ${query.snapshotAt}`);
+      }
+      const [row] = await db
+        .select({ payload: opportunitySnapshots.payload })
+        .from(opportunitySnapshots)
+        .where(and(...filters))
+        .orderBy(sql`${opportunitySnapshots.observedAt} desc`)
+        .limit(1);
+      return row ? projectOpportunityMap(opportunitySnapshotSchema.parse(row.payload)) : null;
+    },
+
+    async readLatestOpportunityMap(input) {
+      const [row] = await db
+        .select({ payload: opportunitySnapshots.payload })
+        .from(opportunitySnapshots)
+        .where(
+          and(
+            eq(opportunitySnapshots.datasetKey, input.datasetKey),
+            eq(opportunitySnapshots.seasonKey, input.seasonKey),
+            eq(opportunitySnapshots.horizon, input.horizon),
+          ),
+        )
+        .orderBy(desc(opportunitySnapshots.observedAt))
+        .limit(1);
+      return row ? projectOpportunityMap(opportunitySnapshotSchema.parse(row.payload)) : null;
     },
 
     async close() {

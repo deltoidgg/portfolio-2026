@@ -10,9 +10,13 @@ const premierLeagueAliases: Record<string, string> = {
   "brighton hove albion": "BHA",
   burnley: "BUR",
   chelsea: "CHE",
+  coventry: "COV",
+  "coventry city": "COV",
   "crystal palace": "CRY",
   everton: "EVE",
   fulham: "FUL",
+  hull: "HUL",
+  "hull city": "HUL",
   "ipswich town": "IPS",
   "leeds united": "LEE",
   "leicester city": "LEI",
@@ -67,4 +71,17 @@ export function canonicalFixtureKey({
   const home = resolvePremierLeagueTeam(homeTeam).toLocaleLowerCase();
   const away = resolvePremierLeagueTeam(awayTeam).toLocaleLowerCase();
   return `${competitionKey}:${seasonKey}:gw${gameweek}:${home}-${away}`;
+}
+
+export function canonicalSeasonFixtureKey({
+  competition,
+  season,
+  homeTeam,
+  awayTeam,
+}: Omit<GameweekScope, "gameweek"> & { homeTeam: string; awayTeam: string }): string {
+  const competitionKey = competition.toLocaleLowerCase().replaceAll(/[^a-z0-9]+/g, "-");
+  const seasonKey = season.replaceAll(/[^0-9]+/g, "-").replaceAll(/^-|-$/g, "");
+  const home = resolvePremierLeagueTeam(homeTeam).toLocaleLowerCase();
+  const away = resolvePremierLeagueTeam(awayTeam).toLocaleLowerCase();
+  return `${competitionKey}:${seasonKey}:fixture:${home}-${away}`;
 }

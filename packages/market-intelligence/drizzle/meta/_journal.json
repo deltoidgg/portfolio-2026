@@ -8,6 +8,13 @@
       "when": 1784253600000,
       "tag": "20260717030000_market_intelligence",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784314800000,
+      "tag": "20260717190000_season_opportunities",
+      "breakpoints": true
     }
   ]
 }

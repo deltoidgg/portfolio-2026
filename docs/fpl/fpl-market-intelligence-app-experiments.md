@@ -1,5 +1,7 @@
 # FPL Market Intelligence: research and app experiment brief
 
+> The implemented Opportunity Map vertical slice, production data loop, UI behaviour, and success-criterion evidence are documented in [FPL Opportunity Map: technical implementation and design specification](./fpl-opportunity-map-implementation.md).
+
 - **Date:** 16 July 2026
 - **Status:** exploratory research for a private, non-commercial side project; not a data-licensing or legal opinion
 - **Scope:** using football betting and prediction-market signals to estimate Fantasy Premier League (FPL) player points, then making those estimates explorable through useful, distinctive web interfaces

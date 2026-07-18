@@ -1,0 +1,49 @@
+name: FPL data collector
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: fpl-data-collector
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      MI_SEASON_KEY: epl:2026-27
+      MI_SEASON: 2026/27
+      MI_SEASON_STARTS_AT: 2026-08-21T00:00:00.000Z
+      MI_SEASON_ENDS_AT: 2027-05-30T23:59:59.000Z
+      MI_RULESET_KEY: fpl:2026-27:provisional-v1
+      MI_ODDS_MARKETS: h2h,totals
+      MI_FORECAST_HORIZONS: 1,3,5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "24"
+          cache: true
+      - run: vp install
+      - name: Apply additive migrations
+        run: vp run market-intelligence#db:migrate
+      - name: Capture due sources
+        run: vp run market-intelligence#collector:tick
+      - name: Publish the current opportunity snapshot
+        run: vp run market-intelligence#forecast:auto
+      - name: Capture live results when a gameweek has started
+        run: vp run market-intelligence#capture:results
+      - name: Evaluate the latest final gameweek
+        run: vp run market-intelligence#evaluate
