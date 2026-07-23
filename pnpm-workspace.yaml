@@ -36,6 +36,8 @@ catalog:
   "@types/d3": ^7.4.3
   motion: ^12.42.2
   "@fontsource/barlow-condensed": ^5.2.8
+  "@fontsource/instrument-serif": ^5.3.0
+  sharp: ^0.35.3
 overrides:
   vite: "catalog:"
   vitest: "catalog:"

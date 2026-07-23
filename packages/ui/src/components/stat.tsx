@@ -10,7 +10,7 @@ interface StatProps {
 export function Stat({ value, label, className }: StatProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)}>
-      <span className="text-2xl font-medium text-ink tabular-nums">{value}</span>
+      <span className="font-display text-3xl text-accent-ink tabular-nums">{value}</span>
       <span className="text-xs text-ink-subtle leading-snug">{label}</span>
     </div>
   );

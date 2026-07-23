@@ -14,8 +14,8 @@ interface SectionProps {
 export function Section({ id, title, description, children, className }: SectionProps) {
   const headingId = useId();
   return (
-    <section id={id} aria-labelledby={headingId} className={cn("mb-20 scroll-mt-24", className)}>
-      <h2 id={headingId} className="text-lg font-medium text-ink mb-2">
+    <section id={id} aria-labelledby={headingId} className={cn("mb-20 scroll-mt-28", className)}>
+      <h2 id={headingId} className="mb-2 font-display text-2xl text-ink">
         {title}
       </h2>
       {description ? (

@@ -7,6 +7,8 @@ export interface PostMeta {
   date: string;
   readingTime: string;
   tags: string[];
+  category: string;
+  sections: Array<{ id: string; label: string }>;
   /** Pin to the top and feature on the homepage. */
   featured?: boolean;
 }
@@ -19,6 +21,16 @@ export const posts: PostMeta[] = [
     date: "2026-06-12",
     readingTime: "9 min read",
     tags: ["accessibility", "design systems", "data"],
+    category: "Research",
+    sections: [
+      { id: "what-i-measured", label: "What I measured" },
+      { id: "the-result", label: "The result" },
+      { id: "better-teams", label: "Could it be better teams?" },
+      { id: "replication", label: "Replication" },
+      { id: "what-failed", label: "What did not replicate" },
+      { id: "engineering-takeaways", label: "Engineering takeaways" },
+      { id: "dig-deeper", label: "Dig deeper" },
+    ],
   },
 ];
 

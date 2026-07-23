@@ -5,97 +5,111 @@ import { Badge } from "ui";
 import type { Project } from "../../content/projects";
 
 const lifecycleLabels = {
-  active: "Active",
+  active: "Live",
   maintained: "Maintained",
   archived: "Archived",
 } as const;
+
+const sectionLabels: Record<string, string> = {
+  why: "Problem framing",
+  evidence: "Evidence",
+  model: "Model",
+  interface: "Interface",
+  system: "Architecture",
+  status: "What remains",
+  problem: "Problem",
+  decision: "Decision",
+  architecture: "Architecture",
+  outcome: "What it proves",
+  limitations: "What remains",
+};
 
 export function ProjectLayout({ project, children }: { project: Project; children: ReactNode }) {
   const evidenceActions = project.actions.filter((action) => action.kind !== "case-study");
 
   return (
-    <article className="pb-12 sm:pb-20">
-      <div className="mx-auto max-w-2xl px-6 pt-12 sm:px-8 sm:pt-16">
-        <Link
-          to="/projects"
-          className="mb-12 inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-        >
-          <IconArrowLeft size={16} aria-hidden="true" />
-          Selected work
-        </Link>
+    <article className="case-page mx-auto max-w-[var(--ui-case-width)] px-5 pb-4 pt-8 sm:px-8 lg:px-0 lg:pt-12">
+      <Link
+        to="/projects"
+        className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink lg:mb-10"
+      >
+        <IconArrowLeft size={15} aria-hidden="true" />
+        Back to work
+      </Link>
 
-        <header className="mb-10">
-          <div className="mb-5 flex flex-wrap items-center gap-2 font-mono text-xs text-ink-subtle">
-            <span>{project.role}</span>
-            <span aria-hidden="true">/</span>
-            <span>{project.timeframe}</span>
-            <Badge tone={project.lifecycle === "active" ? "accent" : "neutral"}>
-              {lifecycleLabels[project.lifecycle]}
-            </Badge>
-          </div>
-          <h1 className="mb-5 text-4xl font-semibold tracking-[-0.035em] text-ink text-balance sm:text-5xl">
-            {project.name}
-          </h1>
-          <p className="max-w-xl text-lg leading-relaxed text-ink-muted text-pretty">
-            {project.summary}
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            {evidenceActions.map((action) => (
-              <a
-                key={`${action.kind}-${action.href}`}
-                href={action.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center gap-2 rounded-md border border-edge bg-surface px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-edge-strong hover:bg-surface-raised"
-              >
-                {action.label}
-                <IconArrowUpRight size={16} aria-hidden="true" />
-              </a>
-            ))}
-          </div>
-        </header>
-      </div>
-
-      <figure className="mx-auto mb-12 max-w-5xl px-4 sm:mb-16 sm:px-8">
-        <div className="overflow-hidden rounded-xl border border-edge bg-surface shadow-[0_24px_80px_rgb(0_0_0/0.12)]">
-          <img
-            src={project.cover.src}
-            alt={project.cover.alt}
-            width={project.cover.width}
-            height={project.cover.height}
-            fetchPriority="high"
-            decoding="async"
-            className="h-auto w-full"
-          />
+      <header className="case-hero">
+        <div className="mb-5 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
+          <span>Case study</span>
+          <span aria-hidden="true">/</span>
+          <span>{project.kind} &amp; design engineering</span>
+          <Badge tone={project.lifecycle === "active" ? "accent" : "neutral"}>
+            {lifecycleLabels[project.lifecycle]}
+          </Badge>
         </div>
+        <h1>{project.name}</h1>
+        <p>{project.summary}</p>
+        <div className="mt-7 flex flex-wrap gap-3">
+          {evidenceActions.map((action, index) => (
+            <a
+              key={action.href}
+              href={action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={index === 0 ? "primary-action" : "secondary-action"}
+            >
+              {action.label}
+              <IconArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          ))}
+        </div>
+      </header>
+
+      <figure className="case-media">
+        <img
+          src={project.cover.src}
+          alt={project.cover.alt}
+          width={project.cover.width}
+          height={project.cover.height}
+          fetchPriority="high"
+          decoding="async"
+        />
       </figure>
 
-      <div className="mx-auto max-w-2xl px-6 sm:px-8">
-        <ProofTrail project={project} />
-        <div className="project-prose">{children}</div>
+      <div className="case-body-grid">
+        <div className="case-story">
+          <CaseSummaryRow label="Problem">{project.problem}</CaseSummaryRow>
+          <CaseSummaryRow label="Decision">{project.decision}</CaseSummaryRow>
+          <CaseSummaryRow label="Evidence">{project.evidence}</CaseSummaryRow>
+          <div className="project-prose">{children}</div>
+        </div>
+
+        {project.evidencePoints && project.evidencePoints.length > 0 ? (
+          <aside className="case-outcomes" aria-label="Key evidence">
+            <p className="section-kicker">Key evidence</p>
+            {project.evidencePoints.map((point) => (
+              <div key={point.value + point.label}>
+                <strong>{point.value}</strong>
+                <span>{point.label}</span>
+                {point.note ? <small>{point.note}</small> : null}
+              </div>
+            ))}
+          </aside>
+        ) : null}
       </div>
     </article>
   );
 }
 
-function ProofTrail({ project }: { project: Project }) {
-  const items = [
-    { label: "Problem", value: project.problem },
-    { label: "Decision", value: project.decision },
-    { label: "Evidence", value: project.evidence },
-  ];
-
+function CaseSummaryRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <section aria-label="Project proof trail" className="proof-trail mb-16">
-      {items.map((item, index) => (
-        <div key={item.label} className="proof-trail__item">
-          <div className="mb-3 flex items-center gap-2 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-accent-ink">
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <span>{item.label}</span>
-          </div>
-          <p className="text-sm leading-relaxed text-ink-muted text-pretty">{item.value}</p>
-        </div>
-      ))}
+    <section className="case-section case-section--summary">
+      <div className="case-section__label">
+        <i />
+        {label}
+      </div>
+      <div className="case-section__content">
+        <p>{children}</p>
+      </div>
     </section>
   );
 }
@@ -110,9 +124,15 @@ export function ProjectSection({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-24">
-      <h2>{title}</h2>
-      {children}
+    <section id={id} className="case-section scroll-mt-28">
+      <div className="case-section__label">
+        <i />
+        {sectionLabels[id] ?? title}
+      </div>
+      <div className="case-section__content">
+        <h2>{title}</h2>
+        {children}
+      </div>
     </section>
   );
 }
@@ -121,19 +141,23 @@ export function ProjectFigure({
   src,
   alt,
   caption,
+  width = 1600,
+  height = 900,
 }: {
   src: string;
   alt: string;
   caption: string;
+  width?: number;
+  height?: number;
 }) {
   return (
     <figure className="project-figure">
-      <div className="overflow-hidden rounded-lg border border-edge bg-surface">
+      <div className="overflow-hidden rounded-[4px] border border-edge bg-surface">
         <img
           src={src}
           alt={alt}
-          width={1600}
-          height={900}
+          width={width}
+          height={height}
           loading="lazy"
           decoding="async"
           className="h-auto w-full"

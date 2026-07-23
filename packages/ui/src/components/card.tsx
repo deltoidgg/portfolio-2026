@@ -9,6 +9,8 @@ interface CardProps {
 /** A bordered surface for grouped content. */
 export function Card({ children, className }: CardProps) {
   return (
-    <div className={cn("rounded-lg border border-edge bg-surface p-5", className)}>{children}</div>
+    <div className={cn("rounded-md border border-edge bg-surface/45 p-5", className)}>
+      {children}
+    </div>
   );
 }

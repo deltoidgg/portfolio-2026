@@ -7,11 +7,13 @@
   "scripts": {
     "check-links": "node src/check-links.ts",
     "install-browser": "playwright install --with-deps chromium",
-    "test": "node src/audit.ts"
+    "test": "node src/audit.ts",
+    "visual": "node src/visual.ts"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.10.2",
-    "playwright": "^1.58.2"
+    "playwright": "^1.58.2",
+    "sharp": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

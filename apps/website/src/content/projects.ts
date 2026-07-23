@@ -22,6 +22,12 @@ export interface ProjectCover {
   height: number;
 }
 
+export interface ProjectEvidencePoint {
+  value: string;
+  label: string;
+  note?: string;
+}
+
 export interface Project {
   slug: string;
   name: string;
@@ -30,6 +36,7 @@ export interface Project {
   problem: string;
   decision: string;
   evidence: string;
+  evidencePoints?: ProjectEvidencePoint[];
   timeframe: string;
   role: string;
   lifecycle: ProjectLifecycle;
@@ -53,6 +60,12 @@ export const projects: Project[] = [
       "Preserve every source snapshot, resolve it into one gameweek model, then expose the forecast distribution, disagreement, and scoring recipe through a deadline replay.",
     evidence:
       "A deployed full-stack experiment, Neon-backed replay model, source adapters, deterministic forecast pipeline, and responsive browser-audited interface.",
+    evidencePoints: [
+      { value: "Point-in-time", label: "Immutable source snapshots" },
+      { value: "Explainable", label: "Distributions and evidence recipe" },
+      { value: "Deterministic", label: "Forecast and fallback paths" },
+      { value: "Responsive", label: "Browser-audited replay interface" },
+    ],
     timeframe: "2026–present",
     role: "Independent creator",
     lifecycle: "active",
@@ -87,6 +100,12 @@ export const projects: Project[] = [
       "Keep provenance in a framework-neutral TypeScript core, then expose it through React, MSW, custom-element devtools, and a Playwright-aware CLI.",
     evidence:
       "Six public npm packages, an MIT-licensed repository, runnable documentation, redaction controls, and automated tests.",
+    evidencePoints: [
+      { value: "6 packages", label: "Published provenance tooling" },
+      { value: "MIT", label: "Open source" },
+      { value: "Redacted", label: "Safe inspection controls" },
+      { value: "Tested", label: "Automated package coverage" },
+    ],
     timeframe: "2026–present",
     role: "Independent creator",
     lifecycle: "active",
@@ -118,6 +137,11 @@ export const projects: Project[] = [
       "Make reading level, source text, and narration part of one calm workflow instead of presenting model controls or exposing a chatbot interface.",
     evidence:
       "A working responsive product with text transformation, speech playback, persistent reading context, and recoverable generation states.",
+    evidencePoints: [
+      { value: "Responsive", label: "Reading workspace" },
+      { value: "Recoverable", label: "Generation states" },
+      { value: "Private", label: "Reader-first product boundary" },
+    ],
     timeframe: "2025–present",
     role: "Independent creator",
     lifecycle: "active",
@@ -147,6 +171,11 @@ export const projects: Project[] = [
       "Separate fast, presentation-ready summaries from deeper player and event analysis so one dataset could support different decision speeds.",
     evidence:
       "A restored working product, an end-to-end data pipeline, and interface artifacts covering summaries, profiles, breakdowns, and replay analysis.",
+    evidencePoints: [
+      { value: "Restored", label: "Working product" },
+      { value: "End to end", label: "Data pipeline and interface" },
+      { value: "Four views", label: "Summary through investigation" },
+    ],
     timeframe: "2020–2021",
     role: "Independent creator",
     lifecycle: "maintained",

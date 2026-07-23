@@ -26,8 +26,8 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Wasim Arif" },
-      { name: "theme-color", content: "#000000", media: "(prefers-color-scheme: dark)" },
-      { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#020810", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f5f2ea", media: "(prefers-color-scheme: light)" },
       {
         name: "description",
         content:
@@ -36,7 +36,14 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", href: "/favicon.ico" },
+      {
+        rel: "alternate",
+        type: "application/rss+xml",
+        title: "Wasim Arif — Writing",
+        href: "/rss.xml",
+      },
     ],
   }),
   component: RootComponent,

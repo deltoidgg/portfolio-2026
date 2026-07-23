@@ -27,31 +27,19 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={label}
       title={label}
-      className="flex h-10 w-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface hover:text-ink"
+      className="group flex h-10 w-10 items-center justify-center rounded-full text-ink-muted transition-colors duration-200 hover:text-ink"
     >
-      {theme === null ? (
-        <span className="block h-[18px] w-[18px]" aria-hidden="true" />
-      ) : theme === "light" ? (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none">
-          <path
-            d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.2 8.2 0 1 0 11.2 11.2Z"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none">
-          <circle cx="12" cy="12" r="3.75" stroke="currentColor" strokeWidth="1.8" />
-          <path
-            d="M12 2v2.1M12 19.9V22M4.93 4.93l1.49 1.49m11.16 11.16 1.49 1.49M2 12h2.1M19.9 12H22M4.93 19.07l1.49-1.49M17.58 6.42l1.49-1.49"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
+      <span
+        className="relative grid h-6 w-6 place-items-center rounded-full border border-edge bg-canvas shadow-[0_0_0_1px_rgb(255_255_255/0.015)] transition-colors duration-200 group-hover:border-edge-strong"
+        aria-hidden="true"
+      >
+        <span
+          className={
+            "block h-1.5 w-1.5 rounded-full bg-accent-bright shadow-[0_0_10px_var(--ui-accent)] transition-transform duration-200 " +
+            (theme === "light" ? "scale-75" : "scale-100")
+          }
+        />
+      </span>
     </button>
   );
 }

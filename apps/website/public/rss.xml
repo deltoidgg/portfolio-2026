@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Wasim Arif — Writing</title>
+    <link>https://wasimarif.com/writing</link>
+    <description>Writing about systems, evidence, accessibility, data, and product engineering.</description>
+    <language>en-gb</language>
+    <lastBuildDate>Fri, 12 Jun 2026 00:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Do design systems actually deliver on accessibility?</title>
+      <link>https://wasimarif.com/writing/design-systems-accessibility</link>
+      <guid isPermaLink="true">https://wasimarif.com/writing/design-systems-accessibility</guid>
+      <pubDate>Fri, 12 Jun 2026 00:00:00 GMT</pubDate>
+      <description><![CDATA[I tested the claim on 18,500 government websites in two countries. Sites built on a design system showed about half the accessibility violations.]]></description>
+    </item>
+  </channel>
+</rss>

@@ -1,9 +1,9 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Badge, Prose, Section } from "ui";
+import { paperContentRegistry } from "../components/paper-content-registry";
 import { datasetById } from "../content/datasets";
 import { paperBySlug, type PaperStatus } from "../content/papers";
-import { paperContentRegistry } from "../components/paper-content-registry";
 import { buildResearchMetadata, RESEARCH_ORIGIN } from "../lib/metadata";
 
 export const Route = createFileRoute("/papers/$slug")({
@@ -25,8 +25,8 @@ export const Route = createFileRoute("/papers/$slug")({
       : { meta: [] },
   component: PaperPage,
   notFoundComponent: () => (
-    <div className="max-w-3xl mx-auto px-6 py-16 sm:px-8">
-      <p className="text-ink-muted text-sm">
+    <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8">
+      <p className="text-sm text-ink-muted">
         No such paper.{" "}
         <Link to="/" className="text-accent-ink underline underline-offset-2">
           Back to the lab
@@ -41,6 +41,19 @@ const statusLabels: Record<PaperStatus, string> = {
   preregistered: "Pre-registered",
   published: "Published",
 };
+
+const paperSections = [
+  ["abstract", "Abstract"],
+  ["introduction", "1. Introduction"],
+  ["data", "2. Data"],
+  ["methods", "3. Methods"],
+  ["us-results", "4. US results"],
+  ["diagnostics", "5. Diagnostics"],
+  ["uk-replication", "6. UK replication"],
+  ["limitations", "7. Limitations"],
+  ["deviations", "Deviations"],
+  ["downloads", "Downloads"],
+] as const;
 
 function PaperPage() {
   const { paper } = Route.useLoaderData();
@@ -59,112 +72,92 @@ function PaperPage() {
   });
 
   return (
-    <article className="max-w-3xl mx-auto px-6 py-16 sm:px-8 sm:py-20">
+    <article className="research-paper-page mx-auto max-w-[var(--ui-shell-width)] px-5 pb-4 pt-10 sm:px-8 lg:px-[var(--ui-shell-gutter)] lg:pt-14">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink transition-colors mb-10"
+        className="mb-9 inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink"
       >
-        <IconArrowLeft size={16} aria-hidden="true" />
+        <IconArrowLeft size={15} aria-hidden="true" />
         All papers
       </Link>
 
-      <header className="mb-12">
-        <div className="mb-4">
-          <Badge tone={paper.status === "published" ? "accent" : "warn"}>
-            {statusLabels[paper.status]}
-          </Badge>
+      <div className="research-paper-layout">
+        {content ? <PaperContents /> : null}
+
+        <div className="research-paper-main">
+          <header className="research-paper-hero">
+            <div className="mb-5 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.13em] text-ink-subtle">
+              <Badge tone={paper.status === "published" ? "accent" : "warn"}>
+                {statusLabels[paper.status]}
+              </Badge>
+              <span>{paper.displayNumber}</span>
+              {paper.publishedAt ? <time dateTime={paper.publishedAt}>June 2026</time> : null}
+            </div>
+            <h1>{paper.title}</h1>
+            <p>{paper.question}</p>
+          </header>
+
+          <dl className="paper-summary">
+            <div>
+              <dt>Finding</dt>
+              <dd>
+                Strong adoption signals were associated with 50% fewer detected violations in the
+                US; the held-out UK estimate was 44% fewer.
+              </dd>
+            </div>
+            <div>
+              <dt>Why it matters</dt>
+              <dd>
+                The result is consistent with design systems acting as accessibility infrastructure
+                while remaining observational rather than causal.
+              </dd>
+            </div>
+            <div>
+              <dt>What I built</dt>
+              <dd>
+                A detector and scanner, ETL pipeline, pre-registered analysis, publication system,
+                and in-browser explorer.
+              </dd>
+            </div>
+          </dl>
+
+          {content ? <content.Stats /> : null}
+
+          <Section id="abstract" title="Abstract" className="paper-section">
+            <Prose>
+              {paper.abstract.map((paragraph) => (
+                <p key={paragraph.slice(0, 32)}>{paragraph}</p>
+              ))}
+            </Prose>
+          </Section>
+
+          {content ? <content.Body /> : <GenericPaperBody slug={paper.slug} />}
         </div>
-        <h1 className="text-2xl font-medium text-ink leading-snug mb-4">{paper.title}</h1>
-        <p className="text-ink-muted text-base leading-relaxed">{paper.question}</p>
-        {paper.publishedAt ? (
-          <p className="mt-3 font-mono text-xs text-ink-subtle">
-            Published <time dateTime={paper.publishedAt}>June 2026</time>
-          </p>
-        ) : null}
-      </header>
-
-      <dl className="mb-12 grid gap-px overflow-hidden rounded-lg border border-edge bg-edge sm:grid-cols-3">
-        <div className="bg-surface p-5">
-          <dt className="mb-2 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-accent-ink">
-            Finding
-          </dt>
-          <dd className="text-sm leading-relaxed text-ink-muted">
-            Strong adoption signals were associated with 50% fewer detected violations in the US;
-            the held-out UK estimate was 44% fewer.
-          </dd>
-        </div>
-        <div className="bg-surface p-5">
-          <dt className="mb-2 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-accent-ink">
-            Why it matters
-          </dt>
-          <dd className="text-sm leading-relaxed text-ink-muted">
-            The result is consistent with design systems acting as accessibility infrastructure at
-            estate scale, while remaining observational rather than causal.
-          </dd>
-        </div>
-        <div className="bg-surface p-5">
-          <dt className="mb-2 font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-accent-ink">
-            What I built
-          </dt>
-          <dd className="text-sm leading-relaxed text-ink-muted">
-            A frozen detector and scanner, ETL pipeline, pre-registered analysis, publication
-            system, and in-browser data explorer.
-          </dd>
-        </div>
-      </dl>
-
-      {content ? <content.Stats /> : null}
-
-      {content ? <PaperContents /> : null}
-
-      <Section id="abstract" title="Abstract">
-        <Prose>
-          {paper.abstract.map((paragraph) => (
-            <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-          ))}
-        </Prose>
-      </Section>
-
-      {content ? <content.Body /> : <GenericPaperBody slug={paper.slug} />}
+      </div>
     </article>
   );
 }
 
-const paperSections = [
-  ["abstract", "Abstract"],
-  ["introduction", "1. Introduction"],
-  ["data", "2. Data"],
-  ["methods", "3. Methods"],
-  ["us-results", "4. US results"],
-  ["diagnostics", "5. Diagnostics"],
-  ["uk-replication", "6. UK replication"],
-  ["limitations", "7. Limitations"],
-  ["deviations", "Deviations"],
-  ["downloads", "Downloads"],
-] as const;
-
 function PaperContents() {
   return (
-    <nav aria-label="Paper contents" className="mb-12 rounded-lg border border-edge bg-surface p-5">
-      <h2 className="mb-3 text-sm font-semibold text-ink">Contents</h2>
-      <ol className="grid gap-x-6 gap-y-2 text-sm text-ink-muted sm:grid-cols-2">
-        {paperSections.map(([id, label]) => (
-          <li key={id}>
-            <a
-              href={`#${id}`}
-              className="underline decoration-edge underline-offset-4 hover:text-ink"
-            >
-              {label}
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <aside className="paper-contents">
+      <details open>
+        <summary>Paper contents</summary>
+        <nav aria-label="Paper contents">
+          <ol>
+            {paperSections.map(([id, label]) => (
+              <li key={id}>
+                <a href={"#" + id}>{label}</a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      </details>
+    </aside>
   );
 }
 
-/** Fallback for papers that don't have a full write-up registered yet. */
 function GenericPaperBody({ slug }: { slug: string }) {
   const paper = paperBySlug(slug);
   if (!paper) return null;
@@ -176,23 +169,19 @@ function GenericPaperBody({ slug }: { slug: string }) {
         <li>
           <a
             href={paper.preregistrationHref}
-            className="inline-flex items-center gap-1.5 text-accent-ink underline underline-offset-2 hover:text-accent"
+            className="inline-flex items-center gap-1.5 text-accent-ink underline underline-offset-2"
           >
-            Pre-registration
-            <IconExternalLink size={14} aria-hidden="true" />
+            Pre-registration <IconExternalLink size={14} aria-hidden="true" />
           </a>
         </li>
         {dataset ? (
           <li className="text-ink-muted">
             Data:{" "}
-            <a
-              href={dataset.source.href}
-              className="text-accent-ink underline underline-offset-2 hover:text-accent"
-            >
+            <a href={dataset.source.href} className="text-accent-ink underline underline-offset-2">
               {dataset.source.label}
             </a>{" "}
             snapshot, processed to a versioned Parquet artifact by{" "}
-            <code className="font-mono text-ink text-[0.8125rem]">tools/etl</code>.
+            <code className="font-mono text-[0.8125rem] text-ink">tools/etl</code>.
           </li>
         ) : null}
       </ul>

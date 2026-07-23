@@ -1,231 +1,381 @@
 import {
   IconArrowRight,
-  IconArrowUpRight,
-  IconBrandBluesky,
   IconBrandGithub,
   IconBrandLinkedin,
-  IconBrandX,
   IconMail,
+  IconMapPin,
+  IconRss,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { govukSummary, ukResults, usResults, uswdsSummary } from "datasets/artifacts";
-import { FplSpotlight } from "../components/fpl-spotlight";
-import { ProjectCard } from "../components/project-card";
-import { featuredProjects, projectBySlug } from "../content/projects";
+import { featuredPost, formatPostDate } from "../content/posts";
+import { featuredProjects } from "../content/projects";
 import { buildMetadata } from "../lib/metadata";
 
 const description =
-  "Software engineer across product and design engineering, building AI-enabled products from agent workflows and APIs to accessible interfaces and data visualisation.";
+  "Product engineer and technical writer building inspectable systems, accessible interfaces, and open research.";
 
 export const Route = createFileRoute("/")({
   head: () => buildMetadata({ title: "Wasim Arif", description, path: "/" }),
   component: Home,
 });
 
-const socials = [
-  { label: "GitHub", href: "https://github.com/deltoidgg", Icon: IconBrandGithub },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/wasimarif/", Icon: IconBrandLinkedin },
-  { label: "X", href: "https://x.com/xwasim", Icon: IconBrandX },
-  { label: "Bluesky", href: "https://bsky.app/profile/rerixo.bsky.social", Icon: IconBrandBluesky },
-] as const;
+const projectCategories: Record<string, string> = {
+  fpl: "Data & analytics",
+  mockpit: "Developer tools",
+  rewriter: "AI & productivity",
+};
+
+const researchItems = [
+  {
+    date: "30 Jun, 2026",
+    title: "Do design systems deliver accessibility at scale?",
+    copy: "The canonical paper, frozen methodology, replication, and results.",
+    href: "https://research.wasimarif.com/papers/design-systems-accessibility",
+  },
+  {
+    date: "US data",
+    title: "USWDS adoption and accessibility",
+    copy: "Explore 12,252 federal websites locally in your browser.",
+    href: "https://research.wasimarif.com/explore/uswds-a11y",
+  },
+  {
+    date: "UK data",
+    title: "govuk-frontend adoption and accessibility",
+    copy: "Interrogate the held-out replication dataset and evidence.",
+    href: "https://research.wasimarif.com/explore/govuk-a11y",
+  },
+];
 
 function Home() {
   const usDrop = Math.round((1 - usResults.h1.strongVsNone.irr) * 100);
   const ukDrop = Math.round((1 - ukResults.h4.strongVsNone.irr) * 100);
   const totalSites = uswdsSummary.meta.analysedSites + govukSummary.meta.analysedSites;
-  const fplProject = projectBySlug("fpl");
-  const otherFeaturedProjects = featuredProjects.filter((project) => project.slug !== "fpl");
+  const proofEstimates = [
+    {
+      id: "US",
+      y: 68,
+      colour: "var(--ui-data-cyan)",
+      estimate: usResults.h1.strongVsNone,
+    },
+    {
+      id: "UK",
+      y: 124,
+      colour: "var(--ui-data-green)",
+      estimate: ukResults.h4.strongVsNone,
+    },
+  ] as const;
+  const proofTicks = [0.4, 0.6, 0.8, 1] as const;
+  const plotIrr = (value: number) =>
+    112 + ((Math.min(1.05, Math.max(0.3, value)) - 0.3) / 0.75) * 390;
+  const post = featuredPost();
+  const writingItems = [
+    ...(post
+      ? [
+          {
+            date: formatPostDate(post.date),
+            title: post.title,
+            copy: post.deck,
+            to: "/writing/$slug" as const,
+            params: { slug: post.slug },
+          },
+        ]
+      : []),
+    ...featuredProjects
+      .filter((project) => project.slug !== "fpl")
+      .slice(0, 2)
+      .map((project) => ({
+        date: project.timeframe,
+        title: project.name + " — case study",
+        copy: project.decision,
+        to: "/projects/$slug" as const,
+        params: { slug: project.slug },
+      })),
+  ];
 
   return (
-    <div>
-      <header className="mx-auto max-w-2xl px-6 pb-20 pt-16 sm:px-8 sm:pb-24 sm:pt-24">
-        <span className="gradient mask mb-9 block h-12 w-20" role="img" aria-hidden="true" />
-        <p className="mb-4 font-mono text-xs uppercase tracking-[0.16em] text-accent-ink">
-          Software engineer · London
-        </p>
-        <h1 className="mb-5 text-4xl font-semibold tracking-[-0.04em] text-ink text-balance sm:text-5xl">
-          Wasim Arif
-        </h1>
-        <p className="mb-6 text-xl leading-snug tracking-tight text-ink-muted text-balance sm:text-2xl">
-          Software engineer across product &amp; design engineering.
-        </p>
-        <p className="max-w-xl text-base leading-relaxed text-ink-muted text-pretty sm:text-lg">
-          I build AI-enabled products end to end—from agent workflows and APIs to accessible
-          interfaces, interaction, and data visualisation. I like the point where a half-formed idea
-          becomes something people can understand, trust, and use.
-        </p>
-
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            to="/projects"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas transition-opacity hover:opacity-85"
-          >
-            View selected work
-            <IconArrowRight size={16} aria-hidden="true" />
-          </Link>
-          <a
-            href="mailto:wasim.arif@live.co.uk"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-edge bg-surface px-4 py-2 text-sm font-semibold text-ink transition-colors hover:border-edge-strong hover:bg-surface-raised"
-          >
-            <IconMail size={17} aria-hidden="true" />
-            Email me
-          </a>
-          <a
-            href="https://www.linkedin.com/in/wasimarif/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center gap-2 px-2 py-2 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-          >
-            LinkedIn
-            <IconArrowUpRight size={16} aria-hidden="true" />
-          </a>
-        </div>
-
-        <nav aria-label="Social profiles" className="mt-7 flex items-center gap-1">
-          {socials.map(({ label, href, Icon }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface hover:text-ink"
-              aria-label={label}
-              title={label}
-            >
-              <Icon size={19} aria-hidden="true" />
-            </a>
-          ))}
-        </nav>
-      </header>
-
-      <div>
-        <section className="mx-auto max-w-5xl px-4 pb-24 sm:px-8" aria-labelledby="selected-work">
-          <div className="mx-auto mb-9 flex max-w-2xl items-end justify-between gap-6">
-            <div>
-              <p className="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-accent-ink">
-                Selected work
-              </p>
-              <h2 id="selected-work" className="text-2xl font-semibold tracking-tight text-ink">
-                Products with inspectable proof
-              </h2>
-            </div>
-            <Link
-              to="/projects"
-              className="hidden min-h-10 items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink sm:inline-flex"
-            >
-              All work <IconArrowRight size={16} aria-hidden="true" />
+    <div className="home-page mx-auto max-w-[var(--ui-page-width)] px-5 pb-2 pt-12 sm:px-8 lg:px-0 lg:pt-20">
+      <header className="home-hero">
+        <div>
+          <p className="section-kicker">Product engineer &amp; technical writer</p>
+          <h1>
+            Open research<span>.</span>
+            <br />
+            Inspectable systems<span>.</span>
+            <br />
+            Product engineering<span>.</span>
+          </h1>
+          <p className="home-hero__deck">
+            I build AI-enabled products that translate complexity into clarity. I write about
+            systems, evidence, interfaces, and trust—so teams can ship with confidence.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link to="/writing" className="primary-action">
+              Read writing <IconArrowRight size={15} aria-hidden="true" />
+            </Link>
+            <Link to="/projects" className="secondary-action">
+              View selected work <IconArrowRight size={15} aria-hidden="true" />
             </Link>
           </div>
-          {fplProject ? <FplSpotlight project={fplProject} /> : null}
-          <div className="mt-6 grid gap-6 md:grid-cols-2">
-            {otherFeaturedProjects.map((project, index) => (
-              <ProjectCard key={project.slug} project={project} priority={index === 0} />
+        </div>
+
+        <aside className="current-focus">
+          <p className="section-kicker">
+            <span className="inline-block h-2 w-2 rounded-full bg-accent-bright shadow-[0_0_10px_var(--ui-accent)]" />
+            Current focus
+          </p>
+          <p>Systems that are observable, measurable, and built to earn trust.</p>
+          <svg
+            viewBox="0 0 360 70"
+            role="img"
+            aria-label="A calm line representing iterative systems work"
+          >
+            <polyline
+              points="0,50 22,29 43,45 67,49 92,41 118,42 145,28 172,34 201,24 227,41 253,43 279,32 303,46 330,39 360,48"
+              fill="none"
+              stroke="var(--ui-accent)"
+              strokeOpacity="0.38"
+              strokeWidth="1.5"
+            />
+          </svg>
+        </aside>
+      </header>
+
+      <section className="home-split border-t border-edge" aria-label="Latest writing and research">
+        <div className="home-list-column">
+          <div className="section-heading-row">
+            <p className="section-kicker">Latest writing</p>
+            <Link to="/writing">
+              View all writing <IconArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="ledger-list">
+            {writingItems.map((item) => (
+              <Link key={item.title} to={item.to} params={item.params} className="ledger-row group">
+                <time>{item.date}</time>
+                <span>
+                  <strong>{item.title}</strong>
+                  <small>{item.copy}</small>
+                </span>
+                <IconArrowRight size={15} aria-hidden="true" />
+              </Link>
             ))}
           </div>
-        </section>
+        </div>
 
-        <section className="border-y border-edge bg-surface/45" aria-labelledby="research-heading">
-          <div className="mx-auto grid max-w-5xl gap-10 px-6 py-20 sm:px-8 sm:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div>
-              <p className="mb-3 font-mono text-xs uppercase tracking-[0.16em] text-accent-ink">
-                Independent research
-              </p>
-              <h2
-                id="research-heading"
-                className="mb-5 text-3xl font-semibold tracking-[-0.03em] text-ink text-balance"
-              >
-                Do design systems deliver accessibility at scale?
-              </h2>
-              <p className="mb-5 leading-relaxed text-ink-muted text-pretty">
-                Strong design-system adoption signals were associated with roughly half as many
-                automatically detected accessibility violations. The pre-registered specification
-                then replicated on held-out UK data.
-              </p>
-              <p className="leading-relaxed text-ink-muted text-pretty">
-                I built the scanner, ETL, confirmatory analysis, frozen artifacts, accessible
-                visualisations, and DuckDB-WASM explorers. The paper reports nulls and detector
-                limitations alongside the result.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm font-medium">
-                <a
-                  href="https://research.wasimarif.com/papers/design-systems-accessibility"
-                  className="inline-flex min-h-10 items-center gap-1.5 text-ink transition-colors hover:text-accent-ink"
-                >
-                  Read the paper <IconArrowUpRight size={16} aria-hidden="true" />
-                </a>
-                <Link
-                  to="/writing/$slug"
-                  params={{ slug: "design-systems-accessibility" }}
-                  className="inline-flex min-h-10 items-center gap-1.5 text-ink-muted transition-colors hover:text-ink"
-                >
-                  Plain-English version <IconArrowRight size={16} aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="research-evidence" aria-label="Research result summary">
-              <div className="research-evidence__plot" aria-hidden="true">
-                <span style={{ width: "50%" }} />
-                <span style={{ width: "56%" }} />
-                <i />
-              </div>
-              <dl className="grid gap-px overflow-hidden rounded-lg border border-edge bg-edge sm:grid-cols-3">
-                <div className="bg-canvas p-5">
-                  <dt className="mb-2 text-xs leading-snug text-ink-subtle">
-                    US strong-adoption association
-                  </dt>
-                  <dd className="font-mono text-3xl font-semibold tracking-tight text-ink">
-                    −{usDrop}%
-                  </dd>
-                </div>
-                <div className="bg-canvas p-5">
-                  <dt className="mb-2 text-xs leading-snug text-ink-subtle">
-                    Held-out UK replication
-                  </dt>
-                  <dd className="font-mono text-3xl font-semibold tracking-tight text-ink">
-                    −{ukDrop}%
-                  </dd>
-                </div>
-                <div className="bg-canvas p-5">
-                  <dt className="mb-2 text-xs leading-snug text-ink-subtle">
-                    Government sites analysed
-                  </dt>
-                  <dd className="font-mono text-3xl font-semibold tracking-tight text-ink">
-                    {totalSites.toLocaleString()}
-                  </dd>
-                </div>
-              </dl>
-              <p className="mt-4 text-xs leading-relaxed text-ink-subtle">
-                Incidence-rate models with agency or organisation controls. Observational evidence;
-                automated checks measure the floor of accessibility, not the whole experience.
-              </p>
-            </div>
+        <div className="home-list-column">
+          <div className="section-heading-row">
+            <p className="section-kicker">Latest research</p>
+            <a href="https://research.wasimarif.com">
+              View all research <IconArrowRight size={14} aria-hidden="true" />
+            </a>
           </div>
-        </section>
+          <div className="ledger-list">
+            {researchItems.map((item) => (
+              <a key={item.title} href={item.href} className="ledger-row group">
+                <time>{item.date}</time>
+                <span>
+                  <strong>{item.title}</strong>
+                  <small>{item.copy}</small>
+                </span>
+                <IconArrowRight size={15} aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <section
-          className="mx-auto max-w-2xl px-6 py-20 sm:px-8 sm:py-24"
-          aria-labelledby="contact-heading"
-        >
-          <p className="mb-3 font-mono text-xs uppercase tracking-[0.16em] text-accent-ink">
-            Contact
+      <section
+        className="home-section border-t border-edge"
+        aria-labelledby="selected-work-heading"
+      >
+        <div className="section-heading-row">
+          <p id="selected-work-heading" className="section-kicker">
+            Selected work
           </p>
-          <h2 id="contact-heading" className="mb-4 text-2xl font-semibold tracking-tight text-ink">
-            Building across product and interface?
-          </h2>
-          <p className="mb-7 max-w-xl leading-relaxed text-ink-muted text-pretty">
-            I am interested in software engineering roles where product judgement, frontend craft,
-            and the systems underneath the interface all matter.
+          <Link to="/projects">
+            View all projects <IconArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
+        <div className="work-ledger">
+          {featuredProjects.map((project) => (
+            <Link
+              key={project.slug}
+              to="/projects/$slug"
+              params={{ slug: project.slug }}
+              className="work-row group"
+            >
+              <strong>{project.name}</strong>
+              <span>{project.summary}</span>
+              <em>
+                <i />
+                {projectCategories[project.slug] ?? project.kind}
+              </em>
+              <IconArrowRight size={15} aria-hidden="true" />
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="research-proof border-t border-edge"
+        aria-labelledby="research-proof-heading"
+      >
+        <div className="research-proof__intro">
+          <p className="section-kicker">Research proof</p>
+          <h2 id="research-proof-heading">Do design systems deliver accessibility at scale?</h2>
+          <p>
+            Pre-registered evidence across {totalSites.toLocaleString()} production websites, with a
+            held-out replication and open artifacts.
           </p>
-          <a
-            href="mailto:wasim.arif@live.co.uk"
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-canvas transition-opacity hover:opacity-85"
-          >
-            <IconMail size={17} aria-hidden="true" />
-            Email me
+          <a href="https://research.wasimarif.com/papers/design-systems-accessibility">
+            Read the paper <IconArrowRight size={14} aria-hidden="true" />
           </a>
-        </section>
-      </div>
+        </div>
+        <dl className="research-proof__stats">
+          <div>
+            <dt>Held-out UK replication</dt>
+            <dd>
+              <span>−{ukDrop}%</span>
+              <small>less violations</small>
+            </dd>
+          </div>
+          <div>
+            <dt>US association</dt>
+            <dd>
+              <span>−{usDrop}%</span>
+              <small>fewer detected violations</small>
+            </dd>
+          </div>
+        </dl>
+        <div className="research-proof__chart">
+          <p className="section-kicker">Adjusted incidence-rate ratio / 95% CI</p>
+          <svg
+            viewBox="0 0 520 180"
+            role="img"
+            aria-labelledby="proof-chart-title proof-chart-desc"
+          >
+            <title id="proof-chart-title">
+              Adjusted strong-adoption estimates for the United States and United Kingdom
+            </title>
+            <desc id="proof-chart-desc">
+              Artifact-derived incidence-rate ratios compare strong design-system adoption with the
+              below-50 reference group. Both estimates and confidence intervals remain below one,
+              indicating fewer detected accessibility violations.
+            </desc>
+            {proofTicks.map((tick) => (
+              <g key={tick}>
+                <line
+                  x1={plotIrr(tick)}
+                  x2={plotIrr(tick)}
+                  y1="28"
+                  y2="146"
+                  stroke={tick === 1 ? "var(--ui-edge-strong)" : "var(--ui-edge)"}
+                  strokeDasharray={tick === 1 ? "4 4" : undefined}
+                />
+                <text
+                  x={plotIrr(tick)}
+                  y="164"
+                  fill="var(--ui-ink-subtle)"
+                  fontSize="10"
+                  textAnchor="middle"
+                >
+                  {tick.toFixed(1)}
+                </text>
+              </g>
+            ))}
+            {proofEstimates.map(({ id, y, colour, estimate }) => (
+              <g key={id}>
+                <text x="8" y={y + 4} fill="var(--ui-ink-muted)" fontSize="11">
+                  {id}
+                </text>
+                <line
+                  x1={plotIrr(estimate.ciLow)}
+                  x2={plotIrr(estimate.ciHigh)}
+                  y1={y}
+                  y2={y}
+                  stroke={colour}
+                  strokeWidth="3"
+                />
+                <line
+                  x1={plotIrr(estimate.ciLow)}
+                  x2={plotIrr(estimate.ciLow)}
+                  y1={y - 7}
+                  y2={y + 7}
+                  stroke={colour}
+                />
+                <line
+                  x1={plotIrr(estimate.ciHigh)}
+                  x2={plotIrr(estimate.ciHigh)}
+                  y1={y - 7}
+                  y2={y + 7}
+                  stroke={colour}
+                />
+                <circle cx={plotIrr(estimate.irr)} cy={y} r="6" fill={colour} />
+                <text x={plotIrr(estimate.ciHigh) + 9} y={y + 4} fill="var(--ui-ink)" fontSize="10">
+                  {estimate.irr.toFixed(2)}
+                </text>
+              </g>
+            ))}
+          </svg>
+          <div className="research-proof__legend">
+            <span>
+              <i className="bg-data-cyan" />
+              US ({uswdsSummary.meta.analysedSites.toLocaleString()})
+            </span>
+            <span>
+              <i className="bg-data-green" />
+              UK ({govukSummary.meta.analysedSites.toLocaleString()})
+            </span>
+            <span>1.0 = no association</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-closing border-t border-edge" aria-label="About and contact">
+        <div>
+          <p className="section-kicker">About</p>
+          <p>
+            I’m Wasim Arif, a product engineer and technical writer based in London. I build systems
+            that are measurable and maintainable, and write to make complex ideas actionable.
+          </p>
+          <Link to="/about">
+            More about how I work <IconArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </div>
+        <address>
+          <a href="mailto:wasim.arif@live.co.uk">
+            <IconMail size={15} />
+            wasim.arif@live.co.uk
+          </a>
+          <span>
+            <IconMapPin size={15} />
+            London, UK
+          </span>
+          <a href="https://www.linkedin.com/in/wasimarif/">
+            <IconBrandLinkedin size={15} />
+            linkedin.com/in/wasimarif
+          </a>
+          <a href="https://github.com/deltoidgg">
+            <IconBrandGithub size={15} />
+            github.com/deltoidgg
+          </a>
+        </address>
+        <div>
+          <p className="section-kicker">Stay in the loop</p>
+          <p>Occasional notes on systems, research, and building with evidence.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a href="mailto:wasim.arif@live.co.uk" className="secondary-action">
+              <IconMail size={15} />
+              Email
+            </a>
+            <a href="/rss.xml" className="secondary-action">
+              <IconRss size={15} />
+              RSS
+            </a>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

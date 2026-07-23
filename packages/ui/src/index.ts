@@ -1,5 +1,6 @@
 export { cn } from "./cn";
 export { Badge } from "./components/badge";
+export { BrandMark } from "./components/brand-mark";
 export { Card } from "./components/card";
 export { DataTable, type DataTableColumn } from "./components/data-table";
 export { Prose } from "./components/prose";

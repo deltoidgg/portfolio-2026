@@ -100,7 +100,7 @@ export function DesignSystemsAccessibilityPost() {
           you there at the end.
         </p>
 
-        <h2>What I measured</h2>
+        <h2 id="what-i-measured">What I measured</h2>
         <p>
           The US government runs a programme called GSA Site Scanning. It visits every known live
           federal website daily and records, among other things, two values I care about: a graded
@@ -139,7 +139,7 @@ export function DesignSystemsAccessibilityPost() {
           half once a site is a likely or definite adopter.
         </p>
 
-        <h2>About half, once you compare like with like</h2>
+        <h2 id="the-result">About half, once you compare like with like</h2>
         <p>
           Raw averages are where the sceptic in you should speak up, because agencies differ in
           everything: budgets, team size, how modern the stack is. So the headline number comes from
@@ -174,7 +174,7 @@ export function DesignSystemsAccessibilityPost() {
       />
 
       <PostProse>
-        <h2>Could it just be better teams?</h2>
+        <h2 id="better-teams">Could it just be better teams?</h2>
         <p>
           Nobody assigned design systems to agencies at random. The teams that adopt one might be
           the same teams that care about accessibility in the first place. Observational data cannot
@@ -213,7 +213,7 @@ export function DesignSystemsAccessibilityPost() {
       </Callout>
 
       <PostProse>
-        <h2>Then I tested it on a country the model had never seen</h2>
+        <h2 id="replication">Then I tested it on a country the model had never seen</h2>
         <p>
           Find a pattern in one dataset and you should worry you have quietly tuned your analysis to
           it. So before touching any UK data, I wrote the entire UK analysis down: the detector, the
@@ -246,7 +246,7 @@ export function DesignSystemsAccessibilityPost() {
       </Figure>
 
       <PostProse>
-        <h2>What didn't go my way</h2>
+        <h2 id="what-failed">What did not go my way</h2>
         <p>Three predictions missed, and they are the most useful part of the study.</p>
         <ul>
           <li>
@@ -272,7 +272,7 @@ export function DesignSystemsAccessibilityPost() {
           </li>
         </ul>
 
-        <h2>What I'd take from it as an engineer</h2>
+        <h2 id="engineering-takeaways">What I would take from it as an engineer</h2>
         <ol>
           <li>
             If you are weighing bespoke UI against a mature design system, accessibility is now a
@@ -294,7 +294,7 @@ export function DesignSystemsAccessibilityPost() {
           </li>
         </ol>
 
-        <h2>Dig deeper</h2>
+        <h2 id="dig-deeper">Dig deeper</h2>
         <p>
           Everything above is the conversational version of a pre-registered study whose data, code,
           and locked hypotheses are public. If you want the regression tables, the diagnostics, or

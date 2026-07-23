@@ -1,8 +1,7 @@
-import { spawn, type ChildProcess } from "node:child_process";
 import { join } from "node:path";
-import { kill } from "node:process";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, type Page } from "playwright";
+import { startServer, stopServer, waitForServer } from "./server-harness.ts";
 
 const root = new URL("../../../", import.meta.url).pathname;
 const targets = [
@@ -20,7 +19,14 @@ const targets = [
       "/projects/openfgc",
       "/writing",
       "/writing/design-systems-accessibility",
+      "/about",
       "/not-a-real-page",
+    ],
+    viewports: [
+      { width: 320, height: 800 },
+      { width: 390, height: 844 },
+      { width: 768, height: 1024 },
+      { width: 1440, height: 1100 },
     ],
   },
   {
@@ -36,9 +42,15 @@ const targets = [
       "/explore/govuk-a11y",
       "/not-a-real-page",
     ],
+    viewports: [
+      { width: 320, height: 800 },
+      { width: 390, height: 844 },
+      { width: 768, height: 1024 },
+      { width: 1440, height: 1100 },
+    ],
   },
   {
-    name: "fpl",
+    name: "fpl-smoke",
     cwd: join(root, "apps/fpl"),
     origin: "http://127.0.0.1:4175",
     port: "4175",
@@ -48,41 +60,15 @@ const targets = [
       "/archive/2025-26/gw34",
       "/not-a-real-page",
     ],
+    viewports: [{ width: 320, height: 800 }],
   },
 ] as const;
-
-const servers: ChildProcess[] = [];
-
-function startServer(target: (typeof targets)[number]) {
-  const process = spawn("vp", ["dev", "--host", "127.0.0.1", "--port", target.port], {
-    cwd: target.cwd,
-    detached: true,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  servers.push(process);
-  return process;
-}
-
-async function waitForServer(origin: string, process: ChildProcess) {
-  const deadline = Date.now() + 45_000;
-  while (Date.now() < deadline) {
-    if (process.exitCode !== null) throw new Error(`Dev server stopped with ${process.exitCode}`);
-    try {
-      const response = await fetch(origin);
-      if (response.ok) return;
-    } catch {
-      // The server is still starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  throw new Error(`Timed out waiting for ${origin}`);
-}
 
 async function setTheme(page: Page, theme: "light" | "dark") {
   await page.addInitScript((selectedTheme) => localStorage.setItem("theme", selectedTheme), theme);
 }
 
-async function auditPage(page: Page, url: string, theme: "light" | "dark") {
+async function auditPage(page: Page, url: string, theme: "light" | "dark", viewportWidth: number) {
   const consoleErrors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
@@ -97,7 +83,9 @@ async function auditPage(page: Page, url: string, theme: "light" | "dark") {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
-  if (overflow > 1) throw new Error(`${url} overflows horizontally by ${overflow}px at 320px`);
+  if (overflow > 1) {
+    throw new Error(`${url} overflows horizontally by ${overflow}px at ${viewportWidth}px`);
+  }
 
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -106,30 +94,37 @@ async function auditPage(page: Page, url: string, theme: "light" | "dark") {
     const summary = results.violations
       .map((violation) => `${violation.id} (${violation.nodes.length})`)
       .join(", ");
-    throw new Error(`${url} [${theme}] axe violations: ${summary}`);
+    throw new Error(`${url} [${theme}, ${viewportWidth}px] axe violations: ${summary}`);
   }
+
   const unexpectedConsoleErrors = consoleErrors.filter(
     (message) => !(response.status() === 404 && message.includes("status of 404")),
   );
   if (unexpectedConsoleErrors.length > 0) {
-    throw new Error(`${url} [${theme}] console errors: ${unexpectedConsoleErrors.join(" | ")}`);
+    throw new Error(
+      `${url} [${theme}, ${viewportWidth}px] console errors: ${unexpectedConsoleErrors.join(" | ")}`,
+    );
   }
 }
 
-for (const target of targets) startServer(target);
+const servers = targets.map(startServer);
 
 try {
   await Promise.all(targets.map((target, index) => waitForServer(target.origin, servers[index]!)));
   const browser = await chromium.launch({ headless: true });
+  let auditCount = 0;
   try {
     for (const target of targets) {
       for (const theme of ["dark", "light"] as const) {
-        for (const route of target.routes) {
-          const context = await browser.newContext({ viewport: { width: 320, height: 800 } });
-          const page = await context.newPage();
-          await setTheme(page, theme);
-          await auditPage(page, `${target.origin}${route}`, theme);
-          await context.close();
+        for (const viewport of target.viewports) {
+          for (const route of target.routes) {
+            const context = await browser.newContext({ viewport });
+            const page = await context.newPage();
+            await setTheme(page, theme);
+            await auditPage(page, `${target.origin}${route}`, theme, viewport.width);
+            await context.close();
+            auditCount += 1;
+          }
         }
       }
     }
@@ -137,16 +132,8 @@ try {
     await browser.close();
   }
   console.log(
-    `Browser audit passed: ${targets.reduce((sum, target) => sum + target.routes.length, 0)} routes, light and dark themes, 320px viewport.`,
+    `Browser audit passed: ${auditCount} route/theme/viewport combinations; portfolio and research at 320, 390, 768, and 1440px; FPL technical smoke only.`,
   );
 } finally {
-  for (const process of servers) {
-    if (process.pid) {
-      try {
-        kill(-process.pid, "SIGTERM");
-      } catch {
-        process.kill("SIGTERM");
-      }
-    }
-  }
+  servers.forEach(stopServer);
 }

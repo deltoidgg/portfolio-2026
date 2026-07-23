@@ -211,8 +211,8 @@ export function BandExplorer({
   }
 
   return (
-    <div aria-busy={busy}>
-      <div className="flex flex-wrap items-end gap-4 mb-8">
+    <div className="explorer-workbench" aria-busy={busy} data-visual-ready={!busy}>
+      <div className="explorer-controls">
         <div className="flex flex-col gap-1.5">
           <label htmlFor={selectId} className="text-xs text-ink-subtle">
             {config.groupLabel}
@@ -251,7 +251,7 @@ export function BandExplorer({
         </div>
       ) : (
         <>
-          <div className="grid sm:grid-cols-2 gap-8 mb-8">
+          <div className="explorer-charts">
             <figure>
               <figcaption className="text-xs text-ink-subtle mb-2">
                 Mean detected violations

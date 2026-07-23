@@ -2,6 +2,7 @@ import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/r
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
 import { themeScript } from "ui";
+import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import appCss from "../styles.css?url";
 
@@ -11,8 +12,8 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Research — Wasim Arif" },
-      { name: "theme-color", content: "#000000", media: "(prefers-color-scheme: dark)" },
-      { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#020810", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f5f2ea", media: "(prefers-color-scheme: light)" },
       {
         name: "description",
         content:
@@ -21,6 +22,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", href: "/favicon.ico" },
     ],
   }),
@@ -86,19 +88,7 @@ function RootComponent() {
       <main id="main">
         <Outlet />
       </main>
-      <footer className="border-t border-edge">
-        <div className="mx-auto max-w-5xl px-6 py-8 text-xs leading-relaxed text-ink-subtle sm:px-8">
-          <p>
-            Every figure traces to a versioned data artifact and a committed transform script.{" "}
-            <a
-              href="https://github.com/deltoidgg/portfolio-2026"
-              className="underline underline-offset-2 hover:text-ink-muted transition-colors"
-            >
-              Source on GitHub
-            </a>
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </RootDocument>
   );
 }

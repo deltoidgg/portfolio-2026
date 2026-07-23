@@ -1,90 +1,70 @@
-/*
- * Design tokens for the shared design system.
- *
- * Raw values live on :root as --ui-* custom properties; the @theme block maps
- * them to Tailwind v4 color/font names so utilities like `bg-surface` and
- * `text-ink-muted` are generated for every consuming app.
- *
- * Consuming apps must also register this package as a Tailwind source, e.g.:
- *   @import "tailwindcss";
- *   @import "ui/styles.css";
- *   @source "../../../packages/ui/src";
- */
-
 :root {
-  /* Surfaces */
-  --ui-canvas: #000000;
-  --ui-surface: #0a0a0a;
-  --ui-surface-raised: #141414;
-  --ui-edge: #262626;
-  --ui-edge-strong: #404040;
-
-  /* Ink */
-  --ui-ink: #ffffff;
-  --ui-ink-muted: #9ca3af;
-  --ui-ink-subtle: #768091;
-
-  /* Accent (emerald, matching the portfolio's live-status language) */
-  --ui-accent: #10b981;
-  --ui-accent-soft: rgb(16 185 129 / 0.1);
-  --ui-accent-edge: rgb(16 185 129 / 0.3);
-  --ui-accent-ink: #34d399;
-
-  /* Signal colours for data/status */
+  --ui-canvas: #020810;
+  --ui-canvas-deep: #00050c;
+  --ui-surface: #07111a;
+  --ui-surface-raised: #0b1620;
+  --ui-edge: #18222c;
+  --ui-edge-strong: #2a3641;
+  --ui-ink: #f3f1ec;
+  --ui-ink-muted: #9b9ea4;
+  --ui-ink-subtle: #69717a;
+  --ui-accent: #00c78d;
+  --ui-accent-bright: #00e7a4;
+  --ui-accent-soft: rgb(0 199 141 / 0.09);
+  --ui-accent-edge: rgb(0 199 141 / 0.3);
+  --ui-accent-ink: #38d4a5;
+  --ui-data-cyan: #22d1c3;
+  --ui-data-green: #35b74a;
   --ui-warn: #f59e0b;
   --ui-danger: #ef4444;
-
-  /* Type */
   --ui-font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --ui-font-mono: "Geist Mono Variable", ui-monospace, monospace;
-}
-
-/*
- * Light theme. Opt in by setting data-theme="light" on the document root.
- * Apps that never set the attribute (e.g. the research site) stay on the dark
- * defaults above. Surfaces invert to paper white; ink darkens; the emerald
- * accent shifts down a step so links and fills keep their contrast on white.
- */
-:root[data-theme="light"] {
-  /* Surfaces */
-  --ui-canvas: #ffffff;
-  --ui-surface: #f5f6f7;
-  --ui-surface-raised: #ebedef;
-  --ui-edge: #e3e5e8;
-  --ui-edge-strong: #d2d5da;
-
-  /* Ink */
-  --ui-ink: #111418;
-  --ui-ink-muted: #4b5563;
-  --ui-ink-subtle: #626b78;
-
-  /* Accent (emerald, darkened for contrast on light surfaces) */
-  --ui-accent: #059669;
-  --ui-accent-soft: rgb(5 150 105 / 0.1);
-  --ui-accent-edge: rgb(5 150 105 / 0.28);
-  --ui-accent-ink: #047857;
-
-  /* Signal colours */
-  --ui-warn: #b45309;
-  --ui-danger: #dc2626;
-}
-
-/* Keep native UI (scrollbars, form controls) in step with the theme. */
-:root {
+  --ui-font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --ui-shell-gutter: clamp(1.25rem, 3.35vw, 3rem);
+  --ui-page-gutter: clamp(1.25rem, 6.7vw, 6rem);
+  --ui-case-gutter: clamp(1.25rem, 4.45vw, 4rem);
+  --ui-shell-width: 84rem;
+  --ui-page-width: 78rem;
+  --ui-case-width: 82rem;
+  --ui-reading-width: 43.75rem;
+  --ui-fast: 160ms;
+  --ui-base: 220ms;
+  --ui-slow: 600ms;
+  --ui-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: dark;
 }
+
 :root[data-theme="light"] {
+  --ui-canvas: #f5f2ea;
+  --ui-canvas-deep: #ece8de;
+  --ui-surface: #ece8de;
+  --ui-surface-raised: #e4ded2;
+  --ui-edge: #d2ccc0;
+  --ui-edge-strong: #b8b1a5;
+  --ui-ink: #121820;
+  --ui-ink-muted: #59616a;
+  --ui-ink-subtle: #747b82;
+  --ui-accent: #00795b;
+  --ui-accent-bright: #008c68;
+  --ui-accent-soft: rgb(0 121 91 / 0.1);
+  --ui-accent-edge: rgb(0 121 91 / 0.3);
+  --ui-accent-ink: #006c52;
+  --ui-data-cyan: #007c75;
+  --ui-data-green: #2b7d42;
+  --ui-warn: #b45309;
+  --ui-danger: #dc2626;
   color-scheme: light;
 }
 
 :focus-visible {
   outline: 2px solid var(--ui-accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
   border-radius: 3px;
 }
 
 @theme inline {
   --color-canvas: var(--ui-canvas);
+  --color-canvas-deep: var(--ui-canvas-deep);
   --color-surface: var(--ui-surface);
   --color-surface-raised: var(--ui-surface-raised);
   --color-edge: var(--ui-edge);
@@ -93,11 +73,15 @@
   --color-ink-muted: var(--ui-ink-muted);
   --color-ink-subtle: var(--ui-ink-subtle);
   --color-accent: var(--ui-accent);
+  --color-accent-bright: var(--ui-accent-bright);
   --color-accent-soft: var(--ui-accent-soft);
   --color-accent-edge: var(--ui-accent-edge);
   --color-accent-ink: var(--ui-accent-ink);
+  --color-data-cyan: var(--ui-data-cyan);
+  --color-data-green: var(--ui-data-green);
   --color-warn: var(--ui-warn);
   --color-danger: var(--ui-danger);
   --font-sans: var(--ui-font-sans);
   --font-mono: var(--ui-font-mono);
+  --font-display: var(--ui-font-display);
 }
