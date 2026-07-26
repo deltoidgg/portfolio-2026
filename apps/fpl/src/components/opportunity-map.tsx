@@ -20,7 +20,7 @@ import type { OpportunityMap, OpportunityPlayer } from "market-intelligence";
 export type OpportunityViewState = {
   mode: "forecast" | "value" | "opportunity";
   view: "auto" | "map" | "list";
-  scenario: "cautious" | "baseline" | "upside";
+  horizon: 1 | 3 | 5;
   position: "ALL" | OpportunityPlayer["position"];
   team?: string;
   maxPrice?: number;
@@ -28,7 +28,7 @@ export type OpportunityViewState = {
   search?: string;
   player?: string;
   compare?: string;
-  snapshot: number;
+  snapshot: string;
 };
 
 type ViewPatch = Partial<OpportunityViewState>;
@@ -88,6 +88,13 @@ function ownershipLabel(player: OpportunityPlayer): string {
   return `${player.ownership.value.toFixed(1)}%`;
 }
 
+function gameweekFixtureLabel(gameweek: OpportunityPlayer["gameweeks"][number]): string {
+  if (!gameweek.fixtureDetails?.length) return gameweek.fixtures.length === 0 ? "Blank" : "Fixture";
+  return gameweek.fixtureDetails
+    .map((fixture) => `${fixture.opponent} ${fixture.venue === "home" ? "(H)" : "(A)"}`)
+    .join(" + ");
+}
+
 function usePlotSize() {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 900, height: 560 });
@@ -117,6 +124,7 @@ function OpportunityPlot({
 }) {
   const { ref, size } = usePlotSize();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const reduceMotion = useReducedMotion();
   const margin = { top: 38, right: 32, bottom: 62, left: 64 };
   const innerWidth = Math.max(1, size.width - margin.left - margin.right);
@@ -127,13 +135,16 @@ function OpportunityPlot({
     const ys = players.map((player) => player.yValue);
     const xMin = Math.min(...xs, 0);
     const xMax = Math.max(...xs, 1);
-    const yMin = Math.min(...ys, mode === "opportunity" ? -1 : 0);
-    const yMax = Math.max(...ys, 1);
+    const yMin = mode === "forecast" ? 0 : Math.min(...ys, mode === "opportunity" ? -1 : 0);
+    const yMax = mode === "forecast" ? 1 : Math.max(...ys, 1);
     const xPad = Math.max(0.1, (xMax - xMin) * 0.12);
     const yPad = Math.max(mode === "forecast" ? 0.03 : 0.5, (yMax - yMin) * 0.12);
     return {
       x: [Math.max(0, xMin - xPad), xMax + xPad] as [number, number],
-      y: [yMin - yPad, yMax + yPad] as [number, number],
+      y:
+        mode === "forecast"
+          ? ([0, 1] as [number, number])
+          : ([yMin - yPad, yMax + yPad] as [number, number]),
     };
   }, [mode, players]);
   const xScale = useMemo(
@@ -194,8 +205,10 @@ function OpportunityPlot({
     <div className="opportunity-plot" ref={ref}>
       <canvas ref={canvasRef} aria-hidden="true" />
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${size.width} ${size.height}`}
         aria-label={`${modes[mode].label} player map`}
+        aria-describedby="opportunity-encoding-key"
       >
         <g className="opportunity-grid" aria-hidden="true">
           {xTicks.map((tick) => (
@@ -247,11 +260,19 @@ function OpportunityPlot({
           </text>
         </g>
         <g className="opportunity-hit-targets">
-          {players.map((player) => (
+          {players.map((player, index) => (
             <motion.circle
               key={player.registrationKey}
               role="button"
-              tabIndex={0}
+              tabIndex={
+                player.registrationKey ===
+                (players.some((candidate) => candidate.registrationKey === selected)
+                  ? selected
+                  : players[0]?.registrationKey)
+                  ? 0
+                  : -1
+              }
+              data-map-index={index}
               aria-label={`${player.name}, ${player.team}, ${player.displayExpectedPoints.toFixed(1)} projected points`}
               cx={xScale(player.xValue)}
               cy={yScale(player.yValue)}
@@ -270,7 +291,33 @@ function OpportunityPlot({
               onBlur={() => setHovered(undefined)}
               onClick={() => onSelect(player)}
               onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") onSelect(player);
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelect(player);
+                  return;
+                }
+                const direction =
+                  event.key === "ArrowRight" || event.key === "ArrowDown"
+                    ? 1
+                    : event.key === "ArrowLeft" || event.key === "ArrowUp"
+                      ? -1
+                      : 0;
+                if (direction === 0 && event.key !== "Home" && event.key !== "End") return;
+                event.preventDefault();
+                const nextIndex =
+                  event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                      ? players.length - 1
+                      : (index + direction + players.length) % players.length;
+                const next = players[nextIndex];
+                if (!next) return;
+                onSelect(next);
+                window.requestAnimationFrame(() => {
+                  svgRef.current
+                    ?.querySelector<SVGCircleElement>(`[data-map-index="${nextIndex}"]`)
+                    ?.focus();
+                });
               }}
             />
           ))}
@@ -303,10 +350,12 @@ function OpportunityPlot({
 function PlayerList({
   players,
   selected,
+  horizon,
   onSelect,
 }: {
   players: MapPlayer[];
   selected?: string;
+  horizon: 1 | 3 | 5;
   onSelect: (player: MapPlayer) => void;
 }) {
   return (
@@ -315,7 +364,7 @@ function PlayerList({
         <thead>
           <tr>
             <th>Player</th>
-            <th>3-GW xP</th>
+            <th>{horizon}-GW xP</th>
             <th>Price</th>
             <th>Haul</th>
             <th>60+</th>
@@ -333,15 +382,18 @@ function PlayerList({
                   <span>
                     {player.name}
                     <small>
-                      {player.team} · {player.position}
+                      {player.team} · {player.position} ·{" "}
+                      {player.gameweeks[0]
+                        ? gameweekFixtureLabel(player.gameweeks[0])
+                        : "No fixture"}
                     </small>
                   </span>
                 </button>
               </th>
-              <td>{player.displayExpectedPoints.toFixed(1)}</td>
-              <td>{priceLabel(player)}</td>
-              <td>{Math.round(player.haulProbability * 100)}%</td>
-              <td>{Math.round(player.sixtyMinuteProbability * 100)}%</td>
+              <td data-label={`${horizon}-GW xP`}>{player.displayExpectedPoints.toFixed(1)}</td>
+              <td data-label="Price">{priceLabel(player)}</td>
+              <td data-label="Haul">{Math.round(player.haulProbability * 100)}%</td>
+              <td data-label="60+">{Math.round(player.sixtyMinuteProbability * 100)}%</td>
             </tr>
           ))}
         </tbody>
@@ -440,7 +492,10 @@ function PlayerInspector({
             <h3>Gameweek shape</h3>
             {player.gameweeks.map((gameweek) => (
               <div key={gameweek.gameweek}>
-                <span>GW{gameweek.gameweek}</span>
+                <span>
+                  GW{gameweek.gameweek}
+                  <small>{gameweekFixtureLabel(gameweek)}</small>
+                </span>
                 <i>
                   <b style={{ width: `${Math.min(100, gameweek.expectedPoints * 11)}%` }} />
                 </i>
@@ -448,6 +503,15 @@ function PlayerInspector({
               </div>
             ))}
           </section>
+          {player.fpl?.news ? (
+            <p className="inspector-news">
+              <IconAlertTriangle size={14} />
+              <span>
+                <b>Availability note</b>
+                {player.fpl.news}
+              </span>
+            </p>
+          ) : null}
           <div className="inspector-confidence">
             <span>
               Market coverage <b>{Math.round(player.marketCoverage * 100)}%</b>
@@ -548,10 +612,25 @@ export function OpportunityMapExperience({
     () => [...new Set(map.players.map((player) => player.team))].toSorted(),
     [map],
   );
-  const trailLength = Math.max(1, ...map.players.map((player) => player.trail.length));
-  const snapshot = Math.min(state.snapshot, trailLength - 1);
-  const scenarioMultiplier =
-    state.scenario === "cautious" ? 0.88 : state.scenario === "upside" ? 1.12 : 1;
+  const snapshotTimes = useMemo(() => {
+    const coverage = new Map<string, number>();
+    for (const player of map.players) {
+      for (const observedAt of new Set(player.trail.map((point) => point.observedAt))) {
+        coverage.set(observedAt, (coverage.get(observedAt) ?? 0) + 1);
+      }
+    }
+    const minimumCoverage = Math.max(1, Math.floor(map.players.length * 0.95));
+    return [...coverage]
+      .filter(([, count]) => count >= minimumCoverage)
+      .map(([observedAt]) => observedAt)
+      .toSorted()
+      .slice(-11);
+  }, [map.players]);
+  const replayTimes = useMemo(() => [...snapshotTimes, "latest"], [snapshotTimes]);
+  const selectedSnapshot =
+    state.snapshot === "latest" || snapshotTimes.includes(state.snapshot)
+      ? state.snapshot
+      : "latest";
 
   const rankedOwnership = useMemo(() => {
     const ranks = new Map<string, number>();
@@ -573,10 +652,14 @@ export function OpportunityMapExperience({
   const players = useMemo<MapPlayer[]>(() => {
     const search = state.search?.trim().toLocaleLowerCase();
     return map.players
-      .map((player) => {
-        const trailPoint = player.trail[Math.min(snapshot, player.trail.length - 1)];
+      .flatMap((player) => {
+        const trailPoint =
+          selectedSnapshot === "latest"
+            ? undefined
+            : player.trail.find((point) => point.observedAt === selectedSnapshot);
+        if (selectedSnapshot !== "latest" && !trailPoint) return [];
         const displayExpectedPoints = Number(
-          ((trailPoint?.expectedPoints ?? player.expectedPoints) * scenarioMultiplier).toFixed(2),
+          (trailPoint?.expectedPoints ?? player.expectedPoints).toFixed(2),
         );
         const price = playerPrice(player);
         const displayValue = price ? displayExpectedPoints / price : undefined;
@@ -591,14 +674,16 @@ export function OpportunityMapExperience({
             : state.mode === "value"
               ? displayExpectedPoints
               : (player.ownershipRankGap ?? provisionalOwnershipGap ?? 0);
-        return {
-          ...player,
-          displayExpectedPoints,
-          displayValue,
-          provisionalOwnershipGap,
-          xValue,
-          yValue,
-        };
+        return [
+          {
+            ...player,
+            displayExpectedPoints,
+            displayValue,
+            provisionalOwnershipGap,
+            xValue,
+            yValue,
+          },
+        ];
       })
       .filter(
         (player) =>
@@ -609,8 +694,19 @@ export function OpportunityMapExperience({
           player.sixtyMinuteProbability >= state.minSixty &&
           (!search || `${player.name} ${player.team}`.toLocaleLowerCase().includes(search)),
       )
-      .toSorted((left, right) => right.displayExpectedPoints - left.displayExpectedPoints);
-  }, [map.players, rankedOwnership, scenarioMultiplier, snapshot, state]);
+      .toSorted((left, right) => {
+        if (state.mode === "value") {
+          return (right.displayValue ?? 0) - (left.displayValue ?? 0);
+        }
+        if (state.mode === "opportunity") {
+          return (
+            (right.ownershipRankGap ?? right.provisionalOwnershipGap ?? 0) -
+            (left.ownershipRankGap ?? left.provisionalOwnershipGap ?? 0)
+          );
+        }
+        return right.displayExpectedPoints - left.displayExpectedPoints;
+      });
+  }, [map.players, rankedOwnership, selectedSnapshot, state]);
 
   const selected =
     players.find((player) => player.registrationKey === state.player) ??
@@ -622,10 +718,11 @@ export function OpportunityMapExperience({
   useEffect(() => {
     if (!playing || reduceMotion) return;
     const timer = window.setInterval(() => {
-      onStateChange({ snapshot: snapshot >= trailLength - 1 ? 0 : snapshot + 1 });
+      const currentIndex = Math.max(0, replayTimes.indexOf(selectedSnapshot));
+      onStateChange({ snapshot: replayTimes[(currentIndex + 1) % replayTimes.length] });
     }, 1_400);
     return () => window.clearInterval(timer);
-  }, [onStateChange, playing, reduceMotion, snapshot, trailLength]);
+  }, [onStateChange, playing, reduceMotion, replayTimes, selectedSnapshot]);
 
   const selectPlayer = useCallback(
     (player: MapPlayer) => onStateChange({ player: player.registrationKey }),
@@ -637,9 +734,15 @@ export function OpportunityMapExperience({
     else if (next.size < 3) next.add(key);
     onStateChange({ compare: [...next].join(",") || undefined });
   };
-  const latestTrail = map.players[0]?.trail[snapshot];
+  const selectedSnapshotAt = selectedSnapshot === "latest" ? map.observedAt : selectedSnapshot;
   const officialPrices = map.season.priceState === "official";
   const partialPrices = map.season.priceState === "partial";
+  const priceValues = map.players.flatMap((player) => {
+    const value = playerPrice(player);
+    return value === undefined ? [] : [value];
+  });
+  const minimumPrice = Math.min(...priceValues, 4);
+  const maximumPrice = Math.max(...priceValues, 15);
 
   return (
     <div className="opportunity-page" data-view={state.view}>
@@ -647,20 +750,22 @@ export function OpportunityMapExperience({
         <header className="opportunity-hero">
           <div>
             <p className="opportunity-kicker">{map.season.label} / Market intelligence</p>
-            <h1>
-              Opportunity
+            <h1 aria-label="Discovery Map">
+              Discovery
               <br />
               Map
             </h1>
             <p className="opportunity-lede">
-              See where market-informed forecasts diverge from price and early ownership
-              expectations—without hiding uncertainty.
+              Find price-point alternatives and ownership gaps, then move the players that matter
+              into the Squad Lab.
             </p>
           </div>
           <div className="opportunity-hero-status">
             <span className="scenario-badge">
               <IconInfoCircle size={14} />
-              {map.season.lifecycle === "active" ? "Live season" : "Pre-season scenario"}
+              {map.season.lifecycle === "active"
+                ? "Live season"
+                : `${map.season.label} pre-season · live data`}
             </span>
             <strong>{map.players.length}</strong>
             <small>players modelled</small>
@@ -682,7 +787,7 @@ export function OpportunityMapExperience({
                   : "Prices and ownership are not official yet."}
             </strong>{" "}
             {officialPrices
-              ? "The current live snapshot is selected automatically; provenance remains available for every player."
+              ? "Prices are locked until the GW1 deadline. Forecast uncertainty reflects minutes, roles, fixtures and market evidence—not price estimates."
               : partialPrices
                 ? "Published values are used player by player; unavailable values remain visibly withheld."
                 : `Value views use clearly marked estimates and will switch to live data when FPL publishes its ${map.season.label} player list.`}
@@ -691,6 +796,18 @@ export function OpportunityMapExperience({
         </section>
 
         <div className="opportunity-controls">
+          <div className="opportunity-segment" role="group" aria-label="Forecast horizon">
+            {([1, 3, 5] as const).map((horizon) => (
+              <button
+                key={horizon}
+                type="button"
+                aria-pressed={state.horizon === horizon}
+                onClick={() => onStateChange({ horizon, snapshot: "latest" })}
+              >
+                {horizon} GW
+              </button>
+            ))}
+          </div>
           <div className="opportunity-segment" role="group" aria-label="Analysis mode">
             {(Object.keys(modes) as OpportunityViewState["mode"][]).map((mode) => (
               <button
@@ -710,6 +827,8 @@ export function OpportunityMapExperience({
               onChange={(event) => onStateChange({ search: event.target.value || undefined })}
               placeholder="Find a player"
               aria-label="Find a player"
+              name="player-search"
+              autoComplete="off"
             />
           </label>
           <div className="opportunity-segment view-toggle" role="group" aria-label="View">
@@ -763,37 +882,28 @@ export function OpportunityMapExperience({
                 ))}
               </select>
             </label>
-            <label>
-              Scenario
-              <select
-                value={state.scenario}
-                onChange={(event) =>
-                  onStateChange({
-                    scenario: event.target.value as OpportunityViewState["scenario"],
-                  })
-                }
-              >
-                <option value="cautious">Cautious −12%</option>
-                <option value="baseline">Baseline</option>
-                <option value="upside">Upside +12%</option>
-              </select>
-            </label>
-            <label>
+            <label className="price-filter">
               Maximum price{" "}
               <output>{state.maxPrice ? `£${state.maxPrice.toFixed(1)}m` : "Any"}</output>
               <input
                 type="range"
-                min="4"
-                max="15"
-                step="0.5"
-                value={state.maxPrice ?? 15}
+                min={minimumPrice}
+                max={maximumPrice}
+                step="0.1"
+                value={state.maxPrice ?? maximumPrice}
                 onChange={(event) =>
                   onStateChange({
-                    maxPrice:
-                      Number(event.target.value) === 15 ? undefined : Number(event.target.value),
+                    maxPrice: Number(event.target.value),
                   })
                 }
               />
+              <button
+                type="button"
+                aria-pressed={state.maxPrice === undefined}
+                onClick={() => onStateChange({ maxPrice: undefined })}
+              >
+                No price cap
+              </button>
             </label>
             <label>
               60-minute chance <output>{Math.round(state.minSixty * 100)}%+</output>
@@ -828,6 +938,9 @@ export function OpportunityMapExperience({
                   {position}
                 </span>
               ))}
+              <span id="opportunity-encoding-key" className="encoding-key">
+                Point size = haul chance · halo = source agreement
+              </span>
             </div>
           </aside>
 
@@ -854,7 +967,12 @@ export function OpportunityMapExperience({
               />
             </div>
             <div className="list-view">
-              <PlayerList players={players} selected={state.player} onSelect={selectPlayer} />
+              <PlayerList
+                players={players}
+                selected={state.player}
+                horizon={state.horizon}
+                onSelect={selectPlayer}
+              />
             </div>
             <div className="snapshot-rail">
               <button
@@ -866,30 +984,28 @@ export function OpportunityMapExperience({
                 {playing ? <IconPlayerPause size={16} /> : <IconPlayerPlay size={16} />}
               </button>
               <div>
-                {Array.from({ length: trailLength }, (_, index) => (
+                {replayTimes.map((observedAt, index) => (
                   <button
-                    key={index}
+                    key={observedAt}
                     type="button"
-                    aria-pressed={snapshot === index}
+                    aria-pressed={selectedSnapshot === observedAt}
                     onClick={() => {
                       setPlaying(false);
-                      onStateChange({ snapshot: index });
+                      onStateChange({ snapshot: observedAt });
                     }}
                   >
                     <i />
                     <span>
-                      {index === trailLength - 1 ? "Current" : `T−${trailLength - 1 - index}`}
+                      {observedAt === "latest" ? "Current" : `T−${replayTimes.length - 1 - index}`}
                     </span>
                   </button>
                 ))}
               </div>
-              <time dateTime={latestTrail?.observedAt}>
-                {latestTrail
-                  ? new Date(latestTrail.observedAt).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                    })
-                  : "—"}
+              <time dateTime={selectedSnapshotAt}>
+                {new Date(selectedSnapshotAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                })}
               </time>
             </div>
           </section>
@@ -928,7 +1044,10 @@ export function OpportunityMapExperience({
                       <span>
                         <b>{player.name}</b>
                         <small>
-                          {player.team} · {priceLabel(player)}
+                          {player.team} · {priceLabel(player)} ·{" "}
+                          {player.gameweeks[0]
+                            ? gameweekFixtureLabel(player.gameweeks[0])
+                            : "No fixture"}
                         </small>
                       </span>
                       <strong>
@@ -948,6 +1067,11 @@ export function OpportunityMapExperience({
             </motion.section>
           ) : null}
         </AnimatePresence>
+
+        <p className="sr-only" aria-live="polite">
+          {players.length} players visible
+          {selectedMapPlayer ? `. ${selectedMapPlayer.name} selected.` : "."}
+        </p>
 
         <footer className="opportunity-method">
           <IconDatabase size={16} />

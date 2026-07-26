@@ -2,6 +2,7 @@ import { describe, expect, test } from "vite-plus/test";
 import {
   createMarketXpForecastRunner,
   defaultFplRuleset,
+  scoreFplBpsChangedActions,
   scoreFplFixture,
   type ForecastRunRequest,
 } from "market-intelligence";
@@ -92,6 +93,36 @@ describe("market-xp-v2 forecast runner", () => {
         yellowCards: 1,
       }),
     ).toBe(14);
+    expect(
+      scoreFplFixture(defaultFplRuleset, {
+        position: "GKP",
+        minutes: 90,
+        defensiveContributions: 20,
+      }),
+    ).toBe(2);
+  });
+
+  test("uses the revised 2026/27 BPS weights", () => {
+    expect(
+      scoreFplBpsChangedActions(defaultFplRuleset, {
+        clearances: 2,
+        blocks: 2,
+        interceptions: 2,
+        saves: 3,
+        insideBoxSaves: 2,
+        bigChanceSaves: 1,
+        penaltiesSaved: 1,
+        timesTackled: 5,
+      }),
+    ).toBe(18);
+    expect(defaultFplRuleset.bonusPointsSystem).toMatchObject({
+      clearancesBlocksInterceptionsPerPoint: 3,
+      save: 2,
+      insideBoxSave: 1,
+      bigChanceSave: 1,
+      penaltySave: 7,
+      tackled: 0,
+    });
   });
 
   test("emits blank and double gameweeks from exact team fixtures with required provenance", () => {
@@ -100,6 +131,9 @@ describe("market-xp-v2 forecast runner", () => {
     const player = snapshot.players[0]!;
 
     expect(player.gameweeks.map((gameweek) => gameweek.fixtures.length)).toEqual([1, 0, 2]);
+    expect(player.gameweeks[0]?.fixtureDetails).toEqual([
+      expect.objectContaining({ opponent: "LIV", venue: "home" }),
+    ]);
     expect(player.gameweeks[1]).toMatchObject({ gameweek: 2, expectedPoints: 0, p90: 0 });
     expect(player.gameweeks[2]!.expectedPoints).toBeGreaterThan(
       player.gameweeks[0]!.expectedPoints,

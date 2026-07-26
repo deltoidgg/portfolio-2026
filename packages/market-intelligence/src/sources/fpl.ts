@@ -11,6 +11,8 @@ import { canonicalSeasonFixtureKey } from "../entity-resolution.ts";
 import type { SeasonCatalog } from "../season-domain.ts";
 
 const bootstrapSchema = z.object({
+  game_config: z.record(z.string(), jsonValueSchema).default({}),
+  element_types: z.array(z.record(z.string(), jsonValueSchema)).default([]),
   events: z.array(
     z.object({
       id: z.number().int().positive(),
@@ -35,9 +37,21 @@ const bootstrapSchema = z.object({
       team: z.number().int().positive(),
       element_type: z.number().int().min(1).max(4),
       now_cost: z.number().int().nullish(),
+      cost_change_event: z.number().int().default(0),
+      cost_change_event_fall: z.number().int().default(0),
+      cost_change_start: z.number().int().default(0),
+      cost_change_start_fall: z.number().int().default(0),
+      price_change_percent: z.union([z.string(), z.number()]).nullish(),
       selected_by_percent: z.string().nullish(),
+      transfers_in: z.number().int().nonnegative().default(0),
+      transfers_out: z.number().int().nonnegative().default(0),
+      transfers_in_event: z.number().int().nonnegative().default(0),
+      transfers_out_event: z.number().int().nonnegative().default(0),
       status: z.string(),
       chance_of_playing_next_round: z.number().nullable().optional(),
+      chance_of_playing_this_round: z.number().nullable().optional(),
+      news: z.string().default(""),
+      news_added: z.string().nullish(),
       expected_goals: z.string().nullish(),
       expected_assists: z.string().nullish(),
       expected_goals_per_90: z.number().nonnegative().optional(),
@@ -61,6 +75,8 @@ const fixturesSchema = z.array(
     team_a: z.number().int().positive(),
     kickoff_time: z.string().nullable(),
     finished: z.boolean(),
+    team_h_difficulty: z.number().int().min(1).max(5).optional(),
+    team_a_difficulty: z.number().int().min(1).max(5).optional(),
   }),
 );
 
@@ -93,6 +109,29 @@ function numericObservation(
     numericValue,
     unit,
   };
+}
+
+function stringObservation(
+  playerKey: string,
+  capturedAt: string,
+  metric: string,
+  stringValue: string,
+): Observation {
+  return {
+    key: `${playerKey}:${metric}:${capturedAt}`,
+    entityKey: playerKey,
+    metric,
+    observedAt: capturedAt,
+    stringValue,
+  };
+}
+
+async function checksum(value: JsonValue): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(JSON.stringify(value)),
+  );
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function seasonKey(season: string): string {
@@ -189,7 +228,14 @@ export function createFplSource({
       const event = bootstrap.events.find((candidate) => candidate.id === request.gameweek);
       if (!event) throw new Error(`FPL gameweek ${request.gameweek} is not available`);
       const deadlineAt = asIso(event.deadline_time);
+      const deadlineByEvent = new Map(
+        bootstrap.events.map((candidate) => [candidate.id, asIso(candidate.deadline_time)]),
+      );
       const teamById = new Map(bootstrap.teams.map((team) => [team.id, team]));
+      const rulesetChecksum = await checksum({
+        game_config: bootstrap.game_config,
+        element_types: bootstrap.element_types,
+      });
 
       const observations = bootstrap.elements.flatMap((player): Observation[] => {
         const playerKey = durablePlayerKey(player, request.season);
@@ -213,18 +259,46 @@ export function createFplSource({
           numericObservation(playerKey, capturedAt, "minutes", player.minutes, "minutes"),
           numericObservation(playerKey, capturedAt, "starts", player.starts, "matches"),
         ];
+        const currentPrice =
+          player.now_cost === null || player.now_cost === undefined
+            ? undefined
+            : player.now_cost / 10;
         const optionalValues = [
+          ["price", currentPrice, "gbp-million"],
           [
-            "price",
-            player.now_cost === null || player.now_cost === undefined
-              ? undefined
-              : player.now_cost / 10,
+            "start_price",
+            currentPrice === undefined ? undefined : currentPrice - player.cost_change_start / 10,
             "gbp-million",
+          ],
+          ["price_change_event", player.cost_change_event / 10, "gbp-million"],
+          ["price_change_event_fall", player.cost_change_event_fall / 10, "gbp-million"],
+          ["price_change_start", player.cost_change_start / 10, "gbp-million"],
+          ["price_change_start_fall", player.cost_change_start_fall / 10, "gbp-million"],
+          [
+            "price_change_percent_raw",
+            player.price_change_percent == null ? undefined : Number(player.price_change_percent),
+            "percent",
           ],
           [
             "ownership",
             player.selected_by_percent == null ? undefined : Number(player.selected_by_percent),
             "percent",
+          ],
+          ["transfers_in", player.transfers_in, "transfers"],
+          ["transfers_out", player.transfers_out, "transfers"],
+          ["transfers_in_event", player.transfers_in_event, "transfers"],
+          ["transfers_out_event", player.transfers_out_event, "transfers"],
+          [
+            "net_transfers_event",
+            player.transfers_in_event - player.transfers_out_event,
+            "transfers",
+          ],
+          [
+            "chance_of_playing_this_round",
+            player.chance_of_playing_this_round == null
+              ? undefined
+              : player.chance_of_playing_this_round / 100,
+            "probability",
           ],
           [
             "expected_goals",
@@ -256,6 +330,14 @@ export function createFplSource({
             values.push(numericObservation(playerKey, capturedAt, metric, numericValue, unit));
           }
         }
+        if (player.news.trim()) {
+          values.push(stringObservation(playerKey, capturedAt, "news", player.news.trim()));
+        }
+        if (player.news_added) {
+          values.push(
+            stringObservation(playerKey, capturedAt, "news_added_at", asIso(player.news_added)),
+          );
+        }
         return values.map((observation) => ({ ...observation, metadata }));
       });
 
@@ -271,7 +353,7 @@ export function createFplSource({
         fixtures: fixtures
           .filter(
             (fixture) =>
-              fixture.event === request.gameweek &&
+              fixture.event !== null &&
               fixture.kickoff_time &&
               teamById.has(fixture.team_h) &&
               teamById.has(fixture.team_a),
@@ -288,12 +370,21 @@ export function createFplSource({
               }),
               competition: "EPL",
               season: request.season,
-              gameweek: request.gameweek,
+              gameweek: fixture.event!,
               homeTeam,
               awayTeam,
               kickoffAt: asIso(fixture.kickoff_time ?? deadlineAt),
-              deadlineAt,
-              metadata: { finished: fixture.finished, sourceFixtureId: fixture.id },
+              deadlineAt: deadlineByEvent.get(fixture.event!) ?? deadlineAt,
+              metadata: {
+                finished: fixture.finished,
+                sourceFixtureId: fixture.id,
+                ...(fixture.team_h_difficulty === undefined
+                  ? {}
+                  : { homeDifficulty: fixture.team_h_difficulty }),
+                ...(fixture.team_a_difficulty === undefined
+                  ? {}
+                  : { awayDifficulty: fixture.team_a_difficulty }),
+              },
             };
           }),
         rawSnapshots: [
@@ -371,6 +462,9 @@ export function createFplSource({
           datasetKey: "live",
           seasonKey: request.seasonGuard?.seasonKey ?? seasonKey(request.season),
           deadlineAt,
+          rulesetChecksum,
+          gameConfig: bootstrap.game_config,
+          elementTypes: bootstrap.element_types,
         },
       };
       return batch;

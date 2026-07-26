@@ -56,6 +56,18 @@ export const opportunityGameweekSchema = z.object({
   p50: z.number().finite(),
   p90: z.number().finite(),
   fixtures: z.array(z.string()),
+  fixtureDetails: z
+    .array(
+      z.object({
+        key: z.string().min(1),
+        opponent: z.string().min(1),
+        venue: z.enum(["home", "away"]),
+        kickoffAt: isoDateTime,
+        marketCoverage: probability,
+        difficulty: z.number().int().min(1).max(5).optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const opportunityTrailPointSchema = z.object({
@@ -63,6 +75,22 @@ export const opportunityTrailPointSchema = z.object({
   expectedPoints: z.number().finite(),
   price: z.number().positive().optional(),
   ownershipRankGap: z.number().finite().optional(),
+});
+
+export const fplPlayerStateSchema = z.object({
+  startPrice: z.number().positive().optional(),
+  priceChangeEvent: z.number().finite().optional(),
+  priceChangeStart: z.number().finite().optional(),
+  transfersIn: z.number().int().nonnegative().optional(),
+  transfersOut: z.number().int().nonnegative().optional(),
+  transfersInEvent: z.number().int().nonnegative().optional(),
+  transfersOutEvent: z.number().int().nonnegative().optional(),
+  netTransfersEvent: z.number().int().optional(),
+  priceChangePercentRaw: z.number().finite().optional(),
+  pricePressureStatus: z.enum(["locked", "unavailable", "calibrating", "active"]),
+  chanceOfPlayingThisRound: probability.optional(),
+  news: z.string().optional(),
+  newsAddedAt: isoDateTime.optional(),
 });
 
 export const opportunityPlayerSchema = z.object({
@@ -85,6 +113,7 @@ export const opportunityPlayerSchema = z.object({
   forecastRankWithinPosition: z.number().int().positive(),
   gameweeks: z.array(opportunityGameweekSchema),
   trail: z.array(opportunityTrailPointSchema),
+  fpl: fplPlayerStateSchema.optional(),
   provenance: forecastProvenanceSchema,
 });
 
@@ -97,6 +126,28 @@ export const sourceHealthSchema = z.object({
   detail: z.string().optional(),
 });
 
+const positionRuleSchema = z.object({
+  squad: z.number().int().positive(),
+  minStart: z.number().int().nonnegative(),
+  maxStart: z.number().int().positive(),
+});
+
+export const seasonRulesSnapshotSchema = z.object({
+  source: z.literal("fpl-game-config"),
+  checksum: z.string().min(1),
+  observedAt: isoDateTime,
+  budget: z.number().positive(),
+  squadSize: z.number().int().positive(),
+  startingSize: z.number().int().positive(),
+  clubLimit: z.number().int().positive(),
+  positionRules: z.object({
+    GKP: positionRuleSchema,
+    DEF: positionRuleSchema,
+    MID: positionRuleSchema,
+    FWD: positionRuleSchema,
+  }),
+});
+
 export const opportunitySeasonContextSchema = z.object({
   key: z.string().min(1),
   label: z.string().min(1),
@@ -104,6 +155,7 @@ export const opportunitySeasonContextSchema = z.object({
   priceState: pricePublicationStateSchema,
   rulesetKey: z.string().min(1),
   rulesetStatus: z.enum(["provisional", "official"]),
+  officialRules: seasonRulesSnapshotSchema.optional(),
 });
 
 export const opportunitySnapshotSchema = z.object({
@@ -128,10 +180,12 @@ export const opportunityMapQuerySchema = z.object({
 export type PriceState = z.infer<typeof priceStateSchema>;
 export type OwnershipState = z.infer<typeof ownershipStateSchema>;
 export type ForecastProvenance = z.infer<typeof forecastProvenanceSchema>;
+export type FplPlayerState = z.infer<typeof fplPlayerStateSchema>;
 export type OpportunityGameweek = z.infer<typeof opportunityGameweekSchema>;
 export type OpportunityTrailPoint = z.infer<typeof opportunityTrailPointSchema>;
 export type OpportunityPlayer = z.infer<typeof opportunityPlayerSchema>;
 export type SourceHealth = z.infer<typeof sourceHealthSchema>;
+export type SeasonRulesSnapshot = z.infer<typeof seasonRulesSnapshotSchema>;
 export type OpportunitySeasonContext = z.infer<typeof opportunitySeasonContextSchema>;
 export type OpportunitySnapshot = z.infer<typeof opportunitySnapshotSchema>;
 export type OpportunityMapQuery = z.input<typeof opportunityMapQuerySchema>;

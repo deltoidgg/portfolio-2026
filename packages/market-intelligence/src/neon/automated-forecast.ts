@@ -10,7 +10,7 @@ import type {
   AutomatedForecastRegistration,
 } from "../auto-forecast.ts";
 import type { FplPosition } from "../model/v2.ts";
-import type { OpportunitySeasonContext } from "../opportunity-map.ts";
+import type { OpportunitySeasonContext, OpportunityTrailPoint } from "../opportunity-map.ts";
 import type { JsonValue } from "../contracts.ts";
 import {
   captureBatches,
@@ -23,7 +23,13 @@ import {
 } from "./schema.ts";
 import * as schema from "./schema.ts";
 
-const collectedSources = ["premier-league-schedule", "fpl", "odds-api", "polymarket"] as const;
+const collectedSources = [
+  "premier-league-schedule",
+  "fpl",
+  "fpl-element-summary",
+  "odds-api",
+  "polymarket",
+] as const;
 
 export type AutomatedForecastLoadRequest = {
   seasonKey: string;
@@ -105,7 +111,11 @@ export function createNeonAutomatedForecastRepository(
                 lte(opportunitySnapshots.observedAt, request.cutoffAt),
               ),
             )
-            .orderBy(desc(opportunitySnapshots.observedAt))
+            .orderBy(
+              desc(opportunitySnapshots.observedAt),
+              sql`(${opportunitySnapshots.payload} #>> '{season,rulesetStatus}' = 'official') desc`,
+              desc(opportunitySnapshots.createdAt),
+            )
             .limit(12),
         ]);
 
@@ -160,6 +170,7 @@ export function createNeonAutomatedForecastRepository(
         id: batch.batchId,
         sourceKey: batch.sourceKey,
         capturedAt: iso(batch.capturedAt),
+        metadata: batch.metadata as Record<string, JsonValue>,
         ...(publishedAtByBatch.has(batch.batchId)
           ? { publishedAt: publishedAtByBatch.get(batch.batchId) }
           : {}),
@@ -178,6 +189,12 @@ export function createNeonAutomatedForecastRepository(
         homeTeam: fixture.homeTeam,
         awayTeam: fixture.awayTeam,
         kickoffAt: iso(fixture.kickoffAt),
+        ...(typeof fixture.metadata.homeDifficulty === "number"
+          ? { homeDifficulty: fixture.metadata.homeDifficulty }
+          : {}),
+        ...(typeof fixture.metadata.awayDifficulty === "number"
+          ? { awayDifficulty: fixture.metadata.awayDifficulty }
+          : {}),
       }));
       const registrations: AutomatedForecastRegistration[] = registrationRows.flatMap(
         (registration) => {
@@ -210,21 +227,31 @@ export function createNeonAutomatedForecastRepository(
           observedAt: iso(observation.observedAt),
           ...(observation.publishedAt ? { publishedAt: iso(observation.publishedAt) } : {}),
           ...(observation.numericValue === null ? {} : { numericValue: observation.numericValue }),
+          ...(observation.stringValue === null ? {} : { stringValue: observation.stringValue }),
           ...(observation.marketFamily ? { marketFamily: observation.marketFamily } : {}),
           ...(observation.outcome ? { outcome: observation.outcome } : {}),
           metadata: observation.metadata as Record<string, JsonValue>,
         }),
       );
       const playerTrails = Object.fromEntries(
-        registrationRows.map((registration) => [
-          registration.registrationKey,
-          priorSnapshotRows.toReversed().flatMap((snapshot) => {
+        registrationRows.map((registration) => {
+          const byCapture = new Map<string, OpportunityTrailPoint>();
+          for (const snapshot of priorSnapshotRows) {
             const player = snapshot.payload.players.find(
               (candidate) => candidate.registrationKey === registration.registrationKey,
             );
-            return player ? player.trail.slice(-1) : [];
-          }),
-        ]),
+            const point = player?.trail.at(-1);
+            if (point && !byCapture.has(point.observedAt)) {
+              byCapture.set(point.observedAt, point);
+            }
+          }
+          return [
+            registration.registrationKey,
+            [...byCapture.values()].toSorted((left, right) =>
+              left.observedAt.localeCompare(right.observedAt),
+            ),
+          ];
+        }),
       );
 
       return {

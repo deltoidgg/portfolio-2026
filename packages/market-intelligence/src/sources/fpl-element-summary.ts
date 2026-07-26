@@ -11,6 +11,11 @@ const historySchema = z
     total_points: z.number().int(),
   })
   .catchall(numericString.nullable());
+const pastHistorySchema = z
+  .object({
+    season_name: z.string().min(1),
+  })
+  .catchall(numericString.nullable());
 const summarySchema = z.object({
   history: z.array(historySchema),
   fixtures: z.array(
@@ -23,13 +28,14 @@ const summarySchema = z.object({
       })
       .passthrough(),
   ),
-  history_past: z.array(z.unknown()).default([]),
+  history_past: z.array(pastHistorySchema).default([]),
 });
 
 export type FplElementSummaryCaptureRequest = {
   seasonKey: string;
   season: string;
   playerIds: number[];
+  entityKeys?: Record<number, string>;
   capturedAt?: string;
 };
 
@@ -42,6 +48,26 @@ function finiteValue(value: unknown): number | undefined {
   return undefined;
 }
 
+async function mapConcurrent<Input, Output>(
+  values: Input[],
+  concurrency: number,
+  operation: (value: Input) => Promise<Output>,
+): Promise<Output[]> {
+  const results = Array.from<Output>({ length: values.length });
+  let next = 0;
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, values.length) }, async () => {
+      for (;;) {
+        const index = next;
+        next += 1;
+        if (index >= values.length) return;
+        results[index] = await operation(values[index]!);
+      }
+    }),
+  );
+  return results;
+}
+
 export function createFplElementSummarySource({
   fetcher = fetch,
 }: {
@@ -51,31 +77,23 @@ export function createFplElementSummarySource({
     key: "fpl-element-summary",
     async capture(request) {
       const capturedAt = request.capturedAt ?? new Date().toISOString();
-      const rawSnapshots: RawSnapshot[] = [];
-      const observations: Observation[] = [];
-      for (const playerId of [...new Set(request.playerIds)].toSorted(
-        (left, right) => left - right,
-      )) {
+      const playerIds = [...new Set(request.playerIds)].toSorted((left, right) => left - right);
+      const captures = await mapConcurrent(playerIds, 12, async (playerId) => {
         const endpoint = `https://fantasy.premierleague.com/api/element-summary/${playerId}/`;
         const response = await fetcher(endpoint, { headers: { Accept: "application/json" } });
         if (!response.ok)
           throw new Error(`FPL element ${playerId} capture failed: ${response.status}`);
         const payload = await response.json();
         const summary = summarySchema.parse(payload);
-        const entityKey = `${request.seasonKey}:registration:fpl-${playerId}`;
-        rawSnapshots.push({
-          key: `fpl-element-summary:${playerId}:${capturedAt}`,
-          endpoint,
-          observedAt: capturedAt,
-          payload,
-          statusCode: response.status,
-        });
+        const entityKey =
+          request.entityKeys?.[playerId] ?? `${request.seasonKey}:registration:fpl-${playerId}`;
+        const playerObservations: Observation[] = [];
         for (const history of summary.history) {
           for (const [metric, rawValue] of Object.entries(history)) {
             if (metric === "round" || metric === "fixture") continue;
             const numericValue = finiteValue(rawValue);
             if (numericValue === undefined) continue;
-            observations.push({
+            playerObservations.push({
               key: `${entityKey}:gw${history.round}:fixture${history.fixture}:${metric}:${capturedAt}`,
               entityKey,
               metric: `history_${metric}`,
@@ -86,7 +104,7 @@ export function createFplElementSummarySource({
           }
         }
         for (const fixture of summary.fixtures) {
-          observations.push({
+          playerObservations.push({
             key: `${entityKey}:upcoming:${fixture.id}:${capturedAt}`,
             entityKey,
             metric: "upcoming_fixture",
@@ -100,7 +118,45 @@ export function createFplElementSummarySource({
             },
           });
         }
-      }
+        for (const history of summary.history_past) {
+          const sourceSeason = history.season_name;
+          const seasonSlug = sourceSeason.replaceAll(/[^0-9a-z]+/gi, "-").toLocaleLowerCase();
+          playerObservations.push({
+            key: `${entityKey}:historical:${seasonSlug}:season:${capturedAt}`,
+            entityKey,
+            metric: "historical_season",
+            observedAt: capturedAt,
+            stringValue: sourceSeason,
+            metadata: { sourceSeason },
+          });
+          for (const [metric, rawValue] of Object.entries(history)) {
+            if (metric === "season_name" || metric === "element_code") continue;
+            const numericValue = finiteValue(rawValue);
+            if (numericValue === undefined) continue;
+            playerObservations.push({
+              key: `${entityKey}:historical:${seasonSlug}:${metric}:${capturedAt}`,
+              entityKey,
+              metric: `historical_${metric}`,
+              observedAt: capturedAt,
+              numericValue,
+              metadata: { sourceSeason },
+            });
+          }
+        }
+        return { playerId, endpoint, payload, observations: playerObservations };
+      });
+      const rawSnapshots: RawSnapshot[] = [
+        {
+          key: `fpl-element-summary:all:${capturedAt}`,
+          endpoint: "https://fantasy.premierleague.com/api/element-summary/{playerId}/",
+          observedAt: capturedAt,
+          payload: Object.fromEntries(
+            captures.map((capture) => [String(capture.playerId), capture.payload]),
+          ),
+          statusCode: 200,
+        },
+      ];
+      const observations = captures.flatMap((capture) => capture.observations);
       return {
         id: `fpl-element-summary:${request.seasonKey}:${capturedAt}`,
         source: { key: "fpl-element-summary", label: "FPL player history", kind: "fpl" },
@@ -114,7 +170,7 @@ export function createFplElementSummarySource({
           datasetKey: "live",
           seasonKey: request.seasonKey,
           season: request.season,
-          playerCount: request.playerIds.length,
+          playerCount: playerIds.length,
         },
       } satisfies CaptureBatch;
     },

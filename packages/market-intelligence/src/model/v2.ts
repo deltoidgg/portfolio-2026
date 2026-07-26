@@ -7,6 +7,7 @@ import {
   type OwnershipState,
   type PriceState,
   type SourceHealth,
+  type FplPlayerState,
 } from "../opportunity-map.ts";
 import type { ForecastComponents } from "../contracts.ts";
 
@@ -29,10 +30,18 @@ export type FplRuleset = {
   ownGoal: number;
   penaltyMiss: number;
   penaltySave: number;
+  bonusPointsSystem: {
+    clearancesBlocksInterceptionsPerPoint: number;
+    save: number;
+    insideBoxSave: number;
+    bigChanceSave: number;
+    penaltySave: number;
+    tackled: number;
+  };
 };
 
 export const defaultFplRuleset: FplRuleset = {
-  key: "fpl:2025-26:official-v1",
+  key: "fpl:2026-27:official-v1",
   appearance: { underSixty: 1, sixtyPlus: 2 },
   goal: { GKP: 10, DEF: 6, MID: 5, FWD: 4 },
   assist: 3,
@@ -40,7 +49,7 @@ export const defaultFplRuleset: FplRuleset = {
   savesPerPoint: 3,
   goalsConcededPerPenalty: 2,
   defensiveContributions: {
-    threshold: { GKP: 10, DEF: 10, MID: 12, FWD: 12 },
+    threshold: { GKP: 999, DEF: 10, MID: 12, FWD: 12 },
     points: 2,
   },
   yellowCard: -1,
@@ -48,7 +57,43 @@ export const defaultFplRuleset: FplRuleset = {
   ownGoal: -2,
   penaltyMiss: -2,
   penaltySave: 5,
+  bonusPointsSystem: {
+    clearancesBlocksInterceptionsPerPoint: 3,
+    save: 2,
+    insideBoxSave: 1,
+    bigChanceSave: 1,
+    penaltySave: 7,
+    tackled: 0,
+  },
 };
+
+export type FplBpsActionEvent = {
+  clearances?: number;
+  blocks?: number;
+  interceptions?: number;
+  saves?: number;
+  insideBoxSaves?: number;
+  bigChanceSaves?: number;
+  penaltiesSaved?: number;
+  timesTackled?: number;
+};
+
+/**
+ * Scores only the 2026/27 BPS actions whose weights changed this season.
+ * The returned contribution can be combined with the unchanged parts of the
+ * official BPS calculation once those Opta events are available.
+ */
+export function scoreFplBpsChangedActions(rules: FplRuleset, event: FplBpsActionEvent): number {
+  const cbi = (event.clearances ?? 0) + (event.blocks ?? 0) + (event.interceptions ?? 0);
+  return (
+    Math.floor(cbi / rules.bonusPointsSystem.clearancesBlocksInterceptionsPerPoint) +
+    (event.saves ?? 0) * rules.bonusPointsSystem.save +
+    (event.insideBoxSaves ?? 0) * rules.bonusPointsSystem.insideBoxSave +
+    (event.bigChanceSaves ?? 0) * rules.bonusPointsSystem.bigChanceSave +
+    (event.penaltiesSaved ?? 0) * rules.bonusPointsSystem.penaltySave +
+    (event.timesTackled ?? 0) * rules.bonusPointsSystem.tackled
+  );
+}
 
 export type FplFixtureEvent = {
   position: FplPosition;
@@ -110,6 +155,8 @@ export type ForecastFixtureInput = {
   awayGoalRate: number;
   kickoffAt: string;
   marketCoverage: number;
+  homeDifficulty?: number;
+  awayDifficulty?: number;
 };
 
 export type ForecastPlayerInput = {
@@ -126,6 +173,7 @@ export type ForecastPlayerInput = {
   goalsPer90: number;
   assistsPer90: number;
   sourceAgreement: number;
+  fpl?: FplPlayerState;
   savesPer90?: number;
   defensiveContributionsPer90?: number;
   cardsPer90?: number;
@@ -308,10 +356,11 @@ export type ForecastRunArtifact = {
 };
 
 function executeForecastRun(request: ForecastRunRequest): ForecastRunArtifact {
+  const cutoff = Date.parse(request.cutoffAt);
   for (const batch of request.inputBatches) {
     if (
-      batch.capturedAt > request.cutoffAt ||
-      (batch.publishedAt ?? batch.capturedAt) > request.cutoffAt
+      Date.parse(batch.capturedAt) > cutoff ||
+      Date.parse(batch.publishedAt ?? batch.capturedAt) > cutoff
     ) {
       throw new Error(`Input batch ${batch.id} is after cutoff ${request.cutoffAt}`);
     }
@@ -385,6 +434,19 @@ function executeForecastRun(request: ForecastRunRequest): ForecastRunArtifact {
         p50: quantile(gameweekMass, 0.5),
         p90: quantile(gameweekMass, 0.9),
         fixtures: fixtures.map((fixture) => fixture.key),
+        fixtureDetails: fixtures.map((fixture) => {
+          const isHome = fixture.homeTeam === player.team;
+          return {
+            key: fixture.key,
+            opponent: isHome ? fixture.awayTeam : fixture.homeTeam,
+            venue: isHome ? ("home" as const) : ("away" as const),
+            kickoffAt: fixture.kickoffAt,
+            marketCoverage: clampProbability(fixture.marketCoverage),
+            ...((isHome ? fixture.homeDifficulty : fixture.awayDifficulty) === undefined
+              ? {}
+              : { difficulty: isHome ? fixture.homeDifficulty : fixture.awayDifficulty }),
+          };
+        }),
       });
     }
     const marketCoverage =
@@ -455,6 +517,7 @@ function executeForecastRun(request: ForecastRunRequest): ForecastRunArtifact {
       forecastRankWithinPosition: ranks.get(player.registrationKey) ?? 1,
       gameweeks: player.gameweeks,
       trail: player.trail,
+      ...(player.fpl ? { fpl: player.fpl } : {}),
       provenance: player.provenance,
     })),
   };

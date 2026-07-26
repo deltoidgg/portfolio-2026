@@ -8,6 +8,7 @@ import {
 import { createPremierLeagueSeasonManifest } from "../season-schedule.ts";
 import {
   createFplSource,
+  createFplElementSummarySource,
   createPolymarketFootballSource,
   createSeasonAwareOddsApiSource,
   registerFplBatchPlayers,
@@ -53,11 +54,14 @@ try {
   } else {
     const scopeKey = `${manifest.key}:gw${context.gameweek}`;
     const fplSlot = collectionSlot("fpl", context, now);
+    const fplHistorySlot = collectionSlot("fpl-element-summary", context, now);
     const oddsSlot = collectionSlot("odds-api", context, now);
     const polymarketSlot = collectionSlot("polymarket", context, now);
     const scheduleSlot = collectionSlot("season-schedule", context, now);
     const fplSource = createFplSource();
+    const fplHistorySource = createFplElementSummarySource();
     const polymarketSource = createPolymarketFootballSource();
+    let currentPlayers: Array<{ id: number; entityKey: string }> = [];
     const jobs: CollectionJob[] = [
       {
         sourceKey: "premier-league-schedule",
@@ -117,6 +121,12 @@ try {
               expectedTeams: manifest.teams.map((team) => team.shortName),
             },
           });
+          currentPlayers = (batch.entities ?? []).flatMap((entity) => {
+            const id = entity.metadata?.fplElementId;
+            return entity.type === "player" && typeof id === "number"
+              ? [{ id, entityKey: entity.key }]
+              : [];
+          });
           await registerFplBatchPlayers(catalog, manifest.key, batch);
           const publishedPrices = batch.observations.filter(
             (observation) => observation.metric === "price" && observation.numericValue,
@@ -129,6 +139,43 @@ try {
               : {}),
           });
           return collectionFromBatch(batch);
+        },
+      },
+      {
+        sourceKey: "fpl-element-summary",
+        scopeKey: manifest.key,
+        scheduledFor: fplHistorySlot.scheduledFor,
+        async capture() {
+          if (currentPlayers.length === 0) {
+            const batch = await fplSource.capture({
+              season: manifest.label,
+              gameweek: context.gameweek,
+              capturedAt: now,
+              seasonGuard: {
+                seasonKey: manifest.key,
+                startsAt: manifest.startsAt,
+                endsAt: manifest.endsAt,
+                expectedTeams: manifest.teams.map((team) => team.shortName),
+              },
+            });
+            currentPlayers = (batch.entities ?? []).flatMap((entity) => {
+              const id = entity.metadata?.fplElementId;
+              return entity.type === "player" && typeof id === "number"
+                ? [{ id, entityKey: entity.key }]
+                : [];
+            });
+          }
+          return collectionFromBatch(
+            await fplHistorySource.capture({
+              seasonKey: manifest.key,
+              season: manifest.label,
+              playerIds: currentPlayers.map((player) => player.id),
+              entityKeys: Object.fromEntries(
+                currentPlayers.map((player) => [player.id, player.entityKey]),
+              ),
+              capturedAt: now,
+            }),
+          );
         },
       },
       {

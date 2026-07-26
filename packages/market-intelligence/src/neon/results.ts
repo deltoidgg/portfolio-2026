@@ -1,4 +1,5 @@
 import { collectionFromBatch, createCollectionOrchestrator } from "../collector.ts";
+import { fplGameweekFinalisationAt } from "../result-finalisation.ts";
 import { createFplLiveSource, extractFplGameweekResults } from "../sources/fpl-live.ts";
 import { loadLocalEnvironment, requiredEnvironment } from "./load-env.ts";
 import { createNeonCaptureAttemptStore, createNeonSeasonCatalog } from "./operations.ts";
@@ -35,10 +36,12 @@ async function main() {
     if (gameweekFixtures.length === 0) {
       throw new Error(`No fixtures are assigned to ${manifest.key} GW${gameweek}`);
     }
-    const lastKickoff = Math.max(
-      ...gameweekFixtures.map((fixture) => Date.parse(fixture.kickoffAt)),
-    );
-    const automaticallyFinal = Date.parse(observedAt) > lastKickoff + 4 * 3_600_000;
+    const lastKickoffAt = gameweekFixtures
+      .map((fixture) => fixture.kickoffAt)
+      .toSorted()
+      .at(-1)!;
+    const finalisationAt = fplGameweekFinalisationAt(lastKickoffAt);
+    const automaticallyFinal = Date.parse(observedAt) >= Date.parse(finalisationAt);
     const status =
       process.env.MI_RESULTS_STATUS === "final" || automaticallyFinal ? "final" : "provisional";
     const cadenceMinutes = automaticallyFinal ? 1_440 : 10;

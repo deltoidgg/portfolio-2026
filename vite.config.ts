@@ -14,6 +14,9 @@ export default defineConfig({
     options: { typeAware: true, typeCheck: true },
   },
   run: {
-    cache: true,
+    cache: {
+      scripts: true,
+      tasks: false,
+    },
   },
 });

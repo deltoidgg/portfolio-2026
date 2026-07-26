@@ -96,7 +96,39 @@ GitHub Actions owns collection, automated forecasting, and live-result capture. 
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
 
-The workflow can also be run manually. A local `collector:tick` needs the same values in the root `.env.local`.
+Add these under **Settings > Secrets and variables > Actions > Repository
+secrets** in the repository that runs the workflow. Do not add them as Actions
+variables, Codespaces secrets, Dependabot secrets, or environment-only secrets:
+the collector job does not declare a GitHub Environment, so those values resolve
+to an empty string. After adding or changing a secret, start a fresh manual
+workflow run rather than relying on the log from an earlier attempt.
+
+The workflow checks the complete secret set before checkout or dependency
+installation, then runs `market-intelligence#env:verify` to prove that Vite+
+passes the same values to the task process. Both checks report names/counts,
+never values. The workflow can also be run manually. A local `collector:tick`
+needs the same values in the root `.env.local`.
+
+After forecasting, `market-intelligence#snapshot:verify` fails the run unless
+fresh 1-, 3-, and 5-gameweek snapshots contain the current official-price
+player pool. The live app reads those same snapshots and never substitutes the
+bundled preseason demo for its `current` route.
+
+The launched 2026/27 season always resolves to
+`fpl:2026-27:official-v1`; an old local `MI_RULESET_KEY` containing
+`provisional` is ignored so stale setup cannot silently downgrade model
+provenance.
+
+Collector commands are Vite+ tasks rather than package scripts. Task caching is
+disabled at the workspace root because these commands mutate external state,
+and their runtime variables are declared under `untrackedEnv` in this package's
+`vite.config.ts`. This is required because Vite+ runs configured tasks in a
+clean environment and otherwise removes values such as `DATABASE_URL` before
+launching Node.
+
+For an immediate manual refresh of the multi-season player priors, run
+`vp run market-intelligence#capture:fpl-history`. The scheduled collector runs
+the same source daily.
 
 ## Adding a source
 

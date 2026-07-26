@@ -526,6 +526,9 @@ export const opportunitySnapshots = pgTable(
     horizon: integer("horizon").notNull(),
     observedAt: capturedAt("observed_at"),
     payload: jsonb("payload").$type<OpportunitySnapshot>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("mi_opportunity_snapshots_scope_idx").on(

@@ -7,8 +7,14 @@ const marketSchema = z
     id: z.string().min(1),
     question: z.string().min(1),
     conditionId: z.string().optional(),
-    outcomes: z.union([z.string(), z.array(z.string())]),
-    outcomePrices: z.union([z.string(), z.array(z.union([z.string(), z.number()]))]),
+    outcomes: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .default([]),
+    outcomePrices: z
+      .union([z.string(), z.array(z.union([z.string(), z.number()]))])
+      .optional()
+      .default([]),
     liquidityNum: z.number().nonnegative().optional(),
     volumeNum: z.number().nonnegative().optional(),
     endDate: z.string().optional(),

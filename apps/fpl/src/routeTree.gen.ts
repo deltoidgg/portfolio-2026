@@ -9,10 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SquadRouteImport } from './routes/squad'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Archive202526Gw34RouteImport } from './routes/archive.2025-26.gw34'
 
+const SquadRoute = SquadRouteImport.update({
+  id: '/squad',
+  path: '/squad',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
@@ -32,35 +38,46 @@ const Archive202526Gw34Route = Archive202526Gw34RouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/squad': typeof SquadRoute
   '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/squad': typeof SquadRoute
   '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/opportunities': typeof OpportunitiesRoute
+  '/squad': typeof SquadRoute
   '/archive/2025-26/gw34': typeof Archive202526Gw34Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/opportunities' | '/archive/2025-26/gw34'
+  fullPaths: '/' | '/opportunities' | '/squad' | '/archive/2025-26/gw34'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/opportunities' | '/archive/2025-26/gw34'
-  id: '__root__' | '/' | '/opportunities' | '/archive/2025-26/gw34'
+  to: '/' | '/opportunities' | '/squad' | '/archive/2025-26/gw34'
+  id: '__root__' | '/' | '/opportunities' | '/squad' | '/archive/2025-26/gw34'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OpportunitiesRoute: typeof OpportunitiesRoute
+  SquadRoute: typeof SquadRoute
   Archive202526Gw34Route: typeof Archive202526Gw34Route
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/squad': {
+      id: '/squad'
+      path: '/squad'
+      fullPath: '/squad'
+      preLoaderRoute: typeof SquadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/opportunities': {
       id: '/opportunities'
       path: '/opportunities'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OpportunitiesRoute: OpportunitiesRoute,
+  SquadRoute: SquadRoute,
   Archive202526Gw34Route: Archive202526Gw34Route,
 }
 export const routeTree = rootRouteImport

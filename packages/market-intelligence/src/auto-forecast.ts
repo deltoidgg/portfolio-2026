@@ -1,12 +1,21 @@
+import { z } from "zod";
 import { resolvePremierLeagueTeam } from "./entity-resolution.ts";
 import type { JsonValue } from "./contracts.ts";
-import type { ForecastFixtureInput, ForecastRunRequest, FplPosition } from "./model/v2.ts";
+import {
+  defaultFplRuleset,
+  type ForecastFixtureInput,
+  type ForecastRunRequest,
+  type FplPosition,
+  type FplRuleset,
+} from "./model/v2.ts";
 import type {
   OpportunitySeasonContext,
   OpportunityTrailPoint,
   OwnershipState,
   PriceState,
   SourceHealth,
+  FplPlayerState,
+  SeasonRulesSnapshot,
 } from "./opportunity-map.ts";
 
 export type AutomatedForecastBatch = {
@@ -14,6 +23,7 @@ export type AutomatedForecastBatch = {
   sourceKey: string;
   capturedAt: string;
   publishedAt?: string;
+  metadata?: Record<string, JsonValue>;
 };
 
 export type AutomatedForecastAttempt = {
@@ -32,6 +42,7 @@ export type AutomatedForecastObservation = {
   observedAt: string;
   publishedAt?: string;
   numericValue?: number;
+  stringValue?: string;
   marketFamily?: string;
   outcome?: string;
   metadata?: Record<string, JsonValue>;
@@ -43,6 +54,8 @@ export type AutomatedForecastFixture = {
   homeTeam: string;
   awayTeam: string;
   kickoffAt: string;
+  homeDifficulty?: number;
+  awayDifficulty?: number;
 };
 
 export type AutomatedForecastRegistration = {
@@ -75,6 +88,61 @@ export type AutomatedForecastPreparation =
 
 type FixtureMarketEstimate = ForecastFixtureInput & { agreement: number };
 
+const officialFplConfigurationSchema = z.object({
+  gameConfig: z.object({
+    rules: z.object({
+      squad_squadplay: z.number().int().positive(),
+      squad_squadsize: z.number().int().positive(),
+      squad_team_limit: z.number().int().positive(),
+      squad_total_spend: z.number().positive(),
+      ui_currency_multiplier: z.number().positive(),
+    }),
+    scoring: z.object({
+      long_play: z.number().finite(),
+      short_play: z.number().finite(),
+      goals_conceded: z.object({
+        GKP: z.number().finite(),
+        DEF: z.number().finite(),
+        MID: z.number().finite(),
+        FWD: z.number().finite(),
+      }),
+      goals_scored: z.object({
+        GKP: z.number().finite(),
+        DEF: z.number().finite(),
+        MID: z.number().finite(),
+        FWD: z.number().finite(),
+      }),
+      assists: z.number().finite(),
+      clean_sheets: z.object({
+        GKP: z.number().finite(),
+        DEF: z.number().finite(),
+        MID: z.number().finite(),
+        FWD: z.number().finite(),
+      }),
+      penalties_saved: z.number().finite(),
+      penalties_missed: z.number().finite(),
+      yellow_cards: z.number().finite(),
+      red_cards: z.number().finite(),
+      own_goals: z.number().finite(),
+      defensive_contribution: z.object({
+        GKP: z.number().finite(),
+        DEF: z.number().finite(),
+        MID: z.number().finite(),
+        FWD: z.number().finite(),
+      }),
+    }),
+  }),
+  elementTypes: z.array(
+    z.object({
+      plural_name_short: z.enum(["GKP", "DEF", "MID", "FWD"]),
+      squad_select: z.number().int().positive(),
+      squad_min_play: z.number().int().nonnegative(),
+      squad_max_play: z.number().int().positive(),
+    }),
+  ),
+  rulesetChecksum: z.string().min(1),
+});
+
 const priors: Record<
   FplPosition,
   { goalsPer90: number; assistsPer90: number; sixtyProbability: number }
@@ -87,6 +155,61 @@ const priors: Record<
 
 function clamp(value: number, low = 0, high = 1): number {
   return Math.min(high, Math.max(low, value));
+}
+
+function officialFplRules(
+  input: AutomatedForecastInput,
+): { snapshot: SeasonRulesSnapshot; ruleset: FplRuleset } | undefined {
+  const fplBatch = input.batches.find((batch) => batch.sourceKey === "fpl");
+  if (!fplBatch?.metadata) return undefined;
+  const parsed = officialFplConfigurationSchema.safeParse(fplBatch.metadata);
+  if (!parsed.success) return undefined;
+  const { gameConfig, elementTypes, rulesetChecksum } = parsed.data;
+  const { rules, scoring } = gameConfig;
+  const positionRules = Object.fromEntries(
+    elementTypes.map((position) => [
+      position.plural_name_short,
+      {
+        squad: position.squad_select,
+        minStart: position.squad_min_play,
+        maxStart: position.squad_max_play,
+      },
+    ]),
+  ) as SeasonRulesSnapshot["positionRules"];
+  if (Object.keys(positionRules).length !== 4) return undefined;
+
+  return {
+    snapshot: {
+      source: "fpl-game-config",
+      checksum: rulesetChecksum,
+      observedAt: fplBatch.capturedAt,
+      budget: rules.squad_total_spend / rules.ui_currency_multiplier,
+      squadSize: rules.squad_squadsize,
+      startingSize: rules.squad_squadplay,
+      clubLimit: rules.squad_team_limit,
+      positionRules,
+    },
+    ruleset: {
+      ...defaultFplRuleset,
+      key: input.season.rulesetKey,
+      appearance: {
+        underSixty: scoring.short_play,
+        sixtyPlus: scoring.long_play,
+      },
+      goal: scoring.goals_scored,
+      assist: scoring.assists,
+      cleanSheet: scoring.clean_sheets,
+      defensiveContributions: {
+        ...defaultFplRuleset.defensiveContributions,
+        points: scoring.defensive_contribution.DEF,
+      },
+      yellowCard: scoring.yellow_cards,
+      redCard: scoring.red_cards,
+      ownGoal: scoring.own_goals,
+      penaltyMiss: scoring.penalties_missed,
+      penaltySave: scoring.penalties_saved,
+    },
+  };
 }
 
 function mean(values: number[]): number | undefined {
@@ -203,9 +326,88 @@ function estimateFixture(
 function metricMap(observations: AutomatedForecastObservation[]) {
   const byPlayer = new Map<string, Map<string, number>>();
   for (const observation of observations) {
-    if (observation.sourceKey !== "fpl" || observation.numericValue === undefined) continue;
+    if (
+      !["fpl", "fpl-element-summary"].includes(observation.sourceKey) ||
+      observation.metric.startsWith("historical_") ||
+      observation.numericValue === undefined
+    )
+      continue;
     const metrics = byPlayer.get(observation.entityKey) ?? new Map<string, number>();
     metrics.set(observation.metric, observation.numericValue);
+    byPlayer.set(observation.entityKey, metrics);
+  }
+  return byPlayer;
+}
+
+type HistoricalPrior = {
+  minutes: number;
+  goalsPer90?: number;
+  assistsPer90?: number;
+};
+
+function historicalPriorMap(
+  observations: AutomatedForecastObservation[],
+): Map<string, HistoricalPrior> {
+  const byPlayerAndSeason = new Map<string, Map<string, Map<string, number>>>();
+  for (const observation of observations) {
+    const sourceSeason = observation.metadata?.sourceSeason;
+    if (
+      observation.sourceKey !== "fpl-element-summary" ||
+      !observation.metric.startsWith("historical_") ||
+      observation.metric === "historical_season" ||
+      observation.numericValue === undefined ||
+      typeof sourceSeason !== "string"
+    ) {
+      continue;
+    }
+    const bySeason =
+      byPlayerAndSeason.get(observation.entityKey) ?? new Map<string, Map<string, number>>();
+    const metrics = bySeason.get(sourceSeason) ?? new Map<string, number>();
+    metrics.set(observation.metric.slice("historical_".length), observation.numericValue);
+    bySeason.set(sourceSeason, metrics);
+    byPlayerAndSeason.set(observation.entityKey, bySeason);
+  }
+
+  const result = new Map<string, HistoricalPrior>();
+  for (const [playerKey, bySeason] of byPlayerAndSeason) {
+    const seasons = [...bySeason.entries()]
+      .toSorted(([left], [right]) => right.localeCompare(left))
+      .slice(0, 3);
+    let weightedMinutes = 0;
+    let weightedGoals = 0;
+    let weightedAssists = 0;
+    let goalMinutes = 0;
+    let assistMinutes = 0;
+    seasons.forEach(([, metrics], index) => {
+      const weight = [1, 0.65, 0.4][index] ?? 0;
+      const minutes = metrics.get("minutes") ?? 0;
+      const goals = metrics.get("expected_goals") ?? metrics.get("goals_scored");
+      const assists = metrics.get("expected_assists") ?? metrics.get("assists");
+      weightedMinutes += minutes * weight;
+      if (goals !== undefined) {
+        weightedGoals += goals * weight;
+        goalMinutes += minutes * weight;
+      }
+      if (assists !== undefined) {
+        weightedAssists += assists * weight;
+        assistMinutes += minutes * weight;
+      }
+    });
+    result.set(playerKey, {
+      minutes: weightedMinutes,
+      ...(goalMinutes > 0 ? { goalsPer90: (weightedGoals * 90) / goalMinutes } : {}),
+      ...(assistMinutes > 0 ? { assistsPer90: (weightedAssists * 90) / assistMinutes } : {}),
+    });
+  }
+  return result;
+}
+
+function textMetricMap(observations: AutomatedForecastObservation[]) {
+  const byPlayer = new Map<string, Map<string, string>>();
+  for (const observation of observations) {
+    if (observation.sourceKey !== "fpl" || observation.stringValue === undefined) continue;
+    const metrics = byPlayer.get(observation.entityKey) ?? new Map<string, string>();
+    metrics.set(observation.metric, observation.stringValue);
     byPlayer.set(observation.entityKey, metrics);
   }
   return byPlayer;
@@ -215,6 +417,7 @@ function sourceHealth(
   input: AutomatedForecastInput,
   fixtureEstimates: FixtureMarketEstimate[],
   playerMetricCount: number,
+  historicalPlayerCount: number,
   observedAt: string,
 ): SourceHealth[] {
   const specs = [
@@ -231,6 +434,13 @@ function sourceHealth(
       freshMinutes: 90,
       coverage: clamp(playerMetricCount / Math.max(1, input.registrations.length)),
       detail: `${playerMetricCount} of ${input.registrations.length} registrations observed`,
+    },
+    {
+      key: "fpl-element-summary",
+      label: "FPL season history",
+      freshMinutes: 2_160,
+      coverage: clamp(historicalPlayerCount / Math.max(1, input.registrations.length)),
+      detail: `${historicalPlayerCount} registrations have season-labelled historical priors`,
     },
     {
       key: "odds-api",
@@ -320,6 +530,9 @@ export function prepareAutomatedForecast(
   }
 
   const metricsByPlayer = metricMap(input.observations);
+  const textByPlayer = textMetricMap(input.observations);
+  const historicalByPlayer = historicalPriorMap(input.observations);
+  const officialConfiguration = officialFplRules(input);
   const fixtureEstimates = horizonFixtures.map((fixture) =>
     estimateFixture(fixture, input.observations),
   );
@@ -339,29 +552,42 @@ export function prepareAutomatedForecast(
   let observedPlayers = 0;
   const modelCutoffAt = [
     ...input.batches.map((batch) => batch.capturedAt),
+    ...input.batches.flatMap((batch) => (batch.publishedAt ? [batch.publishedAt] : [])),
     ...(input.attempts ?? []).map((attempt) => attempt.scheduledFor),
   ]
-    .toSorted()
+    .toSorted((left, right) => Date.parse(left) - Date.parse(right))
     .at(-1)!;
   const players = input.registrations
     .filter((registration) => registration.status !== "departed")
     .map((registration) => {
       const metrics = metricsByPlayer.get(registration.playerKey) ?? new Map<string, number>();
+      const textMetrics = textByPlayer.get(registration.playerKey) ?? new Map<string, string>();
+      const history = historicalByPlayer.get(registration.playerKey);
       if (metrics.size > 0) observedPlayers += 1;
       const prior = priors[registration.position];
-      const minutes = metrics.get("minutes") ?? 0;
-      const sampleWeight = clamp(minutes / 450);
-      const rawGoalsPer90 =
-        metrics.get("expected_goals_per_90") ??
-        (minutes > 0 ? ((metrics.get("expected_goals") ?? 0) * 90) / minutes : prior.goalsPer90);
-      const rawAssistsPer90 =
-        metrics.get("expected_assists_per_90") ??
-        (minutes > 0
-          ? ((metrics.get("expected_assists") ?? 0) * 90) / minutes
-          : prior.assistsPer90);
-      const availability = clamp(metrics.get("availability_probability") ?? 1);
-      const starts = metrics.get("starts") ?? 0;
       const completedGameweeks = Math.max(0, input.fromGameweek - 1);
+      const minutes = completedGameweeks > 0 ? (metrics.get("minutes") ?? 0) : 0;
+      const historicalMinutes = history?.minutes ?? 0;
+      const historicalSampleWeight = clamp(historicalMinutes / 900, 0, 0.8);
+      const sampleWeight = completedGameweeks > 0 ? clamp(minutes / 450) : historicalSampleWeight;
+      const historicalGoalsPer90 = history?.goalsPer90 ?? prior.goalsPer90;
+      const historicalAssistsPer90 = history?.assistsPer90 ?? prior.assistsPer90;
+      const rawGoalsPer90 =
+        completedGameweeks > 0
+          ? (metrics.get("expected_goals_per_90") ??
+            (minutes > 0
+              ? ((metrics.get("expected_goals") ?? 0) * 90) / minutes
+              : prior.goalsPer90))
+          : historicalGoalsPer90;
+      const rawAssistsPer90 =
+        completedGameweeks > 0
+          ? (metrics.get("expected_assists_per_90") ??
+            (minutes > 0
+              ? ((metrics.get("expected_assists") ?? 0) * 90) / minutes
+              : prior.assistsPer90))
+          : historicalAssistsPer90;
+      const availability = clamp(metrics.get("availability_probability") ?? 1);
+      const starts = completedGameweeks > 0 ? (metrics.get("starts") ?? 0) : 0;
       const substituteAppearances = Math.max(0, minutes - starts * 75) / 25;
       const observedPlayProbability =
         completedGameweeks > 0
@@ -407,6 +633,45 @@ export function prepareAutomatedForecast(
                 observedAt: fplBatch.capturedAt,
               }
             : { status: "provisional", value: clamp(ownershipValue, 0, 100) };
+      const fpl: FplPlayerState = {
+        pricePressureStatus: input.fromGameweek <= 1 ? "locked" : "unavailable",
+        ...(metrics.get("start_price") === undefined
+          ? {}
+          : { startPrice: metrics.get("start_price") }),
+        ...(metrics.get("price_change_event") === undefined
+          ? {}
+          : { priceChangeEvent: metrics.get("price_change_event") }),
+        ...(metrics.get("price_change_start") === undefined
+          ? {}
+          : { priceChangeStart: metrics.get("price_change_start") }),
+        ...(metrics.get("transfers_in") === undefined
+          ? {}
+          : { transfersIn: Math.round(metrics.get("transfers_in")!) }),
+        ...(metrics.get("transfers_out") === undefined
+          ? {}
+          : { transfersOut: Math.round(metrics.get("transfers_out")!) }),
+        ...(metrics.get("transfers_in_event") === undefined
+          ? {}
+          : { transfersInEvent: Math.round(metrics.get("transfers_in_event")!) }),
+        ...(metrics.get("transfers_out_event") === undefined
+          ? {}
+          : { transfersOutEvent: Math.round(metrics.get("transfers_out_event")!) }),
+        ...(metrics.get("net_transfers_event") === undefined
+          ? {}
+          : { netTransfersEvent: Math.round(metrics.get("net_transfers_event")!) }),
+        ...(metrics.get("price_change_percent_raw") === undefined
+          ? {}
+          : { priceChangePercentRaw: metrics.get("price_change_percent_raw") }),
+        ...(metrics.get("chance_of_playing_this_round") === undefined
+          ? {}
+          : {
+              chanceOfPlayingThisRound: clamp(metrics.get("chance_of_playing_this_round")!),
+            }),
+        ...(textMetrics.get("news") ? { news: textMetrics.get("news") } : {}),
+        ...(textMetrics.get("news_added_at")
+          ? { newsAddedAt: textMetrics.get("news_added_at") }
+          : {}),
+      };
       return {
         registrationKey: registration.registrationKey,
         playerKey: registration.playerKey,
@@ -416,6 +681,7 @@ export function prepareAutomatedForecast(
         registrationStatus: registration.status,
         price,
         ownership,
+        fpl,
         playProbability,
         sixtyMinuteProbability: clamp(
           availability *
@@ -444,6 +710,9 @@ export function prepareAutomatedForecast(
     }));
   const identity = JSON.stringify({
     season: input.season.key,
+    rulesetKey: input.season.rulesetKey,
+    rulesetStatus: input.season.rulesetStatus,
+    rulesetChecksum: officialConfiguration?.snapshot.checksum,
     fromGameweek: input.fromGameweek,
     horizon: input.horizon,
     batches: inputBatches.map((batch) => batch.id),
@@ -461,7 +730,10 @@ export function prepareAutomatedForecast(
     request: {
       runId: `market-xp-v2:${input.season.key}:gw${input.fromGameweek}:h${input.horizon}:${shortHash(identity)}`,
       datasetKey: input.datasetKey,
-      season: input.season,
+      season: {
+        ...input.season,
+        ...(officialConfiguration ? { officialRules: officialConfiguration.snapshot } : {}),
+      },
       fromGameweek: input.fromGameweek,
       horizon: input.horizon,
       modelKey: "market-xp",
@@ -469,10 +741,17 @@ export function prepareAutomatedForecast(
       codeVersion: input.codeVersion,
       inputBatches,
       cutoffAt: modelCutoffAt,
-      sourceHealth: sourceHealth(input, fixtureEstimates, observedPlayers, modelCutoffAt),
+      sourceHealth: sourceHealth(
+        input,
+        fixtureEstimates,
+        observedPlayers,
+        historicalByPlayer.size,
+        modelCutoffAt,
+      ),
       ...(Object.keys(playerTrails).length > 0 ? { playerTrails } : {}),
       fixtures: fixtureEstimates.map(({ agreement: _agreement, ...fixture }) => fixture),
       players,
+      ...(officialConfiguration ? { ruleset: officialConfiguration.ruleset } : {}),
     },
   };
 }

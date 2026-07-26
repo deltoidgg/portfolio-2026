@@ -48,6 +48,14 @@ function scopedCaptures(batch: CaptureBatch) {
   return [...scopes.values()].map((scope) => ({ batchId: batch.id, datasetKey, ...scope }));
 }
 
+function chunks<T>(values: T[], size = 500): T[][] {
+  const result: T[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    result.push(values.slice(index, index + size));
+  }
+  return result;
+}
+
 export type NeonMarketIntelligenceStore = MarketIntelligenceStore & {
   readLatestOpportunityMap(input: {
     datasetKey: string;
@@ -217,27 +225,29 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
         }
 
         if (batch.observations.length > 0) {
-          await tx
-            .insert(observations)
-            .values(
-              batch.observations.map((observation) => ({
-                observationKey: observation.key,
-                batchId: batch.id,
-                sourceKey: batch.source.key,
-                fixtureKey: observation.fixtureKey,
-                entityKey: observation.entityKey,
-                metric: observation.metric,
-                observedAt: observation.observedAt,
-                publishedAt: observation.publishedAt,
-                numericValue: observation.numericValue,
-                stringValue: observation.stringValue,
-                unit: observation.unit,
-                marketFamily: observation.marketFamily,
-                outcome: observation.outcome,
-                metadata: observation.metadata ?? {},
-              })),
-            )
-            .onConflictDoNothing();
+          for (const observationChunk of chunks(batch.observations)) {
+            await tx
+              .insert(observations)
+              .values(
+                observationChunk.map((observation) => ({
+                  observationKey: observation.key,
+                  batchId: batch.id,
+                  sourceKey: batch.source.key,
+                  fixtureKey: observation.fixtureKey,
+                  entityKey: observation.entityKey,
+                  metric: observation.metric,
+                  observedAt: observation.observedAt,
+                  publishedAt: observation.publishedAt,
+                  numericValue: observation.numericValue,
+                  stringValue: observation.stringValue,
+                  unit: observation.unit,
+                  marketFamily: observation.marketFamily,
+                  outcome: observation.outcome,
+                  metadata: observation.metadata ?? {},
+                })),
+              )
+              .onConflictDoNothing();
+          }
         }
 
         if (batch.forecasts.length > 0) {
@@ -439,7 +449,11 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
         .select({ payload: opportunitySnapshots.payload })
         .from(opportunitySnapshots)
         .where(and(...filters))
-        .orderBy(sql`${opportunitySnapshots.observedAt} desc`)
+        .orderBy(
+          sql`${opportunitySnapshots.observedAt} desc`,
+          sql`(${opportunitySnapshots.payload} #>> '{season,rulesetStatus}' = 'official') desc`,
+          sql`${opportunitySnapshots.createdAt} desc`,
+        )
         .limit(1);
       return row ? projectOpportunityMap(opportunitySnapshotSchema.parse(row.payload)) : null;
     },
@@ -455,7 +469,11 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
             eq(opportunitySnapshots.horizon, input.horizon),
           ),
         )
-        .orderBy(desc(opportunitySnapshots.observedAt))
+        .orderBy(
+          desc(opportunitySnapshots.observedAt),
+          sql`(${opportunitySnapshots.payload} #>> '{season,rulesetStatus}' = 'official') desc`,
+          desc(opportunitySnapshots.createdAt),
+        )
         .limit(1);
       return row ? projectOpportunityMap(opportunitySnapshotSchema.parse(row.payload)) : null;
     },

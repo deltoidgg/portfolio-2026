@@ -39,4 +39,26 @@ describe("Polymarket football source", () => {
     ]);
     expect(batch.metadata).toEqual(expect.objectContaining({ reconciliationStatus: "unmatched" }));
   });
+
+  test("retains markets whose live payload has not published outcome prices yet", async () => {
+    const batch = await createPolymarketFootballSource({
+      fetcher: async () =>
+        Response.json([
+          {
+            id: "event-1",
+            title: "Arsenal vs Coventry City",
+            slug: "arsenal-coventry",
+            markets: [{ id: "market-1", question: "Will Arsenal win?" }],
+          },
+        ]),
+    }).capture({
+      seasonKey: "epl:2026-27",
+      capturedAt: "2026-08-20T12:00:00.000Z",
+    });
+
+    expect(batch.observations).toEqual([]);
+    expect(batch.entities).toEqual([
+      expect.objectContaining({ key: "polymarket:market:market-1" }),
+    ]);
+  });
 });

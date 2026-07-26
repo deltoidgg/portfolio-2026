@@ -1,4 +1,11 @@
-import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  HeadContent,
+  Link,
+  Outlet,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
 import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
@@ -33,8 +40,8 @@ function NotFoundPage() {
       <p>404 / FPL Lab</p>
       <h1>Experiment not found</h1>
       <span>This lab is still growing. Return to the current market experiment.</span>
-      <Link to="/opportunities" search={defaultOpportunitySearch}>
-        Open Opportunity Map
+      <Link to="/squad" search={{ horizon: 3 }}>
+        Open Squad Lab
       </Link>
     </div>
   );
@@ -43,9 +50,12 @@ function NotFoundPage() {
 function ErrorPage({ reset }: { reset: () => void }) {
   return (
     <div className="fpl-message" role="alert">
-      <p>System error / FPL Lab</p>
-      <h1>The experiment did not load</h1>
-      <span>The data source may be refreshing. You can retry without leaving this page.</span>
+      <p>Live data unavailable / FPL Lab</p>
+      <h1>No current snapshot is ready</h1>
+      <span>
+        The lab will not substitute estimated preseason data. Retry after the collector publishes a
+        verified 2026/27 snapshot.
+      </span>
       <button type="button" onClick={reset}>
         Try again
       </button>
@@ -54,26 +64,34 @@ function ErrorPage({ reset }: { reset: () => void }) {
 }
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   return (
     <RootDocument>
       <header className="fpl-site-header">
         <nav aria-label="Primary">
           <Link
-            to="/opportunities"
-            search={defaultOpportunitySearch}
+            to="/squad"
+            search={{ horizon: 3 }}
             aria-label="FPL Lab home"
             className="fpl-wordmark"
           >
             WA <span>/ FPL Lab</span>
           </Link>
           <div>
-            <Link
-              to="/opportunities"
-              search={defaultOpportunitySearch}
-              activeProps={{ "aria-current": "page" }}
+            <Link to="/squad" search={{ horizon: 3 }} activeProps={{ "aria-current": "page" }}>
+              Squad lab
+            </Link>
+            <a
+              href={`/opportunities?${new URLSearchParams(
+                Object.entries(defaultOpportunitySearch).map(([key, value]) => [
+                  key,
+                  String(value),
+                ]),
+              ).toString()}`}
+              aria-current={pathname === "/opportunities" ? "page" : undefined}
             >
               Opportunity map
-            </Link>
+            </a>
             <Link to="/archive/2025-26/gw34" activeProps={{ "aria-current": "page" }}>
               Archive
             </Link>

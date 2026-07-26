@@ -8,7 +8,9 @@ export {
 export {
   createMarketXpForecastRunner,
   defaultFplRuleset,
+  scoreFplBpsChangedActions,
   scoreFplFixture,
+  type FplBpsActionEvent,
   type ForecastFixtureInput,
   type ForecastInputBatch,
   type ForecastPlayerInput,

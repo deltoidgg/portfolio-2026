@@ -57,7 +57,7 @@ button {
 
 .fpl-site-header a {
   display: inline-flex;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   align-items: center;
   padding-inline: 0.55rem;
   color: #91a5ae;
@@ -170,7 +170,7 @@ button {
     align-items: flex-start;
   }
 
-  .fpl-site-header nav > div a:nth-child(2) {
+  .fpl-site-header nav > div a:nth-child(n + 4) {
     display: none;
   }
 

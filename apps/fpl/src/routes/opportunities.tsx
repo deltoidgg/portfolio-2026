@@ -10,7 +10,7 @@ import { buildFplMetadata } from "../lib/metadata.ts";
 import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
 
 const description =
-  "Explore market-informed FPL forecasts across projected points, estimated price, ownership, upside, and uncertainty.";
+  "Explore market-informed FPL forecasts across projected points, official price, ownership, upside, and uncertainty.";
 
 function oneOf<T extends string>(value: unknown, values: readonly T[], fallback: T): T {
   return typeof value === "string" && values.includes(value as T) ? (value as T) : fallback;
@@ -23,11 +23,12 @@ function optionalNumber(value: unknown): number | undefined {
 }
 
 function validateSearch(search: Record<string, unknown>): OpportunityViewState {
+  const horizon = optionalNumber(search.horizon);
   return {
     ...defaultOpportunitySearch,
     mode: oneOf(search.mode, ["forecast", "value", "opportunity"], "forecast"),
     view: oneOf(search.view, ["auto", "map", "list"], "auto"),
-    scenario: oneOf(search.scenario, ["cautious", "baseline", "upside"], "baseline"),
+    horizon: horizon === 1 || horizon === 5 ? horizon : 3,
     position: oneOf(search.position, ["ALL", "GKP", "DEF", "MID", "FWD"], "ALL"),
     ...(typeof search.team === "string" && search.team ? { team: search.team } : {}),
     ...(optionalNumber(search.maxPrice) === undefined
@@ -37,13 +38,17 @@ function validateSearch(search: Record<string, unknown>): OpportunityViewState {
     ...(typeof search.search === "string" && search.search ? { search: search.search } : {}),
     ...(typeof search.player === "string" && search.player ? { player: search.player } : {}),
     ...(typeof search.compare === "string" && search.compare ? { compare: search.compare } : {}),
-    snapshot: Math.max(0, Math.min(2, Math.round(optionalNumber(search.snapshot) ?? 2))),
+    snapshot: typeof search.snapshot === "string" && search.snapshot ? search.snapshot : "latest",
   };
 }
 
 export const Route = createFileRoute("/opportunities")({
   validateSearch,
-  loader: () => getOpportunityMap({ data: { ...demoOpportunityQuery, datasetKey: "current" } }),
+  loaderDeps: ({ search }) => ({ horizon: search.horizon }),
+  loader: ({ deps }) =>
+    getOpportunityMap({
+      data: { ...demoOpportunityQuery, datasetKey: "current", horizon: deps.horizon },
+    }),
   head: () =>
     buildFplMetadata({
       title: "Opportunity Map — FPL market intelligence",

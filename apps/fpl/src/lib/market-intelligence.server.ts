@@ -49,11 +49,15 @@ export async function readOpportunityMap(query: OpportunityMapQuery): Promise<Op
     throw new Error("The bundled prelaunch scenario only covers GW1 over a three-week horizon");
   }
   const connectionString = process.env.DATABASE_URL;
-  if (!connectionString && (isBundledScenario || isCurrent)) {
+  if (!connectionString && isBundledScenario) {
     return projectOpportunityMap(demo);
   }
   if (!connectionString) {
-    throw new Error(`DATABASE_URL is required for opportunity dataset ${query.datasetKey}`);
+    throw new Error(
+      isCurrent
+        ? "Live FPL data is unavailable because DATABASE_URL is not configured"
+        : `DATABASE_URL is required for opportunity dataset ${query.datasetKey}`,
+    );
   }
   const store = createNeonStore(connectionString);
   const intelligence = createMarketIntelligence({ store });
@@ -64,12 +68,25 @@ export async function readOpportunityMap(query: OpportunityMapQuery): Promise<Op
         seasonKey: query.seasonKey,
         horizon: query.horizon,
       });
-      return current ?? projectOpportunityMap(demo);
+      if (!current) {
+        throw new Error(
+          `No live ${query.horizon}-gameweek snapshot is available for ${query.seasonKey}`,
+        );
+      }
+      const unofficialPlayers = current.players.filter(
+        (player) => player.price.status !== "official",
+      );
+      if (current.season.priceState !== "official" || unofficialPlayers.length > 0) {
+        throw new Error(
+          `The latest ${query.seasonKey} snapshot is not launch-ready: ${unofficialPlayers.length} players do not have official prices`,
+        );
+      }
+      return current;
     }
     return await intelligence.getOpportunityMap(query);
   } catch (error) {
     if (
-      (isBundledScenario || isCurrent) &&
+      isBundledScenario &&
       error instanceof Error &&
       error.message.startsWith("No opportunity-map data")
     ) {

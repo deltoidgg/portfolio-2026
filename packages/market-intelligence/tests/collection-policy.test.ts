@@ -38,4 +38,15 @@ describe("season collection cadence", () => {
     expect(first.cadenceMinutes).toBe(30);
     expect(first.scheduledFor).toBe(second.scheduledFor);
   });
+
+  test("tracks post-GW1 price movement every 15 minutes and tightens around midnight", () => {
+    const context = {
+      gameweek: 2,
+      deadlineAt: "2026-08-29T12:30:00.000Z",
+      hoursUntilDeadline: 120,
+    };
+
+    expect(collectionSlot("fpl", context, "2026-08-25T18:16:00.000Z").cadenceMinutes).toBe(15);
+    expect(collectionSlot("fpl", context, "2026-08-25T22:46:00.000Z").cadenceMinutes).toBe(5);
+  });
 });

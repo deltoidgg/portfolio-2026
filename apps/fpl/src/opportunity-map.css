@@ -104,7 +104,7 @@
   padding: 0.4rem 0.55rem;
   border: 1px solid rgb(240 201 107 / 0.35);
   color: var(--op-amber);
-  font-size: 0.58rem;
+  font-size: 0.65rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   background: rgb(240 201 107 / 0.06);
@@ -119,7 +119,7 @@
 
 .opportunity-hero-status small {
   color: var(--op-subtle);
-  font-size: 0.58rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
 }
 
@@ -156,7 +156,7 @@
 
 .source-health > summary {
   display: flex;
-  min-height: 2rem;
+  min-height: 2.75rem;
   align-items: center;
   gap: 0.4rem;
   padding-inline: 0.6rem;
@@ -231,7 +231,7 @@
 
 .opportunity-controls {
   display: grid;
-  grid-template-columns: auto minmax(12rem, 1fr) auto;
+  grid-template-columns: auto auto minmax(12rem, 1fr) auto;
   gap: 0.7rem;
   align-items: center;
   padding-block: 0.8rem;
@@ -247,12 +247,12 @@
 }
 
 .opportunity-segment button {
-  min-height: 2.1rem;
+  min-height: 2.75rem;
   padding-inline: 0.7rem;
   border: 0;
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   cursor: pointer;
   background: transparent;
 }
@@ -269,7 +269,7 @@
 .opportunity-search {
   display: flex;
   width: min(100%, 25rem);
-  min-height: 2.4rem;
+  min-height: 2.75rem;
   align-items: center;
   gap: 0.5rem;
   justify-self: end;
@@ -330,7 +330,7 @@
   width: 100%;
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.57rem;
+  font-size: 0.64rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -344,11 +344,11 @@
 
 .position-filter button,
 .clear-filters {
-  min-height: 2rem;
+  min-height: 2.75rem;
   border: 1px solid var(--op-line);
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   cursor: pointer;
   background: transparent;
 }
@@ -363,7 +363,7 @@
 
 .opportunity-filter-rail select {
   width: 100%;
-  height: 2.2rem;
+  height: 2.75rem;
   padding-inline: 0.5rem;
   border: 1px solid var(--op-line);
   border-radius: 0;
@@ -377,14 +377,29 @@
   justify-self: end;
   margin-top: -1rem;
   color: var(--op-ink);
-  font-size: 0.58rem;
+  font-size: 0.64rem;
 }
 
 .opportunity-filter-rail input[type="range"] {
   width: 100%;
-  height: 2px;
+  min-height: 2.75rem;
   margin-block: 0.5rem;
   accent-color: var(--op-cyan);
+}
+
+.price-filter button {
+  min-height: 2.75rem;
+  border: 1px solid var(--op-line);
+  color: var(--op-subtle);
+  font-family: var(--ui-font-mono);
+  font-size: 0.62rem;
+  cursor: pointer;
+  background: transparent;
+}
+
+.price-filter button[aria-pressed="true"] {
+  color: var(--op-cyan);
+  border-color: var(--op-line-strong);
 }
 
 .position-key {
@@ -395,13 +410,20 @@
   border-top: 1px solid var(--op-line);
 }
 
+.position-key .encoding-key {
+  flex-basis: 100%;
+  margin-top: 0.2rem;
+  color: var(--op-muted);
+  line-height: 1.45;
+}
+
 .position-key span {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.52rem;
+  font-size: 0.6rem;
 }
 
 .position-key i,
@@ -433,7 +455,7 @@
   gap: 0.1rem;
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -629,7 +651,9 @@
 .snapshot-rail > div {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-auto-columns: minmax(3rem, 1fr);
+  grid-auto-flow: column;
+  overflow-x: auto;
 }
 
 .snapshot-rail > div::before {
@@ -650,7 +674,8 @@
   border: 0;
   color: var(--op-subtle);
   font-family: var(--ui-font-mono);
-  font-size: 0.48rem;
+  min-height: 2.75rem;
+  font-size: 0.55rem;
   cursor: pointer;
   background: transparent;
 }
@@ -831,12 +856,49 @@
 
 .inspector-weeks > div {
   display: grid;
-  grid-template-columns: 2rem 1fr 2.2rem;
+  grid-template-columns: minmax(4.4rem, auto) 1fr 2.2rem;
   gap: 0.5rem;
   align-items: center;
   margin-top: 0.45rem;
   font-family: var(--ui-font-mono);
   font-size: 0.53rem;
+}
+
+.inspector-weeks > div > span {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.inspector-weeks > div > span small {
+  overflow: hidden;
+  max-width: 6rem;
+  color: var(--op-muted);
+  font-size: 0.48rem;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.inspector-news {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  border: 1px solid rgb(240 201 107 / 0.28);
+  color: var(--op-amber);
+  font-size: 0.62rem;
+  line-height: 1.45;
+  background: rgb(240 201 107 / 0.05);
+}
+
+.inspector-news span {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.inspector-news b {
+  color: var(--op-ink);
+  font-weight: 500;
 }
 
 .inspector-weeks > div > i {
@@ -1114,10 +1176,10 @@
   }
 
   .opportunity-controls {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto auto 1fr;
   }
 
-  .opportunity-controls > .opportunity-segment:first-child {
+  .opportunity-controls > .opportunity-segment {
     overflow-x: auto;
   }
 
@@ -1232,12 +1294,6 @@
     flex: 0 0 10.5rem;
   }
 
-  .opportunity-filter-rail > label:nth-of-type(n + 2),
-  .opportunity-filter-rail .clear-filters,
-  .position-key {
-    display: none;
-  }
-
   .stage-head p {
     display: none;
   }
@@ -1260,11 +1316,57 @@
     padding-inline: 0.45rem;
   }
 
-  .opportunity-list th:nth-child(3),
-  .opportunity-list td:nth-child(3),
-  .opportunity-list th:nth-child(5),
-  .opportunity-list td:nth-child(5) {
+  .opportunity-list-wrap {
+    overflow-x: hidden;
+  }
+
+  .opportunity-list {
+    min-width: 0;
+  }
+
+  .opportunity-list thead {
     display: none;
+  }
+
+  .opportunity-list tbody {
+    display: grid;
+  }
+
+  .opportunity-list tbody tr {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--op-line);
+  }
+
+  .opportunity-list tbody th {
+    grid-column: 1 / -1;
+  }
+
+  .opportunity-list th,
+  .opportunity-list td {
+    border-bottom: 0;
+  }
+
+  .opportunity-list tbody button {
+    min-height: 3rem;
+  }
+
+  .opportunity-list tbody td {
+    display: grid;
+    gap: 0.18rem;
+    padding: 0.4rem 0.55rem;
+    color: var(--op-ink);
+    font-family: var(--ui-font-mono);
+    font-size: 0.68rem;
+    text-align: left;
+  }
+
+  .opportunity-list tbody td::before {
+    content: attr(data-label);
+    color: var(--op-subtle);
+    font-size: 0.56rem;
+    text-transform: uppercase;
   }
 
   .opportunity-inspector {

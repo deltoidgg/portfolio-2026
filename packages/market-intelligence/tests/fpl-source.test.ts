@@ -8,6 +8,8 @@ describe("FPL source adapter", () => {
       [
         "https://fantasy.premierleague.com/api/bootstrap-static/",
         {
+          game_config: { squad_squadplay: 11, squad_total_spend: 1000 },
+          element_types: [{ id: 3, singular_name_short: "MID" }],
           events: [{ id: 1, deadline_time: "2026-08-14T17:30:00Z" }],
           teams: [
             { id: 1, name: "Arsenal", short_name: "ARS" },
@@ -24,9 +26,21 @@ describe("FPL source adapter", () => {
               team: 1,
               element_type: 3,
               now_cost: 105,
+              cost_change_event: 1,
+              cost_change_event_fall: -1,
+              cost_change_start: 2,
+              cost_change_start_fall: -2,
+              price_change_percent: "62.5",
               selected_by_percent: "45.0",
+              transfers_in: 12000,
+              transfers_out: 2000,
+              transfers_in_event: 3000,
+              transfers_out_event: 500,
               status: "a",
               chance_of_playing_next_round: 100,
+              chance_of_playing_this_round: 75,
+              news: "Being assessed",
+              news_added: "2026-08-13T09:30:00Z",
               expected_goals: "0.30",
               expected_assists: "0.25",
               expected_goals_per_90: 0.45,
@@ -52,6 +66,8 @@ describe("FPL source adapter", () => {
             team_a: 2,
             kickoff_time: "2026-08-15T16:30:00Z",
             finished: false,
+            team_h_difficulty: 3,
+            team_a_difficulty: 4,
           },
         ],
       ],
@@ -92,8 +108,21 @@ describe("FPL source adapter", () => {
           metric: "defensive_contributions_per_90",
           numericValue: 7.2,
         }),
+        expect.objectContaining({ metric: "start_price", numericValue: 10.3 }),
+        expect.objectContaining({ metric: "net_transfers_event", numericValue: 2500 }),
+        expect.objectContaining({ metric: "price_change_percent_raw", numericValue: 62.5 }),
+        expect.objectContaining({ metric: "news", stringValue: "Being assessed" }),
         expect.objectContaining({ metric: "cards_per_90", numericValue: 0.1 }),
       ]),
+    );
+    expect(batch.fixtures[0]?.metadata).toEqual(
+      expect.objectContaining({ homeDifficulty: 3, awayDifficulty: 4 }),
+    );
+    expect(batch.metadata).toEqual(
+      expect.objectContaining({
+        gameConfig: expect.objectContaining({ squad_total_spend: 1000 }),
+        rulesetChecksum: expect.stringMatching(/^[a-f0-9]{64}$/),
+      }),
     );
     expect(
       batch.observations.some((observation) => observation.metric === "expected_points_next"),

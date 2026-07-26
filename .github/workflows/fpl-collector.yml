@@ -27,22 +27,51 @@ jobs:
       MI_SEASON: 2026/27
       MI_SEASON_STARTS_AT: 2026-08-21T00:00:00.000Z
       MI_SEASON_ENDS_AT: 2027-05-30T23:59:59.000Z
-      MI_RULESET_KEY: fpl:2026-27:provisional-v1
+      MI_RULESET_KEY: fpl:2026-27:official-v1
       MI_ODDS_MARKETS: h2h,totals
       MI_FORECAST_HORIZONS: 1,3,5
     steps:
+      - name: Validate collector secrets
+        shell: bash
+        run: |
+          missing=()
+          for name in \
+            DATABASE_URL \
+            THE_ODDS_API_KEY \
+            CLOUDFLARE_ACCOUNT_ID \
+            R2_BUCKET \
+            R2_ACCESS_KEY_ID \
+            R2_SECRET_ACCESS_KEY
+          do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+
+          if (( ${#missing[@]} > 0 )); then
+            echo "::error title=Missing collector secrets::Unavailable GitHub Actions secrets: ${missing[*]}"
+            echo "Configure them under Settings > Secrets and variables > Actions > Repository secrets."
+            echo "Secrets stored only in a GitHub Environment are unavailable because this job does not declare an environment."
+            exit 1
+          fi
+
+          echo "All required collector secrets are available."
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: "24"
           cache: true
       - run: vp install
+      - name: Verify secrets reach the Vite+ task process
+        run: vp run market-intelligence#env:verify
       - name: Apply additive migrations
         run: vp run market-intelligence#db:migrate
       - name: Capture due sources
         run: vp run market-intelligence#collector:tick
       - name: Publish the current opportunity snapshot
         run: vp run market-intelligence#forecast:auto
+      - name: Verify fresh official-price snapshots
+        run: vp run market-intelligence#snapshot:verify
       - name: Capture live results when a gameweek has started
         run: vp run market-intelligence#capture:results
       - name: Evaluate the latest final gameweek

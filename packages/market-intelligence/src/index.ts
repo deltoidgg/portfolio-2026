@@ -48,7 +48,9 @@ export {
 export {
   createMarketXpForecastRunner,
   defaultFplRuleset,
+  scoreFplBpsChangedActions,
   scoreFplFixture,
+  type FplBpsActionEvent,
   type ForecastFixtureInput,
   type ForecastInputBatch,
   type ForecastPlayerInput,
@@ -126,6 +128,7 @@ export {
 } from "./evaluation.ts";
 export {
   forecastProvenanceSchema,
+  fplPlayerStateSchema,
   opportunityGameweekSchema,
   opportunityMapQuerySchema,
   opportunityPlayerSchema,
@@ -135,8 +138,10 @@ export {
   ownershipStateSchema,
   priceStateSchema,
   projectOpportunityMap,
+  seasonRulesSnapshotSchema,
   sourceHealthSchema,
   type ForecastProvenance,
+  type FplPlayerState,
   type OpportunityGameweek,
   type OpportunityMap,
   type OpportunityMapQuery,
@@ -146,6 +151,7 @@ export {
   type OpportunityTrailPoint,
   type OwnershipState,
   type PriceState,
+  type SeasonRulesSnapshot,
   type SourceHealth,
 } from "./opportunity-map.ts";
 export {
@@ -179,3 +185,17 @@ export {
   parsePremierLeagueFixtureArticle,
   PREMIER_LEAGUE_2026_27_FIXTURES_URL,
 } from "./season-schedule.ts";
+export { fplGameweekFinalisationAt } from "./result-finalisation.ts";
+export {
+  buildSuggestedSquad,
+  createEmptySquad,
+  defaultSquadRules,
+  squadRulesFromSeason,
+  squadPickSchema,
+  squadStateSchema,
+  validateSquad,
+  type SquadPick,
+  type SquadRules,
+  type SquadState,
+  type SquadValidation,
+} from "./squad.ts";
