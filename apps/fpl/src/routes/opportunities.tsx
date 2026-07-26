@@ -12,6 +12,8 @@ import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
 const description =
   "Explore market-informed FPL forecasts across projected points, official price, ownership, upside, and uncertainty.";
 
+type OpportunitySearch = OpportunityViewState & { dataset: "current" | "demo" };
+
 function oneOf<T extends string>(value: unknown, values: readonly T[], fallback: T): T {
   return typeof value === "string" && values.includes(value as T) ? (value as T) : fallback;
 }
@@ -22,10 +24,11 @@ function optionalNumber(value: unknown): number | undefined {
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-function validateSearch(search: Record<string, unknown>): OpportunityViewState {
+function validateSearch(search: Record<string, unknown>): OpportunitySearch {
   const horizon = optionalNumber(search.horizon);
   return {
     ...defaultOpportunitySearch,
+    dataset: search.dataset === "demo" ? "demo" : "current",
     mode: oneOf(search.mode, ["forecast", "value", "opportunity"], "forecast"),
     view: oneOf(search.view, ["auto", "map", "list"], "auto"),
     horizon: horizon === 1 || horizon === 5 ? horizon : 3,
@@ -44,10 +47,14 @@ function validateSearch(search: Record<string, unknown>): OpportunityViewState {
 
 export const Route = createFileRoute("/opportunities")({
   validateSearch,
-  loaderDeps: ({ search }) => ({ horizon: search.horizon }),
+  loaderDeps: ({ search }) => ({ horizon: search.horizon, dataset: search.dataset }),
   loader: ({ deps }) =>
     getOpportunityMap({
-      data: { ...demoOpportunityQuery, datasetKey: "current", horizon: deps.horizon },
+      data: {
+        ...demoOpportunityQuery,
+        datasetKey: deps.dataset === "demo" ? demoOpportunityQuery.datasetKey : "current",
+        horizon: deps.horizon,
+      },
     }),
   head: () =>
     buildFplMetadata({

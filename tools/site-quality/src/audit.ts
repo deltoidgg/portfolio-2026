@@ -54,9 +54,10 @@ const targets = [
     cwd: join(root, "apps/fpl"),
     origin: "http://127.0.0.1:4175",
     port: "4175",
+    readinessPath: "/squad?horizon=3&dataset=demo",
     routes: [
-      "/",
-      "/opportunities?mode=forecast&view=auto&scenario=baseline&position=ALL&minSixty=0&snapshot=2",
+      "/squad?horizon=3&dataset=demo",
+      "/opportunities?mode=forecast&view=auto&position=ALL&minSixty=0&horizon=3&snapshot=latest&dataset=demo",
       "/archive/2025-26/gw34",
       "/not-a-real-page",
     ],
@@ -110,7 +111,14 @@ async function auditPage(page: Page, url: string, theme: "light" | "dark", viewp
 const servers = targets.map(startServer);
 
 try {
-  await Promise.all(targets.map((target, index) => waitForServer(target.origin, servers[index]!)));
+  await Promise.all(
+    targets.map((target, index) =>
+      waitForServer(
+        `${target.origin}${"readinessPath" in target ? target.readinessPath : "/"}`,
+        servers[index]!,
+      ),
+    ),
+  );
   const browser = await chromium.launch({ headless: true });
   let auditCount = 0;
   try {

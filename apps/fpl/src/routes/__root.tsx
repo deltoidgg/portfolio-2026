@@ -40,7 +40,7 @@ function NotFoundPage() {
       <p>404 / FPL Lab</p>
       <h1>Experiment not found</h1>
       <span>This lab is still growing. Return to the current market experiment.</span>
-      <Link to="/squad" search={{ horizon: 3 }}>
+      <Link to="/squad" search={{ horizon: 3, dataset: "current" }}>
         Open Squad Lab
       </Link>
     </div>
@@ -71,14 +71,18 @@ function RootComponent() {
         <nav aria-label="Primary">
           <Link
             to="/squad"
-            search={{ horizon: 3 }}
+            search={{ horizon: 3, dataset: "current" }}
             aria-label="FPL Lab home"
             className="fpl-wordmark"
           >
             WA <span>/ FPL Lab</span>
           </Link>
           <div>
-            <Link to="/squad" search={{ horizon: 3 }} activeProps={{ "aria-current": "page" }}>
+            <Link
+              to="/squad"
+              search={{ horizon: 3, dataset: "current" }}
+              activeProps={{ "aria-current": "page" }}
+            >
               Squad lab
             </Link>
             <a
