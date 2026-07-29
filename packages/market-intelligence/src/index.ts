@@ -52,6 +52,8 @@ export {
   scoreFplFixture,
   type FplBpsActionEvent,
   type ForecastFixtureInput,
+  type ForecastHorizonsArtifact,
+  type ForecastHorizonsRequest,
   type ForecastInputBatch,
   type ForecastPlayerInput,
   type ForecastRunArtifact,
@@ -186,6 +188,75 @@ export {
   PREMIER_LEAGUE_2026_27_FIXTURES_URL,
 } from "./season-schedule.ts";
 export { fplGameweekFinalisationAt } from "./result-finalisation.ts";
+export {
+  canonicalJson,
+  createMemoryArtifactStore,
+  sha256Hex,
+  type ArtifactHead,
+  type ArtifactObject,
+  type ArtifactReceipt,
+  type ArtifactStore,
+  type ImmutableArtifactInput,
+  type ManifestReceipt,
+} from "./hot-cold/artifact-store.ts";
+export {
+  createMemoryHotStateRepository,
+  type CanonicalCaptureCommit,
+  type CaptureCommitReceipt,
+  type CaptureFailure,
+  type CollectionRepository,
+  type CollectionSlot,
+  type CurrentFixtureMarketState,
+  type CurrentPlayerPrior,
+  type CurrentPlayerState,
+  type ForecastInputRepository,
+  type ForecastInputState,
+  type ForecastStateRequest,
+  type HotArtifactReference,
+  type MemoryHotStateRepository,
+  type PruneReceipt,
+  type SourceHead,
+} from "./hot-cold/hot-state.ts";
+export {
+  projectFplCurrentState,
+  projectFplPlayerPriors,
+  projectOddsConsensus,
+} from "./hot-cold/projectors.ts";
+export {
+  createScheduledPipeline,
+  DATABASE_WARNING_BYTES,
+  DATABASE_WRITE_CEILING_BYTES,
+  isEligibleDeadlineCheckpoint,
+  type ArtifactChannel,
+  type LedgerPruneReceipt,
+  type PipelineCaptureReceipt,
+  type PipelineFinalisationReceipt,
+  type PipelineMode,
+  type PipelinePlan,
+  type PipelinePublicationReceipt,
+  type PipelineReceipt,
+  type PipelineSource,
+  type PipelineVerificationReceipt,
+  type PipelineWorker,
+  type ScheduledPipelineInput,
+} from "./hot-cold/scheduled-pipeline.ts";
+export {
+  prepareCompactForecast,
+  type CompactForecastPreparation,
+} from "./hot-cold/compact-forecast.ts";
+export {
+  createOpportunityReplayArtifact,
+  createPublishedOpportunityBundle,
+  currentOpportunityManifestSchema,
+  forecastBundleArtifactSchema,
+  opportunityReplayArtifactSchema,
+  publishedOpportunityBundleSchema,
+  selectOpportunityMap,
+  type CurrentOpportunityManifestV1,
+  type ForecastBundleArtifactV1,
+  type OpportunityReplayArtifactV1,
+  type PublishedOpportunityBundleV1,
+} from "./hot-cold/artifacts.ts";
 export {
   buildSuggestedSquad,
   createEmptySquad,

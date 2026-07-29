@@ -166,10 +166,20 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
 
         if (batch.fixtures.length > 0) {
           for (const fixture of batch.fixtures) {
+            const fixtureSeasonKey =
+              typeof fixture.metadata?.seasonKey === "string"
+                ? fixture.metadata.seasonKey
+                : typeof batch.metadata?.seasonKey === "string"
+                  ? batch.metadata.seasonKey
+                  : undefined;
+            if (!fixtureSeasonKey) {
+              throw new Error(`Fixture ${fixture.key} does not declare a seasonKey`);
+            }
             await tx
               .insert(fixtures)
               .values({
                 fixtureKey: fixture.key,
+                seasonKey: fixtureSeasonKey,
                 competition: fixture.competition,
                 season: fixture.season,
                 gameweek: fixture.gameweek,
@@ -182,6 +192,7 @@ export function createNeonStore(connectionString: string): NeonMarketIntelligenc
               .onConflictDoUpdate({
                 target: fixtures.fixtureKey,
                 set: {
+                  seasonKey: fixtureSeasonKey,
                   competition: fixture.competition,
                   season: fixture.season,
                   gameweek: fixture.gameweek,

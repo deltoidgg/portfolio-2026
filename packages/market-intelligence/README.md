@@ -27,21 +27,25 @@ FPL element IDs are registrations, not people. Each registration is season-scope
 
 Production uses two storage tiers:
 
-- Neon stores canonical rows, season/registration identities, reconciliation links, capture attempts, immutable model-run provenance, compact forecast distributions, results, evaluations, and UI read models.
-- Cloudflare R2 stores gzip-compressed, SHA-256-addressed raw source responses. Neon retains the object key, hash, byte counts, media type, and capture metadata rather than duplicating large payloads.
+- Neon is a bounded hot-state index. It stores compact dimensions, current player/prior/fixture-consensus rows, source heads, short-lived ledgers and publication headers, active-season final results, deadline checkpoint scalars, and current artifact pointers.
+- Private Cloudflare R2 stores every gzip-compressed raw response, complete forecast input/output bundle, evaluation artifact, migration export, and legacy backup indefinitely.
+- Public Cloudflare R2 stores sanitized combined H1/H3/H5 bundles, lazy replay artifacts, and the short-lived `current.json` pointer consumed through the CDN.
 
-The additive migrations create tables for:
+The `compact-v1` migration creates or extends:
 
-- sources and immutable capture batches;
 - datasets, season manifests, rulesets, team seasons, and player registrations;
 - stable fixtures plus effective-dated gameweek/kick-off assignments and provider links;
-- idempotent capture attempts, R2 snapshot references, and point-in-time observations;
 - canonical entities and effective-dated source aliases;
-- model runs, exact input-batch provenance, fixture PMFs, multi-gameweek horizons, and Opportunity Map snapshots;
-- provisional/final results and latest-predeadline evaluation runs;
-- timeline annotations for market moves, availability, and team news.
+- one source head and bounded idempotency ledger per source/season;
+- replace-in-place current FPL state, historical priors, and one odds-consensus row per fixture;
+- bounded publication headers plus a permanent serving pointer independent of their expiry;
+- latest eligible pre-deadline H1 checkpoint scalars, final player/gameweek results, and compact evaluations.
 
-The in-memory adapter implements the same store interface for deterministic tests and the bundled demo replay. The React app chooses Neon whenever `DATABASE_URL` is present and `MARKET_INTELLIGENCE_MODE` is not `demo`.
+The old capture/observation/model/PMF/snapshot table definitions remain only for exporter
+compatibility. The fresh project refuses a compact migration if those tables contain data, the
+runtime never writes to them, and guarded cleanup drops them only after the rollback window.
+Provider, Neon, R2, and memory adapters sit behind `CollectionRepository`,
+`ForecastInputRepository`, and `ArtifactStore`.
 
 ## Local setup
 
@@ -49,70 +53,67 @@ Copy the root `.env.example` to `.env.local`, replace `DATABASE_URL` with a Neon
 
 ```bash
 vp run market-intelligence#db:migrate
-vp run market-intelligence#db:backfill
-vp run market-intelligence#season:sync
-vp run market-intelligence#db:seed
+vp run market-intelligence#db:grant-runtime
+vp run market-intelligence#pipeline:tick
 vp run fpl#dev
 ```
 
-The backfill isolates old synthetic records under `demo-2025-26-gw34-v1`. Season sync parses all 380 fixtures from the official Premier League article, validates the 20-club/380-match invariants, and imports changed kick-off assignments without rewriting history. The seed is idempotent and writes both the archived eight-snapshot replay and the explicit 2026/27 prelaunch scenario.
+Use a direct owner URL only for migration/grant/cutover tasks and a pooled `fpl_collector` URL for
+`pipeline:tick`. The runtime role has no DDL permission. The pipeline parses the official
+20-club/380-match schedule before other sources, versions aliases and assignments only on semantic
+change, and writes exact provider bodies to private R2 before mutating Neon.
 
-Live capture commands are:
+Primary operational commands are:
 
 ```bash
-vp run market-intelligence#capture:fpl
-vp run market-intelligence#capture:odds
-vp run market-intelligence#capture:deadline
-vp run market-intelligence#collector:tick
-vp run market-intelligence#forecast:auto
-vp run market-intelligence#capture:results
-vp run market-intelligence#forecast:baseline
-vp run market-intelligence#forecast:v2
-vp run market-intelligence#evaluate
+vp run market-intelligence#pipeline:tick
+vp run market-intelligence#pipeline:verify
+vp run market-intelligence#db:budget
+vp run market-intelligence#legacy:backup
+vp run market-intelligence#legacy:export-artifacts
+vp run market-intelligence#compact:backfill -- --dry-run
+vp run market-intelligence#compact:backfill -- --apply
+vp run market-intelligence#compact:validate
+vp run market-intelligence#artifact:promote -- --promote
 ```
 
-FPL capture uses bootstrap, fixtures, event-live, and element-summary JSON endpoints. Odds capture uses The Odds API and strips the API key from the persisted endpoint. A read-only Polymarket Gamma adapter captures football markets without pretending unmatched event titles are EPL fixtures. Every adapter validates upstream data at its boundary.
+The scheduled pipeline does not collect Polymarket or unused transfer/price-pressure telemetry.
+Element history is requested only for registrations missing priors. It computes fixture/player PMFs
+once through GW5 and derives H1/H3/H5 from the shared masses. A material hash excludes timestamps,
+R2 keys, transfer telemetry, and volatile metadata. Identical material state produces no new run or
+publication; source-health-only changes update only `current.json`.
 
-`collector:tick` is the unattended capture path used by `.github/workflows/fpl-collector.yml`. The workflow wakes every five minutes, while the application-level policy decides whether a source is actually due: odds and prediction markets tighten from 30 to 5 minutes inside 48 hours of a deadline; FPL tightens from 60 to 15 minutes; the official schedule is refreshed daily (six-hourly near a deadline). The unique source/scope/slot claim makes reruns and overlapping Actions safe. One failed source does not roll back successful captures.
+FPL live is fetched only after the London 09:00 finalisation threshold, hourly for at most 24 hours.
+The raw final response goes to R2 and Neon receives only final player/gameweek rows. Evaluation reads
+the latest eligible pre-deadline H1 scalar checkpoint, writes the complete evaluation to R2, and
+keeps compact aggregate metrics in Neon.
 
-`forecast:auto` selects the latest current-season batch for each source, derives de-vigged match goal rates, shrinks early player samples toward position priors, runs the 1/3/5-gameweek market-xP model, and persists an immutable `live` Opportunity Map snapshot. It is safe to call after every collector wake: the run identity is derived from exact input batches and code version. Before the guarded new-season FPL player list appears, it reports a skip and exits successfully. The app automatically prefers the newest live snapshot and otherwise serves the explicit pre-launch scenario.
-
-`capture:deadline` is the complete production path: it captures FPL and bookmaker snapshots at one observed time, de-vigs each bookmaker's 1X2 prices, resolves unambiguous player props, builds minutes and historical-rate priors, creates explainable player distributions, then persists evidence and forecasts before projecting the Neon-backed room. If player props are unavailable, de-vigged team-win consensus still informs clean-sheet probability while goal and assist rates fall back explicitly to FPL per-90 evidence.
-
-The lower-level baseline command remains available for the archived room. `forecast:v2` reads a caller-supplied file from `MI_MARKET_XP_INPUT` and runs the same season-aware TypeScript model directly. It scores complete fixture outcomes through a versioned FPL ruleset, retains exact discrete fixture PMFs, convolves blanks and doubles into 1/3/5-week horizons, rejects input batches captured or published after the cut-off, and persists the result as one immutable model run. Reusing a run ID with different inputs or code fails.
-
-`capture:results` stores provisional or final gameweek scoring components from FPL live data. `evaluate` joins only final results to the latest horizon-one forecast at or before the recorded deadline and writes MAE, RMSE, interval coverage, and haul-probability Brier score.
+Legacy task entry points remain during the rollback window but are no longer used by any schedule.
+The full platform and cutover procedure is in
+[`docs/fpl/neon-free-hot-cold-cutover.md`](../../docs/fpl/neon-free-hot-cold-cutover.md).
 
 ## Deployment boundaries
 
-Vercel is read-only: configure `DATABASE_URL` there so server functions can query compact Neon read models. Do not put R2 credentials or betting-provider keys in Vercel unless a server read path genuinely needs them.
+GitHub Actions owns all writes. The 15-minute production schedule has a sparse, dependency-free
+calendar gate; no-work wakes never start the environment's secret-bearing worker or open Neon. The
+fixed environments are `fpl-next`, `fpl-production`, and protected `fpl-cutover`.
 
-GitHub Actions owns collection, automated forecasting, and live-result capture. Configure these repository secrets:
+Vercel reads only the public custom domain after promotion:
 
-- `DATABASE_URL`
-- `THE_ODDS_API_KEY`
-- `CLOUDFLARE_ACCOUNT_ID`
-- `R2_BUCKET`
-- `R2_ACCESS_KEY_ID`
-- `R2_SECRET_ACCESS_KEY`
+```text
+VITE_MI_DATA_SOURCE=r2
+VITE_MI_PUBLIC_ARTIFACT_BASE_URL=https://data.fpl.wasimarif.com/serving/v1/production
+```
 
-Add these under **Settings > Secrets and variables > Actions > Repository
-secrets** in the repository that runs the workflow. Do not add them as Actions
-variables, Codespaces secrets, Dependabot secrets, or environment-only secrets:
-the collector job does not declare a GitHub Environment, so those values resolve
-to an empty string. After adding or changing a secret, start a fresh manual
-workflow run rather than relying on the log from an earlier attempt.
+R2 credentials and provider keys never enter Vercel. The temporary `neon|r2` switch exists only for
+the cutover; remove the Neon reader, switch, `DATABASE_URL`, and old demo fallback variables after
+production smoke tests and the agreed rollback confidence period.
 
-The workflow checks the complete secret set before checkout or dependency
-installation, then runs `market-intelligence#env:verify` to prove that Vite+
-passes the same values to the task process. Both checks report names/counts,
-never values. The workflow can also be run manually. A local `collector:tick`
-needs the same values in the root `.env.local`.
-
-After forecasting, `market-intelligence#snapshot:verify` fails the run unless
-fresh 1-, 3-, and 5-gameweek snapshots contain the current official-price
-player pool. The live app reads those same snapshots and never substitutes the
-bundled preseason demo for its `current` route.
+The public client validates `current.json`, the immutable bundle schema, hashes, and byte counts.
+Squad Lab and Opportunity Map share one bundle cache; horizon changes are client-side and replay is
+lazy. A navigation failure may retain a previously validated same-season bundle with a stale
+banner. A first-load failure uses the route error boundary and never silently substitutes demo
+data.
 
 The launched 2026/27 season always resolves to
 `fpl:2026-27:official-v1`; an old local `MI_RULESET_KEY` containing
@@ -126,9 +127,8 @@ and their runtime variables are declared under `untrackedEnv` in this package's
 clean environment and otherwise removes values such as `DATABASE_URL` before
 launching Node.
 
-For an immediate manual refresh of the multi-season player priors, run
-`vp run market-intelligence#capture:fpl-history`. The scheduled collector runs
-the same source daily.
+Historical priors bootstrap once and then only fetch newly registered players missing a compact
+prior. There is no scheduled full-player history refresh.
 
 ## Adding a source
 

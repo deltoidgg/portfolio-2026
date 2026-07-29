@@ -22,6 +22,13 @@
       "when": 1785106500000,
       "tag": "20260726235500_opportunity_snapshot_order",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1785315600000,
+      "tag": "20260729090000_compact_hot_state",
+      "breakpoints": true
     }
   ]
 }

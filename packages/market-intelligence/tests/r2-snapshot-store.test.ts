@@ -56,4 +56,28 @@ describe("R2 snapshot store", () => {
       }),
     ).resolves.toEqual(expect.objectContaining({ encoding: "gzip" }));
   });
+
+  test("preserves the exact validated JSON response body when supplied", async () => {
+    const commands: Array<{ input?: Record<string, unknown> }> = [];
+    const store = createR2SnapshotStore({
+      bucket: "fpl-raw",
+      client: {
+        async send(command) {
+          commands.push(command as { input?: Record<string, unknown> });
+          return {};
+        },
+      },
+    });
+    const rawBody = '{ "prices": [1.9, 3.5], "providerSpacing": true }';
+
+    await store.put({
+      sourceKey: "odds-api",
+      endpoint: "https://api.example.test/odds",
+      observedAt: "2026-08-21T12:15:00.000Z",
+      payload: JSON.parse(rawBody),
+      rawBody,
+    });
+
+    expect(gunzipSync(commands[0]?.input?.Body as Uint8Array).toString("utf8")).toBe(rawBody);
+  });
 });

@@ -85,7 +85,8 @@ export function createOddsApiSource({
       const url = oddsUrl(apiKey, regions, markets);
       const response = await fetcher(url, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`The Odds API capture failed: ${response.status}`);
-      const payload = jsonValueSchema.parse(await response.json());
+      const rawBody = await response.text();
+      const payload = jsonValueSchema.parse(JSON.parse(rawBody));
       const events = oddsResponseSchema.parse(payload);
       const canonicalEvents = events.map((event) => {
         const homeTeam = resolvePremierLeagueTeam(event.home_team);
@@ -196,6 +197,7 @@ export function createOddsApiSource({
             endpoint: safeEndpoint.toString(),
             observedAt: capturedAt,
             payload,
+            rawBody,
             statusCode: response.status,
           },
         ],
@@ -276,7 +278,8 @@ export function createSeasonAwareOddsApiSource({
       const url = oddsUrl(apiKey, regions, markets);
       const response = await fetcher(url, { headers: { Accept: "application/json" } });
       if (!response.ok) throw new Error(`The Odds API capture failed: ${response.status}`);
-      const payload = jsonValueSchema.parse(await response.json());
+      const rawBody = await response.text();
+      const payload = jsonValueSchema.parse(JSON.parse(rawBody));
       const events = oddsResponseSchema.parse(payload);
       const reconciliation = await reconciler.reconcile(
         events.map((event) => ({
@@ -380,6 +383,7 @@ export function createSeasonAwareOddsApiSource({
             endpoint: safeEndpoint.toString(),
             observedAt: capturedAt,
             payload,
+            rawBody,
             statusCode: response.status,
           },
         ],

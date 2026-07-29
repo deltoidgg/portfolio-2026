@@ -597,10 +597,12 @@ export function OpportunityMapExperience({
   map,
   state,
   onStateChange,
+  onReplayRequest,
 }: {
   map: OpportunityMap;
   state: OpportunityViewState;
   onStateChange: (patch: ViewPatch) => void;
+  onReplayRequest?: () => void | Promise<void>;
 }) {
   const reduceMotion = useReducedMotion();
   const [playing, setPlaying] = useState(false);
@@ -978,7 +980,13 @@ export function OpportunityMapExperience({
               <button
                 type="button"
                 className="snapshot-play"
-                onClick={() => setPlaying((value) => !value)}
+                onClick={() => {
+                  if (snapshotTimes.length === 0 && onReplayRequest) {
+                    void Promise.resolve(onReplayRequest()).then(() => setPlaying(true));
+                  } else {
+                    setPlaying((value) => !value);
+                  }
+                }}
                 aria-label={playing ? "Pause snapshot replay" : "Play snapshot replay"}
               >
                 {playing ? <IconPlayerPause size={16} /> : <IconPlayerPlay size={16} />}

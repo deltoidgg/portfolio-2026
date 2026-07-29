@@ -201,10 +201,18 @@ function validateSeasonGuard(
   }
 }
 
-async function getJson(fetcher: typeof fetch, url: string): Promise<JsonValue> {
+async function getJson(
+  fetcher: typeof fetch,
+  url: string,
+): Promise<{ payload: JsonValue; rawBody: string; statusCode: number }> {
   const response = await fetcher(url, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`FPL capture failed: ${response.status} ${url}`);
-  return jsonValueSchema.parse(await response.json());
+  const rawBody = await response.text();
+  return {
+    payload: jsonValueSchema.parse(JSON.parse(rawBody)),
+    rawBody,
+    statusCode: response.status,
+  };
 }
 
 export function createFplSource({
@@ -218,10 +226,12 @@ export function createFplSource({
       const capturedAt = request.capturedAt ?? new Date().toISOString();
       const bootstrapUrl = "https://fantasy.premierleague.com/api/bootstrap-static/";
       const fixturesUrl = "https://fantasy.premierleague.com/api/fixtures/";
-      const [bootstrapPayload, fixturesPayload] = await Promise.all([
+      const [bootstrapResponse, fixturesResponse] = await Promise.all([
         getJson(fetcher, bootstrapUrl),
         getJson(fetcher, fixturesUrl),
       ]);
+      const bootstrapPayload = bootstrapResponse.payload;
+      const fixturesPayload = fixturesResponse.payload;
       const bootstrap = bootstrapSchema.parse(bootstrapPayload);
       const fixtures = fixturesSchema.parse(fixturesPayload);
       if (request.seasonGuard) validateSeasonGuard(bootstrap, request.seasonGuard);
@@ -393,14 +403,16 @@ export function createFplSource({
             endpoint: bootstrapUrl,
             observedAt: capturedAt,
             payload: bootstrapPayload,
-            statusCode: 200,
+            rawBody: bootstrapResponse.rawBody,
+            statusCode: bootstrapResponse.statusCode,
           },
           {
             key: `fpl:fixtures:${capturedAt}`,
             endpoint: fixturesUrl,
             observedAt: capturedAt,
             payload: fixturesPayload,
-            statusCode: 200,
+            rawBody: fixturesResponse.rawBody,
+            statusCode: fixturesResponse.statusCode,
           },
         ],
         observations,

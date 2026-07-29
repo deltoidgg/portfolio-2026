@@ -6,6 +6,7 @@ export type SnapshotEnvelope = {
   endpoint: string;
   observedAt: string;
   payload: JsonValue;
+  rawBody?: string;
   statusCode?: number;
   headers?: Record<string, string>;
 };
@@ -40,7 +41,8 @@ export function createMemorySnapshotStore(): MemorySnapshotStore {
   const objects = new Map<string, string>();
   return {
     async put(snapshot) {
-      const serialized = JSON.stringify(snapshot.payload);
+      const serialized = snapshot.rawBody ?? JSON.stringify(snapshot.payload);
+      JSON.parse(serialized);
       const digest = await sha256(serialized);
       objects.set(digest, serialized);
       const date = snapshot.observedAt.slice(0, 10).replaceAll("-", "/");
@@ -123,6 +125,7 @@ export function collectionFromBatch(batch: CaptureBatch): CollectionCapture {
               endpoint: snapshot.endpoint,
               observedAt: snapshot.observedAt,
               payload: snapshot.payload,
+              ...(snapshot.rawBody === undefined ? {} : { rawBody: snapshot.rawBody }),
               ...(snapshot.statusCode === undefined ? {} : { statusCode: snapshot.statusCode }),
             },
           ],

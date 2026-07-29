@@ -1,78 +1,100 @@
-name: FPL data collector
+name: FPL production collector
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Pipeline mode
+        type: choice
+        required: true
+        default: auto
+        options:
+          - auto
+          - force-collect
+          - finalise
+          - retention
+          - verify
+      at:
+        description: Optional ISO date-time override
+        type: string
+        required: false
 
 concurrency:
-  group: fpl-data-collector
+  group: fpl-production-collector
   cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  collect:
+  gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 2
+    environment: fpl-production
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      nominal_slot: ${{ steps.gate.outputs.nominal_slot }}
+      due_sources: ${{ steps.gate.outputs.due_sources }}
+      finalisation_due: ${{ steps.gate.outputs.finalisation_due }}
+      retention_due: ${{ steps.gate.outputs.retention_due }}
+      verification_due: ${{ steps.gate.outputs.verification_due }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            .github/scripts
+            .github/fpl-season-calendar.json
+      - id: gate
+        name: Decide whether a secret-bearing worker is due
+        env:
+          MI_COLLECTION_ENABLED: ${{ vars.MI_COLLECTION_ENABLED }}
+          MI_PIPELINE_MODE: ${{ inputs.mode || 'auto' }}
+          MI_GATE_AT: ${{ inputs.at }}
+        run: node .github/scripts/fpl-collection-gate.mjs
+
+  worker:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: fpl-production
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      R2_BUCKET: ${{ secrets.R2_BUCKET }}
-      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      MI_SEASON_KEY: epl:2026-27
-      MI_SEASON: 2026/27
-      MI_SEASON_STARTS_AT: 2026-08-21T00:00:00.000Z
-      MI_SEASON_ENDS_AT: 2027-05-30T23:59:59.000Z
-      MI_RULESET_KEY: fpl:2026-27:official-v1
-      MI_ODDS_MARKETS: h2h,totals
-      MI_FORECAST_HORIZONS: 1,3,5
+      R2_PRIVATE_ACCESS_KEY_ID: ${{ secrets.R2_PRIVATE_ACCESS_KEY_ID }}
+      R2_PRIVATE_SECRET_ACCESS_KEY: ${{ secrets.R2_PRIVATE_SECRET_ACCESS_KEY }}
+      R2_PUBLIC_ACCESS_KEY_ID: ${{ secrets.R2_PUBLIC_ACCESS_KEY_ID }}
+      R2_PUBLIC_SECRET_ACCESS_KEY: ${{ secrets.R2_PUBLIC_SECRET_ACCESS_KEY }}
+      MI_COLLECTION_ENABLED: ${{ vars.MI_COLLECTION_ENABLED }}
+      MI_ARTIFACT_CHANNEL: production
+      MI_SEASON_KEY: ${{ vars.MI_SEASON_KEY }}
+      MI_SEASON: ${{ vars.MI_SEASON }}
+      MI_SEASON_STARTS_AT: ${{ vars.MI_SEASON_STARTS_AT }}
+      MI_SEASON_ENDS_AT: ${{ vars.MI_SEASON_ENDS_AT }}
+      MI_RULESET_KEY: ${{ vars.MI_RULESET_KEY }}
+      MI_ODDS_MARKETS: ${{ vars.MI_ODDS_MARKETS }}
+      R2_PRIVATE_BUCKET: ${{ vars.R2_PRIVATE_BUCKET }}
+      R2_PUBLIC_BUCKET: ${{ vars.R2_PUBLIC_BUCKET }}
+      R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+      MI_PIPELINE_MODE: ${{ inputs.mode || 'auto' }}
+      MI_PIPELINE_AT: ${{ inputs.at || needs.gate.outputs.nominal_slot }}
+      MI_NOMINAL_SLOT: ${{ needs.gate.outputs.nominal_slot }}
+      MI_DUE_SOURCES: ${{ needs.gate.outputs.due_sources }}
+      MI_FINALISATION_DUE: ${{ needs.gate.outputs.finalisation_due }}
+      MI_RETENTION_DUE: ${{ needs.gate.outputs.retention_due }}
+      MI_VERIFICATION_DUE: ${{ needs.gate.outputs.verification_due }}
+      MI_GATE_REASON: ${{ needs.gate.outputs.reason }}
     steps:
-      - name: Validate collector secrets
-        shell: bash
-        run: |
-          missing=()
-          for name in \
-            DATABASE_URL \
-            THE_ODDS_API_KEY \
-            CLOUDFLARE_ACCOUNT_ID \
-            R2_BUCKET \
-            R2_ACCESS_KEY_ID \
-            R2_SECRET_ACCESS_KEY
-          do
-            if [[ -z "${!name:-}" ]]; then
-              missing+=("$name")
-            fi
-          done
-
-          if (( ${#missing[@]} > 0 )); then
-            echo "::error title=Missing collector secrets::Unavailable GitHub Actions secrets: ${missing[*]}"
-            echo "Configure them under Settings > Secrets and variables > Actions > Repository secrets."
-            echo "Secrets stored only in a GitHub Environment are unavailable because this job does not declare an environment."
-            exit 1
-          fi
-
-          echo "All required collector secrets are available."
       - uses: actions/checkout@v6
       - uses: voidzero-dev/setup-vp@v1
         with:
           node-version: "24"
           cache: true
       - run: vp install
-      - name: Verify secrets reach the Vite+ task process
-        run: vp run market-intelligence#env:verify
-      - name: Apply additive migrations
-        run: vp run market-intelligence#db:migrate
-      - name: Capture due sources
-        run: vp run market-intelligence#collector:tick
-      - name: Publish the current opportunity snapshot
-        run: vp run market-intelligence#forecast:auto
-      - name: Verify fresh official-price snapshots
-        run: vp run market-intelligence#snapshot:verify
-      - name: Capture live results when a gameweek has started
-        run: vp run market-intelligence#capture:results
-      - name: Evaluate the latest final gameweek
-        run: vp run market-intelligence#evaluate
+      - run: vp run market-intelligence#env:verify
+      - name: Run the unified hot/cold pipeline
+        run: vp run market-intelligence#pipeline:tick

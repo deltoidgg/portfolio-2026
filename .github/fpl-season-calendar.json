@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "collection-calendar/v1",
+  "seasonKey": "epl:2026-27",
+  "startsAt": "2026-08-21T00:00:00.000Z",
+  "endsAt": "2027-05-30T23:59:59.000Z",
+  "generatedFrom": "https://www.premierleague.com/en/news/4675097/all-380-fixtures-for-202627-premier-league-season/",
+  "gameweeks": [
+    {
+      "gameweek": 1,
+      "deadlineAt": "2026-08-21T17:30:00.000Z",
+      "lastKickoffAt": "2026-08-24T19:00:00.000Z"
+    },
+    {
+      "gameweek": 2,
+      "deadlineAt": "2026-08-28T17:30:00.000Z",
+      "lastKickoffAt": "2026-08-31T19:00:00.000Z"
+    },
+    {
+      "gameweek": 3,
+      "deadlineAt": "2026-09-04T17:30:00.000Z",
+      "lastKickoffAt": "2026-09-06T15:30:00.000Z"
+    },
+    {
+      "gameweek": 4,
+      "deadlineAt": "2026-09-12T12:30:00.000Z",
+      "lastKickoffAt": "2026-09-14T19:00:00.000Z"
+    },
+    {
+      "gameweek": 5,
+      "deadlineAt": "2026-09-18T17:30:00.000Z",
+      "lastKickoffAt": "2026-09-20T15:30:00.000Z"
+    },
+    {
+      "gameweek": 6,
+      "deadlineAt": "2026-10-10T12:30:00.000Z",
+      "lastKickoffAt": "2026-10-10T14:00:00.000Z"
+    },
+    {
+      "gameweek": 7,
+      "deadlineAt": "2026-10-17T12:30:00.000Z",
+      "lastKickoffAt": "2026-10-17T14:00:00.000Z"
+    },
+    {
+      "gameweek": 8,
+      "deadlineAt": "2026-10-24T12:30:00.000Z",
+      "lastKickoffAt": "2026-10-24T14:00:00.000Z"
+    },
+    {
+      "gameweek": 9,
+      "deadlineAt": "2026-10-31T13:30:00.000Z",
+      "lastKickoffAt": "2026-10-31T15:00:00.000Z"
+    },
+    {
+      "gameweek": 10,
+      "deadlineAt": "2026-11-07T13:30:00.000Z",
+      "lastKickoffAt": "2026-11-07T15:00:00.000Z"
+    },
+    {
+      "gameweek": 11,
+      "deadlineAt": "2026-11-21T13:30:00.000Z",
+      "lastKickoffAt": "2026-11-21T15:00:00.000Z"
+    },
+    {
+      "gameweek": 12,
+      "deadlineAt": "2026-11-28T13:30:00.000Z",
+      "lastKickoffAt": "2026-11-28T15:00:00.000Z"
+    },
+    {
+      "gameweek": 13,
+      "deadlineAt": "2026-12-02T18:30:00.000Z",
+      "lastKickoffAt": "2026-12-02T20:00:00.000Z"
+    },
+    {
+      "gameweek": 14,
+      "deadlineAt": "2026-12-05T13:30:00.000Z",
+      "lastKickoffAt": "2026-12-05T15:00:00.000Z"
+    },
+    {
+      "gameweek": 15,
+      "deadlineAt": "2026-12-12T13:30:00.000Z",
+      "lastKickoffAt": "2026-12-12T15:00:00.000Z"
+    },
+    {
+      "gameweek": 16,
+      "deadlineAt": "2026-12-19T13:30:00.000Z",
+      "lastKickoffAt": "2026-12-19T15:00:00.000Z"
+    },
+    {
+      "gameweek": 17,
+      "deadlineAt": "2026-12-26T13:30:00.000Z",
+      "lastKickoffAt": "2026-12-26T15:00:00.000Z"
+    },
+    {
+      "gameweek": 18,
+      "deadlineAt": "2026-12-30T18:30:00.000Z",
+      "lastKickoffAt": "2026-12-30T20:00:00.000Z"
+    },
+    {
+      "gameweek": 19,
+      "deadlineAt": "2027-01-02T13:30:00.000Z",
+      "lastKickoffAt": "2027-01-02T15:00:00.000Z"
+    },
+    {
+      "gameweek": 20,
+      "deadlineAt": "2027-01-06T18:30:00.000Z",
+      "lastKickoffAt": "2027-01-06T20:00:00.000Z"
+    },
+    {
+      "gameweek": 21,
+      "deadlineAt": "2027-01-16T13:30:00.000Z",
+      "lastKickoffAt": "2027-01-16T15:00:00.000Z"
+    },
+    {
+      "gameweek": 22,
+      "deadlineAt": "2027-01-23T13:30:00.000Z",
+      "lastKickoffAt": "2027-01-23T15:00:00.000Z"
+    },
+    {
+      "gameweek": 23,
+      "deadlineAt": "2027-01-30T13:30:00.000Z",
+      "lastKickoffAt": "2027-01-30T15:00:00.000Z"
+    },
+    {
+      "gameweek": 24,
+      "deadlineAt": "2027-02-06T13:30:00.000Z",
+      "lastKickoffAt": "2027-02-06T15:00:00.000Z"
+    },
+    {
+      "gameweek": 25,
+      "deadlineAt": "2027-02-10T18:30:00.000Z",
+      "lastKickoffAt": "2027-02-10T20:00:00.000Z"
+    },
+    {
+      "gameweek": 26,
+      "deadlineAt": "2027-02-20T13:30:00.000Z",
+      "lastKickoffAt": "2027-02-20T15:00:00.000Z"
+    },
+    {
+      "gameweek": 27,
+      "deadlineAt": "2027-02-27T13:30:00.000Z",
+      "lastKickoffAt": "2027-02-27T15:00:00.000Z"
+    },
+    {
+      "gameweek": 28,
+      "deadlineAt": "2027-03-03T18:30:00.000Z",
+      "lastKickoffAt": "2027-03-03T20:00:00.000Z"
+    },
+    {
+      "gameweek": 29,
+      "deadlineAt": "2027-03-13T13:30:00.000Z",
+      "lastKickoffAt": "2027-03-13T15:00:00.000Z"
+    },
+    {
+      "gameweek": 30,
+      "deadlineAt": "2027-03-20T13:30:00.000Z",
+      "lastKickoffAt": "2027-03-20T15:00:00.000Z"
+    },
+    {
+      "gameweek": 31,
+      "deadlineAt": "2027-04-10T12:30:00.000Z",
+      "lastKickoffAt": "2027-04-10T14:00:00.000Z"
+    },
+    {
+      "gameweek": 32,
+      "deadlineAt": "2027-04-17T12:30:00.000Z",
+      "lastKickoffAt": "2027-04-17T14:00:00.000Z"
+    },
+    {
+      "gameweek": 33,
+      "deadlineAt": "2027-04-24T12:30:00.000Z",
+      "lastKickoffAt": "2027-04-24T14:00:00.000Z"
+    },
+    {
+      "gameweek": 34,
+      "deadlineAt": "2027-05-01T12:30:00.000Z",
+      "lastKickoffAt": "2027-05-01T14:00:00.000Z"
+    },
+    {
+      "gameweek": 35,
+      "deadlineAt": "2027-05-08T12:30:00.000Z",
+      "lastKickoffAt": "2027-05-08T14:00:00.000Z"
+    },
+    {
+      "gameweek": 36,
+      "deadlineAt": "2027-05-15T12:30:00.000Z",
+      "lastKickoffAt": "2027-05-15T14:00:00.000Z"
+    },
+    {
+      "gameweek": 37,
+      "deadlineAt": "2027-05-23T12:30:00.000Z",
+      "lastKickoffAt": "2027-05-23T14:00:00.000Z"
+    },
+    {
+      "gameweek": 38,
+      "deadlineAt": "2027-05-30T13:30:00.000Z",
+      "lastKickoffAt": "2027-05-30T15:00:00.000Z"
+    }
+  ]
+}

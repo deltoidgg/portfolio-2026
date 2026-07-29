@@ -12,6 +12,8 @@ export {
   scoreFplFixture,
   type FplBpsActionEvent,
   type ForecastFixtureInput,
+  type ForecastHorizonsArtifact,
+  type ForecastHorizonsRequest,
   type ForecastInputBatch,
   type ForecastPlayerInput,
   type ForecastRunArtifact,

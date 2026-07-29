@@ -34,6 +34,14 @@ const liveResponseSchema = z.object({
   ),
 });
 
+const fixtureStatusSchema = z.array(
+  z.object({
+    event: z.number().int().positive().nullable(),
+    finished: z.boolean(),
+    finished_provisional: z.boolean().default(false),
+  }),
+);
+
 export type FplLiveCaptureRequest = {
   seasonKey: string;
   season: string;
@@ -51,10 +59,29 @@ export function createFplLiveSource({
     async capture(request) {
       const capturedAt = request.capturedAt ?? new Date().toISOString();
       const endpoint = `https://fantasy.premierleague.com/api/event/${request.gameweek}/live/`;
-      const response = await fetcher(endpoint, { headers: { Accept: "application/json" } });
-      if (!response.ok) throw new Error(`FPL live capture failed: ${response.status}`);
-      const payload = await response.json();
+      const fixturesEndpoint = "https://fantasy.premierleague.com/api/fixtures/";
+      const [response, fixturesResponse] = await Promise.all([
+        fetcher(endpoint, { headers: { Accept: "application/json" } }),
+        fetcher(fixturesEndpoint, { headers: { Accept: "application/json" } }),
+      ]);
+      if (!response.ok || !fixturesResponse.ok) {
+        throw new Error(
+          `FPL final capture failed: live=${response.status} fixtures=${fixturesResponse.status}`,
+        );
+      }
+      const [rawBody, fixturesRawBody] = await Promise.all([
+        response.text(),
+        fixturesResponse.text(),
+      ]);
+      const payload = JSON.parse(rawBody);
       const live = liveResponseSchema.parse(payload);
+      const fixturesPayload = JSON.parse(fixturesRawBody);
+      const gameweekFixtures = fixtureStatusSchema
+        .parse(fixturesPayload)
+        .filter((fixture) => fixture.event === request.gameweek);
+      const isFinal =
+        gameweekFixtures.length > 0 &&
+        gameweekFixtures.every((fixture) => fixture.finished && !fixture.finished_provisional);
       const observations: Observation[] = live.elements.flatMap((element) => {
         const entityKey = `${request.seasonKey}:registration:fpl-${element.id}`;
         return Object.entries(element.stats).flatMap(([metric, value]) =>
@@ -83,7 +110,16 @@ export function createFplLiveSource({
             endpoint,
             observedAt: capturedAt,
             payload,
+            rawBody,
             statusCode: response.status,
+          },
+          {
+            key: `fpl-live-fixtures:${request.gameweek}:${capturedAt}`,
+            endpoint: fixturesEndpoint,
+            observedAt: capturedAt,
+            payload: fixturesPayload,
+            rawBody: fixturesRawBody,
+            statusCode: fixturesResponse.status,
           },
         ],
         observations,
@@ -94,6 +130,7 @@ export function createFplLiveSource({
           seasonKey: request.seasonKey,
           season: request.season,
           gameweek: request.gameweek,
+          isFinal,
         },
       } satisfies CaptureBatch;
     },

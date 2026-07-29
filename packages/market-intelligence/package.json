@@ -11,6 +11,7 @@
     "./sources": "./src/sources/index.ts",
     "./demo": "./src/demo.ts",
     "./schema": "./src/neon/schema.ts",
+    "./publication": "./src/hot-cold/publication.ts",
     "./squad": "./src/squad.ts",
     "./package.json": "./package.json"
   },

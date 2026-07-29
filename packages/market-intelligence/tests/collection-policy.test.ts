@@ -17,7 +17,7 @@ describe("season collection cadence", () => {
 
     expect(context).toEqual(expect.objectContaining({ gameweek: 1, hoursUntilDeadline: 24 }));
     expect(collectionSlot("odds-api", context!, "2026-08-20T17:34:59.000Z")).toEqual({
-      cadenceMinutes: 5,
+      cadenceMinutes: 15,
       scheduledFor: "2026-08-20T17:30:00.000Z",
     });
     expect(collectionSlot("fpl", context!, "2026-08-20T17:34:59.000Z")).toEqual({
@@ -35,18 +35,18 @@ describe("season collection cadence", () => {
     const first = collectionSlot("odds-api", context, "2026-08-18T17:44:00.000Z");
     const second = collectionSlot("odds-api", context, "2026-08-18T17:59:59.000Z");
 
-    expect(first.cadenceMinutes).toBe(30);
+    expect(first.cadenceMinutes).toBe(60);
     expect(first.scheduledFor).toBe(second.scheduledFor);
   });
 
-  test("tracks post-GW1 price movement every 15 minutes and tightens around midnight", () => {
+  test("keeps the low-cost hourly cadence outside the deadline window after GW1", () => {
     const context = {
       gameweek: 2,
       deadlineAt: "2026-08-29T12:30:00.000Z",
       hoursUntilDeadline: 120,
     };
 
-    expect(collectionSlot("fpl", context, "2026-08-25T18:16:00.000Z").cadenceMinutes).toBe(15);
-    expect(collectionSlot("fpl", context, "2026-08-25T22:46:00.000Z").cadenceMinutes).toBe(5);
+    expect(collectionSlot("fpl", context, "2026-08-25T18:16:00.000Z").cadenceMinutes).toBe(60);
+    expect(collectionSlot("odds-api", context, "2026-08-25T22:46:00.000Z").cadenceMinutes).toBe(60);
   });
 });

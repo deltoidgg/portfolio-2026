@@ -30,27 +30,12 @@ export function nextDeadlineContext(
   };
 }
 
-function isPriceChangeWindow(now: string): boolean {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/London",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(new Date(now));
-  const hour = Number(parts.find((part) => part.type === "hour")?.value);
-  const minute = Number(parts.find((part) => part.type === "minute")?.value);
-  return (hour === 23 && minute >= 30) || (hour === 0 && minute <= 10);
-}
-
-function cadenceMinutes(source: ScheduledSource, context: DeadlineContext, now: string): number {
+function cadenceMinutes(source: ScheduledSource, context: DeadlineContext): number {
   if (source === "season-schedule") return context.hoursUntilDeadline <= 48 ? 360 : 1_440;
   if (source === "fpl-element-summary") return 1_440;
   if (source === "fpl-live") return 10;
-  if (source === "fpl") {
-    if (context.gameweek > 1) return isPriceChangeWindow(now) ? 5 : 15;
-    return context.hoursUntilDeadline <= 48 ? 15 : 60;
-  }
-  return context.hoursUntilDeadline <= 48 ? 5 : 30;
+  if (source === "fpl" || source === "odds-api") return context.hoursUntilDeadline <= 48 ? 15 : 60;
+  return context.hoursUntilDeadline <= 48 ? 15 : 60;
 }
 
 export function collectionSlot(
@@ -58,7 +43,7 @@ export function collectionSlot(
   context: DeadlineContext,
   now: string,
 ): { cadenceMinutes: number; scheduledFor: string } {
-  const cadence = cadenceMinutes(source, context, now);
+  const cadence = cadenceMinutes(source, context);
   const milliseconds = cadence * 60_000;
   const slot = Math.floor(Date.parse(now) / milliseconds) * milliseconds;
   return { cadenceMinutes: cadence, scheduledFor: new Date(slot).toISOString() };
