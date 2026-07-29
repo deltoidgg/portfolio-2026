@@ -5,7 +5,7 @@ import { migrate } from "drizzle-orm/neon-http/migrator";
 import { loadLocalEnvironment, requiredEnvironment } from "./load-env.ts";
 
 loadLocalEnvironment();
-const connectionString = requiredEnvironment("DATABASE_URL");
+const connectionString = process.env.DATABASE_MIGRATION_URL ?? requiredEnvironment("DATABASE_URL");
 
 const db = drizzle({ client: neon(connectionString) });
 const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));

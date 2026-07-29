@@ -35,7 +35,8 @@ export function createR2SnapshotStore(options: R2SnapshotStoreOptions): Snapshot
   const client = createClient(options);
   return {
     async put(snapshot: SnapshotEnvelope): Promise<StoredSnapshot> {
-      const serialized = JSON.stringify(snapshot.payload);
+      const serialized = snapshot.rawBody ?? JSON.stringify(snapshot.payload);
+      JSON.parse(serialized);
       const digest = createHash("sha256").update(serialized).digest("hex");
       const compressed = gzipSync(serialized, { level: 9 });
       const [year, month, day] = snapshot.observedAt.slice(0, 10).split("-");

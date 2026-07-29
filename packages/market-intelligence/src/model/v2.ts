@@ -337,6 +337,7 @@ function fixtureDistribution(
 export interface MarketXpForecastRunner {
   run(request: ForecastRunRequest): OpportunitySnapshot;
   runArtifact(request: ForecastRunRequest): ForecastRunArtifact;
+  runHorizons(request: ForecastHorizonsRequest): ForecastHorizonsArtifact;
 }
 
 export type PlayerFixtureForecastArtifact = {
@@ -355,7 +356,43 @@ export type ForecastRunArtifact = {
   fixtureForecasts: PlayerFixtureForecastArtifact[];
 };
 
-function executeForecastRun(request: ForecastRunRequest): ForecastRunArtifact {
+export type ForecastHorizonsRequest = Omit<ForecastRunRequest, "horizon" | "playerTrails"> & {
+  horizons: readonly [1, 3, 5];
+  playerTrailsByHorizon?: Record<1 | 3 | 5, Record<string, OpportunityTrailPoint[]>>;
+};
+
+export type ForecastHorizonsArtifact = {
+  runId: string;
+  snapshots: Record<1 | 3 | 5, OpportunitySnapshot>;
+  fixtureForecasts: PlayerFixtureForecastArtifact[];
+  fixtureDistributionCalculations: number;
+};
+
+type DistributionCache = {
+  values: Map<string, ProbabilityMass>;
+  calculations: number;
+};
+
+function cachedFixtureDistribution(
+  cache: DistributionCache | undefined,
+  rules: FplRuleset,
+  player: ForecastPlayerInput,
+  fixture: ForecastFixtureInput,
+): ProbabilityMass {
+  if (!cache) return fixtureDistribution(rules, player, fixture);
+  const key = `${rules.key}:${player.registrationKey}:${fixture.key}`;
+  const current = cache.values.get(key);
+  if (current) return current;
+  const distribution = fixtureDistribution(rules, player, fixture);
+  cache.values.set(key, distribution);
+  cache.calculations += 1;
+  return distribution;
+}
+
+function executeForecastRun(
+  request: ForecastRunRequest,
+  distributionCache?: DistributionCache,
+): ForecastRunArtifact {
   const cutoff = Date.parse(request.cutoffAt);
   for (const batch of request.inputBatches) {
     if (
@@ -384,7 +421,7 @@ function executeForecastRun(request: ForecastRunRequest): ForecastRunArtifact {
       );
       let gameweekMass: ProbabilityMass = new Map([[0, 1]]);
       for (const fixture of fixtures) {
-        const distribution = fixtureDistribution(rules, player, fixture);
+        const distribution = cachedFixtureDistribution(distributionCache, rules, player, fixture);
         const fixtureExpectedPoints = expectedValue(distribution);
         const isHome = fixture.homeTeam === player.team;
         const opponentGoalRate = isHome ? fixture.awayGoalRate : fixture.homeGoalRate;
@@ -535,6 +572,35 @@ export function createMarketXpForecastRunner(): MarketXpForecastRunner {
     },
     runArtifact(request) {
       return executeForecastRun(request);
+    },
+    runHorizons(request) {
+      const distributionCache: DistributionCache = { values: new Map(), calculations: 0 };
+      const { playerTrailsByHorizon, ...sharedRequest } = request;
+      const artifacts = Object.fromEntries(
+        request.horizons.map((horizon) => [
+          horizon,
+          executeForecastRun(
+            {
+              ...sharedRequest,
+              horizon,
+              ...(playerTrailsByHorizon?.[horizon]
+                ? { playerTrails: playerTrailsByHorizon[horizon] }
+                : {}),
+            },
+            distributionCache,
+          ),
+        ]),
+      ) as Record<1 | 3 | 5, ForecastRunArtifact>;
+      return {
+        runId: request.runId,
+        snapshots: {
+          1: artifacts[1].snapshot,
+          3: artifacts[3].snapshot,
+          5: artifacts[5].snapshot,
+        },
+        fixtureForecasts: artifacts[5].fixtureForecasts,
+        fixtureDistributionCalculations: distributionCache.calculations,
+      };
     },
   };
 }

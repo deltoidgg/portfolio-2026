@@ -45,8 +45,12 @@ describe("FPL element summary source", () => {
         }),
       ]),
     );
-    expect(batch.rawSnapshots[0]?.payload).toEqual(
-      expect.objectContaining({ "7": expect.any(Object) }),
+    expect(batch.rawSnapshots[0]).toEqual(
+      expect.objectContaining({
+        endpoint: "https://fantasy.premierleague.com/api/element-summary/7/",
+        payload: expect.any(Object),
+        rawBody: expect.any(String),
+      }),
     );
   });
 });

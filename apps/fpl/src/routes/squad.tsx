@@ -1,9 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { demoOpportunityQuery } from "market-intelligence/demo";
 import { SquadLab } from "../components/squad-lab.tsx";
 import "../squad-lab.css";
-import { getOpportunityMap } from "../lib/market-intelligence.functions.ts";
 import { buildFplMetadata } from "../lib/metadata.ts";
+import {
+  isStaleOpportunityDataset,
+  loadOpportunityDataset,
+  opportunityMapFromDataset,
+} from "../lib/opportunity-data.ts";
 
 type SquadSearch = {
   horizon: 1 | 3 | 5;
@@ -20,15 +23,8 @@ function validateSearch(search: Record<string, unknown>): SquadSearch {
 
 export const Route = createFileRoute("/squad")({
   validateSearch,
-  loaderDeps: ({ search }) => ({ horizon: search.horizon, dataset: search.dataset }),
-  loader: ({ deps }) =>
-    getOpportunityMap({
-      data: {
-        ...demoOpportunityQuery,
-        datasetKey: deps.dataset === "demo" ? demoOpportunityQuery.datasetKey : "current",
-        horizon: deps.horizon,
-      },
-    }),
+  loaderDeps: ({ search }) => ({ dataset: search.dataset }),
+  loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
   head: () =>
     buildFplMetadata({
       title: "Squad & Transfer Lab — FPL market intelligence",
@@ -40,17 +36,25 @@ export const Route = createFileRoute("/squad")({
 });
 
 function SquadPage() {
-  const map = Route.useLoaderData();
+  const dataset = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const map = opportunityMapFromDataset(dataset, search.horizon);
 
   return (
-    <SquadLab
-      map={map}
-      horizon={search.horizon}
-      onHorizonChange={(horizon) =>
-        void navigate({ search: (previous) => ({ ...previous, horizon }) })
-      }
-    />
+    <>
+      {isStaleOpportunityDataset(dataset) ? (
+        <p className="squad-stale" role="status">
+          Showing the last validated 2026/27 forecast while the live artifact is unavailable.
+        </p>
+      ) : null}
+      <SquadLab
+        map={map}
+        horizon={search.horizon}
+        onHorizonChange={(horizon) =>
+          void navigate({ search: (previous) => ({ ...previous, horizon }) })
+        }
+      />
+    </>
   );
 }

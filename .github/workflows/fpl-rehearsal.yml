@@ -1,0 +1,95 @@
+name: FPL next-channel rehearsal
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Rehearsal mode
+        type: choice
+        required: true
+        default: force-collect
+        options:
+          - force-collect
+          - finalise
+          - retention
+          - verify
+      at:
+        description: Optional ISO date-time override
+        type: string
+        required: false
+
+concurrency:
+  group: fpl-next-rehearsal
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    environment: fpl-next
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      nominal_slot: ${{ steps.gate.outputs.nominal_slot }}
+      due_sources: ${{ steps.gate.outputs.due_sources }}
+      finalisation_due: ${{ steps.gate.outputs.finalisation_due }}
+      retention_due: ${{ steps.gate.outputs.retention_due }}
+      verification_due: ${{ steps.gate.outputs.verification_due }}
+      reason: ${{ steps.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            .github/scripts
+            .github/fpl-season-calendar.json
+      - id: gate
+        env:
+          MI_COLLECTION_ENABLED: ${{ vars.MI_COLLECTION_ENABLED }}
+          MI_PIPELINE_MODE: ${{ inputs.mode }}
+          MI_GATE_AT: ${{ inputs.at }}
+        run: node .github/scripts/fpl-collection-gate.mjs
+
+  worker:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: fpl-next
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_PRIVATE_ACCESS_KEY_ID: ${{ secrets.R2_PRIVATE_ACCESS_KEY_ID }}
+      R2_PRIVATE_SECRET_ACCESS_KEY: ${{ secrets.R2_PRIVATE_SECRET_ACCESS_KEY }}
+      R2_PUBLIC_ACCESS_KEY_ID: ${{ secrets.R2_PUBLIC_ACCESS_KEY_ID }}
+      R2_PUBLIC_SECRET_ACCESS_KEY: ${{ secrets.R2_PUBLIC_SECRET_ACCESS_KEY }}
+      MI_COLLECTION_ENABLED: ${{ vars.MI_COLLECTION_ENABLED }}
+      MI_ARTIFACT_CHANNEL: next
+      MI_SEASON_KEY: ${{ vars.MI_SEASON_KEY }}
+      MI_SEASON: ${{ vars.MI_SEASON }}
+      MI_SEASON_STARTS_AT: ${{ vars.MI_SEASON_STARTS_AT }}
+      MI_SEASON_ENDS_AT: ${{ vars.MI_SEASON_ENDS_AT }}
+      MI_RULESET_KEY: ${{ vars.MI_RULESET_KEY }}
+      MI_ODDS_MARKETS: ${{ vars.MI_ODDS_MARKETS }}
+      R2_PRIVATE_BUCKET: ${{ vars.R2_PRIVATE_BUCKET }}
+      R2_PUBLIC_BUCKET: ${{ vars.R2_PUBLIC_BUCKET }}
+      R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+      MI_PIPELINE_MODE: ${{ inputs.mode }}
+      MI_PIPELINE_AT: ${{ inputs.at || needs.gate.outputs.nominal_slot }}
+      MI_NOMINAL_SLOT: ${{ needs.gate.outputs.nominal_slot }}
+      MI_DUE_SOURCES: ${{ needs.gate.outputs.due_sources }}
+      MI_FINALISATION_DUE: ${{ needs.gate.outputs.finalisation_due }}
+      MI_RETENTION_DUE: ${{ needs.gate.outputs.retention_due }}
+      MI_VERIFICATION_DUE: ${{ needs.gate.outputs.verification_due }}
+      MI_GATE_REASON: ${{ needs.gate.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "24"
+          cache: true
+      - run: vp install
+      - run: vp run market-intelligence#env:verify
+      - run: vp run market-intelligence#pipeline:tick

@@ -167,6 +167,48 @@ describe("market-xp-v2 forecast runner", () => {
     );
   });
 
+  test("derives H1/H3/H5 while calculating each player-fixture PMF once", () => {
+    const { horizon: _horizon, ...requestBase } = request;
+    const runner = createMarketXpForecastRunner();
+    const bundle = runner.runHorizons({
+      ...requestBase,
+      horizons: [1, 3, 5],
+    });
+
+    expect(bundle.fixtureDistributionCalculations).toBe(3);
+    expect(bundle.fixtureForecasts).toHaveLength(3);
+    expect(bundle.snapshots[1].players[0]?.gameweeks).toHaveLength(1);
+    expect(bundle.snapshots[3].players[0]?.gameweeks).toHaveLength(3);
+    expect(bundle.snapshots[5].players[0]?.gameweeks).toHaveLength(5);
+    for (const horizon of [1, 3, 5] as const) {
+      expect(bundle.snapshots[horizon]).toEqual(runner.run({ ...requestBase, horizon }));
+    }
+  });
+
+  test("carries a separate bounded replay trail for each horizon", () => {
+    const { horizon: _horizon, ...requestBase } = request;
+    const registrationKey = request.players[0]!.registrationKey;
+    const bundle = createMarketXpForecastRunner().runHorizons({
+      ...requestBase,
+      horizons: [1, 3, 5],
+      playerTrailsByHorizon: {
+        1: {
+          [registrationKey]: [{ observedAt: "2026-07-15T10:00:00.000Z", expectedPoints: 4.1 }],
+        },
+        3: {
+          [registrationKey]: [{ observedAt: "2026-07-15T10:00:00.000Z", expectedPoints: 12.2 }],
+        },
+        5: {
+          [registrationKey]: [{ observedAt: "2026-07-15T10:00:00.000Z", expectedPoints: 19.8 }],
+        },
+      },
+    });
+
+    expect(bundle.snapshots[1].players[0]?.trail[0]?.expectedPoints).toBe(4.1);
+    expect(bundle.snapshots[3].players[0]?.trail[0]?.expectedPoints).toBe(12.2);
+    expect(bundle.snapshots[5].players[0]?.trail[0]?.expectedPoints).toBe(19.8);
+  });
+
   test("rejects evidence captured after the point-in-time cutoff", () => {
     expect(() =>
       createMarketXpForecastRunner().run({

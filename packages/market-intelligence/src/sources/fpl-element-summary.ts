@@ -83,7 +83,8 @@ export function createFplElementSummarySource({
         const response = await fetcher(endpoint, { headers: { Accept: "application/json" } });
         if (!response.ok)
           throw new Error(`FPL element ${playerId} capture failed: ${response.status}`);
-        const payload = await response.json();
+        const rawBody = await response.text();
+        const payload = JSON.parse(rawBody);
         const summary = summarySchema.parse(payload);
         const entityKey =
           request.entityKeys?.[playerId] ?? `${request.seasonKey}:registration:fpl-${playerId}`;
@@ -143,19 +144,23 @@ export function createFplElementSummarySource({
             });
           }
         }
-        return { playerId, endpoint, payload, observations: playerObservations };
+        return {
+          playerId,
+          endpoint,
+          payload,
+          rawBody,
+          statusCode: response.status,
+          observations: playerObservations,
+        };
       });
-      const rawSnapshots: RawSnapshot[] = [
-        {
-          key: `fpl-element-summary:all:${capturedAt}`,
-          endpoint: "https://fantasy.premierleague.com/api/element-summary/{playerId}/",
-          observedAt: capturedAt,
-          payload: Object.fromEntries(
-            captures.map((capture) => [String(capture.playerId), capture.payload]),
-          ),
-          statusCode: 200,
-        },
-      ];
+      const rawSnapshots: RawSnapshot[] = captures.map((capture) => ({
+        key: `fpl-element-summary:${capture.playerId}:${capturedAt}`,
+        endpoint: capture.endpoint,
+        observedAt: capturedAt,
+        payload: capture.payload,
+        rawBody: capture.rawBody,
+        statusCode: capture.statusCode,
+      }));
       const observations = captures.flatMap((capture) => capture.observations);
       return {
         id: `fpl-element-summary:${request.seasonKey}:${capturedAt}`,

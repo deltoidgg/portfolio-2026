@@ -60,6 +60,7 @@ export const rawSnapshotSchema = z.object({
   endpoint: z.string().min(1),
   observedAt: isoDateTime,
   payload: jsonValueSchema.optional(),
+  rawBody: z.string().optional(),
   statusCode: z.number().int().optional(),
   objectKey: z.string().min(1).optional(),
   sha256: z.string().min(1).optional(),

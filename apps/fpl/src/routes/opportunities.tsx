@@ -1,12 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { demoOpportunityQuery } from "market-intelligence/demo";
+import { useMemo, useState } from "react";
+import type { OpportunityReplayArtifactV1 } from "market-intelligence";
 import {
   OpportunityMapExperience,
   type OpportunityViewState,
 } from "../components/opportunity-map.tsx";
 import "../opportunity-map.css";
-import { getOpportunityMap } from "../lib/market-intelligence.functions.ts";
 import { buildFplMetadata } from "../lib/metadata.ts";
+import {
+  isStaleOpportunityDataset,
+  loadOpportunityDataset,
+  loadOpportunityReplay,
+  opportunityMapFromDataset,
+} from "../lib/opportunity-data.ts";
 import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
 
 const description =
@@ -47,15 +53,8 @@ function validateSearch(search: Record<string, unknown>): OpportunitySearch {
 
 export const Route = createFileRoute("/opportunities")({
   validateSearch,
-  loaderDeps: ({ search }) => ({ horizon: search.horizon, dataset: search.dataset }),
-  loader: ({ deps }) =>
-    getOpportunityMap({
-      data: {
-        ...demoOpportunityQuery,
-        datasetKey: deps.dataset === "demo" ? demoOpportunityQuery.datasetKey : "current",
-        horizon: deps.horizon,
-      },
-    }),
+  loaderDeps: ({ search }) => ({ dataset: search.dataset }),
+  loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
   head: () =>
     buildFplMetadata({
       title: "Opportunity Map — FPL market intelligence",
@@ -66,19 +65,32 @@ export const Route = createFileRoute("/opportunities")({
 });
 
 function OpportunityMapPage() {
-  const map = Route.useLoaderData();
+  const dataset = Route.useLoaderData();
   const state = Route.useSearch();
   const navigate = Route.useNavigate();
+  const [replay, setReplay] = useState<OpportunityReplayArtifactV1>();
+  const map = useMemo(
+    () => opportunityMapFromDataset(dataset, state.horizon, replay),
+    [dataset, replay, state.horizon],
+  );
   return (
-    <OpportunityMapExperience
-      map={map}
-      state={state}
-      onStateChange={(patch) =>
-        void navigate({
-          replace: true,
-          search: (previous) => ({ ...previous, ...patch }),
-        })
-      }
-    />
+    <>
+      {isStaleOpportunityDataset(dataset) ? (
+        <p className="opportunity-stale" role="status">
+          Showing the last validated 2026/27 forecast while the live artifact is unavailable.
+        </p>
+      ) : null}
+      <OpportunityMapExperience
+        map={map}
+        state={state}
+        onReplayRequest={async () => setReplay(await loadOpportunityReplay(dataset))}
+        onStateChange={(patch) =>
+          void navigate({
+            replace: true,
+            search: (previous) => ({ ...previous, ...patch }),
+          })
+        }
+      />
+    </>
   );
 }

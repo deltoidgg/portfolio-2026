@@ -5,20 +5,11 @@ import {
   IconDatabase,
   IconPlayerPause,
   IconPlayerPlay,
-  IconRefresh,
 } from "@tabler/icons-react";
-import { useServerFn } from "@tanstack/react-start";
 import { sourceStatusAt } from "market-intelligence";
-import type {
-  Annotation,
-  DeadlineRoom,
-  DeadlineRoomQuery,
-  ForecastPoint,
-  RoomPlayer,
-} from "market-intelligence";
+import type { Annotation, DeadlineRoom, ForecastPoint, RoomPlayer } from "market-intelligence";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { getDeadlineRoom } from "../lib/market-intelligence.functions.ts";
 
 const plot = { left: 48, right: 742, top: 26, bottom: 294 } as const;
 
@@ -339,16 +330,9 @@ function Recipe({ player, point }: { player: RoomPlayer; point: ForecastPoint })
   );
 }
 
-export function DeadlineIntelligenceRoom({
-  initialRoom,
-  query,
-}: {
-  initialRoom: DeadlineRoom;
-  query: DeadlineRoomQuery;
-}) {
-  const fetchRoom = useServerFn(getDeadlineRoom);
+export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: DeadlineRoom }) {
   const reducedMotion = useReducedMotion();
-  const [room, setRoom] = useState(initialRoom);
+  const room = initialRoom;
   const [selectedIndex, setSelectedIndex] = useState(initialRoom.timeline.length - 1);
   const [selectedPlayerKey, setSelectedPlayerKey] = useState(
     initialRoom.players[0]?.playerKey ?? "",
@@ -360,8 +344,6 @@ export function DeadlineIntelligenceRoom({
   const [tableSort, setTableSort] = useState<TableSort>("rank");
   const [compareKeys, setCompareKeys] = useState<string[]>([]);
   const [hasHydrated, setHasHydrated] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [refreshError, setRefreshError] = useState<string>();
 
   useEffect(() => setHasHydrated(true), []);
 
@@ -437,26 +419,6 @@ export function DeadlineIntelligenceRoom({
   );
   const transferLead = leaderPoint ? leaderPoint.expectedPoints - selectedPoint.expectedPoints : 0;
 
-  async function refresh() {
-    setRefreshing(true);
-    setRefreshError(undefined);
-    try {
-      const nextRoom = await fetchRoom({ data: query });
-      setRoom(nextRoom);
-      setSelectedIndex(nextRoom.timeline.length - 1);
-      setPinnedIndex(null);
-      setSelectedPlayerKey((current) =>
-        nextRoom.players.some((player) => player.playerKey === current)
-          ? current
-          : (nextRoom.players[0]?.playerKey ?? ""),
-      );
-    } catch (error) {
-      setRefreshError(error instanceof Error ? error.message : "The room could not refresh.");
-    } finally {
-      setRefreshing(false);
-    }
-  }
-
   return (
     <div className="deadline-room">
       <div className="room-frame">
@@ -478,7 +440,6 @@ export function DeadlineIntelligenceRoom({
               GW{room.gameweek} · {room.season} · {room.sources.length} sources
             </span>
             <span>Snapshot {formatObservedAt(room.generatedAt)}</span>
-            {refreshError ? <span className="room-error">{refreshError}</span> : null}
           </div>
         </header>
 
@@ -511,20 +472,6 @@ export function DeadlineIntelligenceRoom({
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="room-icon-button"
-            aria-label="Refresh room data"
-            title="Refresh room data"
-            disabled={refreshing}
-            onClick={() => void refresh()}
-          >
-            <IconRefresh
-              size={17}
-              className={refreshing ? "animate-spin" : ""}
-              aria-hidden="true"
-            />
-          </button>
         </div>
 
         <div className="room-grid">

@@ -1,0 +1,142 @@
+name: FPL protected cutover
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Protected cutover operation
+        type: choice
+        required: true
+        options:
+          - legacy-backup
+          - legacy-export
+          - next-db-migrate
+          - next-db-grant-runtime
+          - next-compact-dry-run
+          - next-compact-apply
+          - next-compact-validate
+          - production-db-migrate
+          - production-db-grant-runtime
+          - production-compact-dry-run
+          - production-compact-apply
+          - production-compact-validate
+          - artifact-promote
+          - artifact-rollback
+          - production-db-cleanup-legacy
+      at:
+        description: Optional ISO cutover timestamp
+        type: string
+        required: false
+
+concurrency:
+  group: fpl-protected-cutover
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cutover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: fpl-cutover
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: restore-check
+          POSTGRES_DB: restore_check
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      LEGACY_DATABASE_DIRECT_URL: ${{ secrets.LEGACY_DATABASE_DIRECT_URL }}
+      NEXT_DATABASE_MIGRATION_URL: ${{ secrets.NEXT_DATABASE_MIGRATION_URL }}
+      PRODUCTION_DATABASE_MIGRATION_URL: ${{ secrets.PRODUCTION_DATABASE_MIGRATION_URL }}
+      COLLECTOR_ROLE_PASSWORD: ${{ secrets.COLLECTOR_ROLE_PASSWORD }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_PRIVATE_ACCESS_KEY_ID: ${{ secrets.R2_PRIVATE_ACCESS_KEY_ID }}
+      R2_PRIVATE_SECRET_ACCESS_KEY: ${{ secrets.R2_PRIVATE_SECRET_ACCESS_KEY }}
+      R2_PUBLIC_ACCESS_KEY_ID: ${{ secrets.R2_PUBLIC_ACCESS_KEY_ID }}
+      R2_PUBLIC_SECRET_ACCESS_KEY: ${{ secrets.R2_PUBLIC_SECRET_ACCESS_KEY }}
+      R2_PRIVATE_BUCKET: ${{ vars.R2_PRIVATE_BUCKET }}
+      R2_PUBLIC_BUCKET: ${{ vars.R2_PUBLIC_BUCKET }}
+      R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+      MI_SEASON_KEY: ${{ vars.MI_SEASON_KEY }}
+      MI_CUTOVER_AT: ${{ inputs.at }}
+      MI_CUTOVER_OPERATION: ${{ inputs.operation }}
+      MI_ROLLBACK_RECORD_KEY: ${{ secrets.MI_ROLLBACK_RECORD_KEY }}
+      MI_CONFIRM_CLEANUP_LEGACY: ${{ secrets.MI_CONFIRM_CLEANUP_LEGACY }}
+      MI_RESTORE_DATABASE_URL: postgresql://postgres:restore-check@localhost:5432/restore_check
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install PostgreSQL 18 client tools
+        shell: bash
+        run: |
+          curl --fail --silent --show-error \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc |
+            sudo gpg --dearmor --yes --output /usr/share/keyrings/postgresql-pgdg.gpg
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/keyrings/postgresql-pgdg.gpg] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" |
+            sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "24"
+          cache: true
+      - run: vp install
+      - name: Run the enumerated cutover operation
+        shell: bash
+        run: |
+          case "$MI_CUTOVER_OPERATION" in
+            legacy-backup) vp run market-intelligence#legacy:backup ;;
+            legacy-export) vp run market-intelligence#legacy:export-artifacts ;;
+            next-db-migrate)
+              DATABASE_MIGRATION_URL="$NEXT_DATABASE_MIGRATION_URL" vp run market-intelligence#db:migrate
+              ;;
+            next-db-grant-runtime)
+              DATABASE_MIGRATION_URL="$NEXT_DATABASE_MIGRATION_URL" vp run market-intelligence#db:grant-runtime
+              ;;
+            next-compact-dry-run)
+              DATABASE_MIGRATION_URL="$NEXT_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=next \
+                vp run market-intelligence#compact:backfill -- --dry-run
+              ;;
+            next-compact-apply)
+              DATABASE_MIGRATION_URL="$NEXT_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=next \
+                vp run market-intelligence#compact:backfill -- --apply
+              ;;
+            next-compact-validate)
+              DATABASE_MIGRATION_URL="$NEXT_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=next \
+                vp run market-intelligence#compact:validate
+              ;;
+            production-db-migrate)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" vp run market-intelligence#db:migrate
+              ;;
+            production-db-grant-runtime)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" vp run market-intelligence#db:grant-runtime
+              ;;
+            production-compact-dry-run)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=production \
+                vp run market-intelligence#compact:backfill -- --dry-run
+              ;;
+            production-compact-apply)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=production \
+                vp run market-intelligence#compact:backfill -- --apply
+              ;;
+            production-compact-validate)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" MI_ARTIFACT_CHANNEL=production \
+                vp run market-intelligence#compact:validate
+              ;;
+            artifact-promote) vp run market-intelligence#artifact:promote -- --promote ;;
+            artifact-rollback) vp run market-intelligence#artifact:promote -- --restore ;;
+            production-db-cleanup-legacy)
+              DATABASE_MIGRATION_URL="$PRODUCTION_DATABASE_MIGRATION_URL" \
+                vp run market-intelligence#db:cleanup-legacy
+              ;;
+          esac

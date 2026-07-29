@@ -1151,3 +1151,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+.squad-stale {
+  margin: 0;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgb(240 201 107 / 28%);
+  background: #2a2415;
+  color: #f0c96b;
+  font:
+    500 0.78rem/1.4 "Geist Variable",
+    sans-serif;
+  text-align: center;
+}

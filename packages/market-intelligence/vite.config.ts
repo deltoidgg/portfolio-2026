@@ -4,6 +4,12 @@ const runtimeEnvironment = [
   "DATABASE_URL",
   "THE_ODDS_API_KEY",
   "CLOUDFLARE_ACCOUNT_ID",
+  "R2_PRIVATE_BUCKET",
+  "R2_PRIVATE_ACCESS_KEY_ID",
+  "R2_PRIVATE_SECRET_ACCESS_KEY",
+  "R2_PUBLIC_BUCKET",
+  "R2_PUBLIC_ACCESS_KEY_ID",
+  "R2_PUBLIC_SECRET_ACCESS_KEY",
   "R2_BUCKET",
   "R2_ENDPOINT",
   "R2_ACCESS_KEY_ID",
@@ -11,6 +17,11 @@ const runtimeEnvironment = [
   "MI_*",
   "GITHUB_SHA",
   "VERCEL_GIT_COMMIT_SHA",
+  "LEGACY_DATABASE_DIRECT_URL",
+  "DATABASE_MIGRATION_URL",
+  "NEXT_DATABASE_MIGRATION_URL",
+  "PRODUCTION_DATABASE_MIGRATION_URL",
+  "COLLECTOR_ROLE_PASSWORD",
 ];
 
 function runtimeTask(command: string) {
@@ -24,6 +35,16 @@ export default defineConfig({
   run: {
     tasks: {
       "env:verify": runtimeTask("node src/neon/verify-runtime-env.ts"),
+      "pipeline:tick": runtimeTask("node src/neon/pipeline-tick.ts"),
+      "pipeline:verify": runtimeTask("node src/neon/pipeline-tick.ts verify"),
+      "db:budget": runtimeTask("node src/neon/db-budget.ts"),
+      "db:grant-runtime": runtimeTask("node src/neon/grant-runtime.ts"),
+      "db:cleanup-legacy": runtimeTask("node src/neon/cleanup-legacy.ts"),
+      "legacy:backup": runtimeTask("node src/neon/legacy-backup.ts"),
+      "legacy:export-artifacts": runtimeTask("node src/neon/legacy-export-artifacts.ts"),
+      "compact:backfill": runtimeTask("node src/neon/compact-backfill.ts"),
+      "compact:validate": runtimeTask("node src/neon/compact-validate.ts"),
+      "artifact:promote": runtimeTask("node src/neon/artifact-promote.ts"),
       "capture:fpl": runtimeTask("node src/neon/capture.ts fpl"),
       "capture:fpl-history": runtimeTask("node src/neon/capture-fpl-history.ts"),
       "capture:odds": runtimeTask("node src/neon/capture.ts odds-api"),
