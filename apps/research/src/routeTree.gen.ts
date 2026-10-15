@@ -10,22 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PapersSlugRouteImport } from './routes/papers.$slug'
 import { Route as ExploreDatasetRouteImport } from './routes/explore.$dataset'
+import { Route as PapersSlugRouteImport } from './routes/papers.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PapersSlugRoute = PapersSlugRouteImport.update({
-  id: '/papers/$slug',
-  path: '/papers/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ExploreDatasetRoute = ExploreDatasetRouteImport.update({
   id: '/explore/$dataset',
   path: '/explore/$dataset',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PapersSlugRoute = PapersSlugRouteImport.update({
+  id: '/papers/$slug',
+  path: '/papers/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -68,18 +68,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/papers/$slug': {
-      id: '/papers/$slug'
-      path: '/papers/$slug'
-      fullPath: '/papers/$slug'
-      preLoaderRoute: typeof PapersSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/explore/$dataset': {
       id: '/explore/$dataset'
       path: '/explore/$dataset'
       fullPath: '/explore/$dataset'
       preLoaderRoute: typeof ExploreDatasetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/papers/$slug': {
+      id: '/papers/$slug'
+      path: '/papers/$slug'
+      fullPath: '/papers/$slug'
+      preLoaderRoute: typeof PapersSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
