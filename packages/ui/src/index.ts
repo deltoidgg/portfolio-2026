@@ -1,11 +1,10 @@
 export { cn } from "./cn";
-export { Badge } from "./components/badge";
 export { BrandMark } from "./components/brand-mark";
 export { Card } from "./components/card";
 export { DataTable, type DataTableColumn } from "./components/data-table";
 export { Prose } from "./components/prose";
 export { Section } from "./components/section";
 export { Stat } from "./components/stat";
-export { StatusDot } from "./components/status-dot";
 export { ThemeToggle } from "./components/theme-toggle";
 export { themeScript, type Theme } from "./theme";
+export { useActiveSection } from "./use-active-section";

@@ -1,52 +1,41 @@
-const stages = [
+const steps = [
   {
-    marker: "01 / inputs",
-    title: "FPL + markets",
-    detail: "Availability, fixtures, ownership, team odds, and player props",
+    title: "Collect",
+    detail: "FPL prices, fixtures and availability, plus match odds and goal lines.",
   },
   {
-    marker: "02 / capture",
-    title: "Raw evidence",
-    detail: "Immutable payloads with observed and published timestamps",
+    title: "Keep the raw copy",
+    detail: "Every response is compressed, named by its hash and stored untouched.",
   },
   {
-    marker: "03 / resolve",
-    title: "Canonical graph",
-    detail: "Stable player, team, fixture, season, and gameweek identities",
+    title: "Line it up",
+    detail: "Players, teams and fixtures get stable IDs so the sources agree.",
   },
   {
-    marker: "04 / forecast",
-    title: "Points distribution",
-    detail: "Minutes, rates, market priors, scoring rules, and uncertainty",
+    title: "Forecast",
+    detail: "Odds become goal rates, then a points range for every player.",
   },
   {
-    marker: "05 / decision",
-    title: "Deadline room",
-    detail: "Replayable ranks, intervals, disagreement, and evidence recipes",
+    title: "Publish",
+    detail: "The squad lab and map read one checked, published snapshot.",
   },
 ] as const;
 
 export function FplSignalTrace() {
   return (
-    <div className="fpl-trace">
-      <div className="fpl-trace__status">
-        <span>Market → points trace</span>
-        <span>
-          <i aria-hidden="true" /> Point-in-time
-        </span>
-      </div>
-      <ol className="fpl-trace__stages">
-        {stages.map((stage) => (
-          <li key={stage.marker} className="fpl-trace__stage">
-            <span>{stage.marker}</span>
-            <strong>{stage.title}</strong>
-            <small>{stage.detail}</small>
+    <figure className="case-figure case-figure--wide">
+      <ol className="pipeline" aria-label="How a forecast is made">
+        {steps.map((step) => (
+          <li key={step.title} className="pipeline__step">
+            <strong>{step.title}</strong>
+            <span>{step.detail}</span>
           </li>
         ))}
       </ol>
-      <p className="fpl-trace__footnote">
-        Every displayed forecast retains the source batch and model recipe that produced it.
-      </p>
-    </div>
+      <figcaption>
+        How a number gets from a bookmaker to the squad lab. Each forecast run keeps an ID for the
+        exact inputs and code that produced it.
+      </figcaption>
+    </figure>
   );
 }

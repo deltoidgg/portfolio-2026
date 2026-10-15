@@ -1,5 +1,5 @@
 export const FPL_ORIGIN = "https://fpl.wasimarif.com";
-const SITE_NAME = "FPL Lab — Wasim Arif";
+const SITE_NAME = "FPL Lab by Wasim Arif";
 
 interface FplMetadataInput {
   title: string;
@@ -15,7 +15,7 @@ interface MetaEntry {
 }
 
 export function buildFplMetadata({ title, description, path }: FplMetadataInput) {
-  const resolvedTitle = title === SITE_NAME ? title : `${title} — ${SITE_NAME}`;
+  const resolvedTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
   const canonical = new URL(path, FPL_ORIGIN).toString();
   const meta: MetaEntry[] = [
     { title: resolvedTitle },

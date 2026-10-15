@@ -1,143 +1,133 @@
-import {
-  IconArrowRight,
-  IconBrandGithub,
-  IconBrandLinkedin,
-  IconMail,
-  IconMapPin,
-} from "@tabler/icons-react";
+import { IconArrowRight, IconArrowUpRight } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { buildMetadata } from "../lib/metadata";
 
 const description =
-  "About Wasim Arif: a London-based product engineer and technical writer building inspectable systems and accessible interfaces.";
+  "About Wasim Arif, a product and design engineer in London who works in TypeScript and React and cares about accessibility, performance and motion.";
 
 export const Route = createFileRoute("/about")({
   head: () => buildMetadata({ title: "About", description, path: "/about" }),
   component: AboutPage,
 });
 
-const principles = [
+const habits = [
   {
-    number: "01",
-    title: "Make the evidence inspectable",
-    copy: "A decision is easier to trust when its inputs, assumptions, and limitations stay visible.",
+    title: "Show your working.",
+    copy: "If a number is on screen, you should be able to find out where it came from. That goes for dashboards, forecasts and research alike.",
   },
   {
-    number: "02",
-    title: "Treat accessibility as infrastructure",
-    copy: "Semantics, focus, resilient states, and reader control belong in the system, not at the end.",
+    title: "Build accessibility in, don’t bolt it on.",
+    copy: "Good semantics, focus handling and readable contrast are much cheaper at the start than in a last-minute audit.",
   },
   {
-    number: "03",
-    title: "Design the seam",
-    copy: "The quality of a product often lives where data, interface, model, and human judgement meet.",
+    title: "Sweat the in-between bits.",
+    copy: "The place where data, design and code meet is usually where a product either feels great or falls apart.",
   },
   {
-    number: "04",
-    title: "Say what remains unproven",
-    copy: "Working software and public artifacts are evidence. Adoption and outcomes require different proof.",
+    title: "Be honest about what’s unproven.",
+    copy: "Working software is one thing. Whether it actually helped anyone is a different question, and I try not to blur the two.",
   },
 ];
 
 function AboutPage() {
   return (
-    <div className="about-page mx-auto max-w-[var(--ui-page-width)] px-5 py-14 sm:px-8 lg:px-0 lg:py-20">
-      <header className="about-hero">
-        <div>
-          <p className="section-kicker">About / Product &amp; design engineering</p>
-          <h1>I build systems people can inspect, trust, and use.</h1>
-        </div>
-        <div>
-          <p>
-            I’m Wasim Arif, a London-based product engineer and technical writer. I work across
-            product judgement, frontend craft, data, AI-enabled workflows, and the systems beneath
-            the interface.
-          </p>
-          <p>
-            I like the point where a half-formed idea becomes something measurable, maintainable,
-            and clear enough for another person to reason about.
-          </p>
-        </div>
+    <div className="page about">
+      <header className="page-intro">
+        <h1>About</h1>
       </header>
 
-      <section
-        className="about-principles border-t border-edge"
-        aria-labelledby="principles-heading"
-      >
-        <div className="section-heading-row">
-          <p id="principles-heading" className="section-kicker">
-            Working principles
-          </p>
-        </div>
-        <div className="about-principles__grid">
-          {principles.map((principle) => (
-            <article key={principle.number}>
-              <span>{principle.number}</span>
-              <h2>{principle.title}</h2>
-              <p>{principle.copy}</p>
-            </article>
+      <div className="about__bio">
+        <p className="about__lede">
+          I&rsquo;m Wasim, a product and design engineer based in London. I work mostly in
+          TypeScript and React, and I&rsquo;m happiest somewhere between design and engineering:
+          working out how something should feel, then making it feel that way in the browser.
+        </p>
+        <p>
+          I care a lot about the details people notice without realising. That usually means chasing
+          smooth animation, digging into performance and analytics tools, checking things work with
+          a keyboard and a screen reader, and trying out new browser features before they&rsquo;re
+          everywhere.
+        </p>
+        <p>
+          Most of my side projects grow out of things I enjoy: classic books turned into{" "}
+          <Link to="/projects/$slug" params={{ slug: "rewriter" }}>
+            Rewriter
+          </Link>
+          , football into the{" "}
+          <Link to="/projects/$slug" params={{ slug: "fpl" }}>
+            FPL lab
+          </Link>
+          , and fighting games into{" "}
+          <Link to="/projects/$slug" params={{ slug: "openfgc" }}>
+            OpenFGC
+          </Link>
+          . I also like writing things up properly, which is how a question about design systems
+          turned into a{" "}
+          <a href="https://research.wasimarif.com/papers/design-systems-accessibility">
+            pre-registered study of 18,547 government websites
+          </a>
+          .
+        </p>
+      </div>
+
+      <section className="about__section" aria-labelledby="habits-heading">
+        <h2 id="habits-heading">How I like to work</h2>
+        <ul className="habits">
+          {habits.map((habit) => (
+            <li key={habit.title}>
+              <strong>{habit.title}</strong> {habit.copy}
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      <section className="about-proof border-t border-edge" aria-labelledby="proof-heading">
-        <div>
-          <p className="section-kicker">Selected proof</p>
-          <h2 id="proof-heading">The work joins product craft with evidence.</h2>
-        </div>
-        <div className="about-proof__links">
-          <Link to="/projects">
-            <span>
-              <strong>Product case studies</strong>
-              <small>Decisions, architecture, interface consequences, and what remains.</small>
-            </span>
-            <IconArrowRight size={16} aria-hidden="true" />
-          </Link>
-          <a href="https://research.wasimarif.com">
-            <span>
-              <strong>Open research</strong>
-              <small>Pre-registration, data, code, replication, and browser-local explorers.</small>
-            </span>
-            <IconArrowRight size={16} aria-hidden="true" />
-          </a>
-          <Link to="/writing">
-            <span>
-              <strong>Writing</strong>
-              <small>Technical evidence translated into practical engineering language.</small>
-            </span>
-            <IconArrowRight size={16} aria-hidden="true" />
-          </Link>
-        </div>
+      <section className="about__section" aria-labelledby="more-heading">
+        <h2 id="more-heading">Where to look next</h2>
+        <ul className="link-list">
+          <li>
+            <Link to="/projects">
+              <span>
+                <strong>Work</strong>
+                <span>Four projects, each with a write-up of how it was made.</span>
+              </span>
+              <IconArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </li>
+          <li>
+            <Link to="/writing">
+              <span>
+                <strong>Writing</strong>
+                <span>Longer pieces in plain English.</span>
+              </span>
+              <IconArrowRight size={16} aria-hidden="true" />
+            </Link>
+          </li>
+          <li>
+            <a href="https://research.wasimarif.com">
+              <span>
+                <strong>Research</strong>
+                <span>Papers, pre-registrations and data you can query in the browser.</span>
+              </span>
+              <IconArrowUpRight size={16} aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
       </section>
 
-      <section className="about-contact border-t border-edge" aria-labelledby="contact-heading">
-        <div>
-          <p className="section-kicker">Contact</p>
-          <h2 id="contact-heading">
-            Interested in systems where the interface and the evidence both matter?
-          </h2>
-        </div>
-        <address>
-          <a href="mailto:wasim.arif@live.co.uk">
-            <IconMail size={16} />
-            wasim.arif@live.co.uk
-          </a>
-          <span>
-            <IconMapPin size={16} />
-            London, UK
-          </span>
-          <a href="https://www.linkedin.com/in/wasimarif/">
-            <IconBrandLinkedin size={16} />
-            LinkedIn
-          </a>
-          <a href="https://github.com/deltoidgg">
-            <IconBrandGithub size={16} />
-            GitHub
-          </a>
-          <a href="mailto:wasim.arif@live.co.uk" className="primary-action mt-4 not-italic">
-            Start a conversation <IconArrowRight size={15} aria-hidden="true" />
-          </a>
-        </address>
+      <section className="about__section hello" aria-labelledby="contact-heading">
+        <h2 id="contact-heading">Get in touch</h2>
+        <p>
+          Email&rsquo;s best. I&rsquo;m always up for talking about a project, a role, or anything
+          you&rsquo;ve read here.
+        </p>
+        <a href="mailto:wasim.arif@live.co.uk" className="hello__email">
+          wasim.arif@live.co.uk
+        </a>
+        <p className="hello__elsewhere">
+          You can also find me on <a href="https://www.linkedin.com/in/wasimarif/">LinkedIn</a>,{" "}
+          <a href="https://github.com/deltoidgg">GitHub</a> and{" "}
+          <a href="https://bsky.app/profile/rerixo.bsky.social">Bluesky</a>.
+        </p>
       </section>
     </div>
   );

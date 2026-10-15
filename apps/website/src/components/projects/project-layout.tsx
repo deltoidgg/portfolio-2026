@@ -1,61 +1,54 @@
-import { IconArrowLeft, IconArrowUpRight } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowRight, IconArrowUpRight } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Badge } from "ui";
-import type { Project } from "../../content/projects";
+import { nextProject, type Project, type ProjectImage } from "../../content/projects";
+import { ProjectPicture, projectTransition } from "../project-picture";
 
-const lifecycleLabels = {
-  active: "Live",
-  maintained: "Maintained",
+const statusLabels = {
+  active: "Live, still working on it",
+  maintained: "Live, no longer in development",
   archived: "Archived",
 } as const;
 
-const sectionLabels: Record<string, string> = {
-  why: "Problem framing",
-  evidence: "Evidence",
-  model: "Model",
-  interface: "Interface",
-  system: "Architecture",
-  status: "What remains",
-  problem: "Problem",
-  decision: "Decision",
-  architecture: "Architecture",
-  outcome: "What it proves",
-  limitations: "What remains",
-};
-
 export function ProjectLayout({ project, children }: { project: Project; children: ReactNode }) {
-  const evidenceActions = project.actions.filter((action) => action.kind !== "case-study");
+  const next = nextProject(project.slug);
 
   return (
-    <article className="case-page mx-auto max-w-[var(--ui-case-width)] px-5 pb-4 pt-8 sm:px-8 lg:px-0 lg:pt-12">
-      <Link
-        to="/projects"
-        className="mb-8 inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink lg:mb-10"
-      >
-        <IconArrowLeft size={15} aria-hidden="true" />
-        Back to work
+    <article className="page case">
+      <Link to="/projects" className="back-link">
+        <IconArrowLeft size={16} aria-hidden="true" />
+        All work
       </Link>
 
-      <header className="case-hero">
-        <div className="mb-5 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.14em] text-ink-subtle">
-          <span>Case study</span>
-          <span aria-hidden="true">/</span>
-          <span>{project.kind} &amp; design engineering</span>
-          <Badge tone={project.lifecycle === "active" ? "accent" : "neutral"}>
-            {lifecycleLabels[project.lifecycle]}
-          </Badge>
-        </div>
+      <header className="case__header">
         <h1>{project.name}</h1>
-        <p>{project.summary}</p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          {evidenceActions.map((action, index) => (
+        <p className="case__lede">{project.summary}</p>
+        <dl className="case__facts">
+          <div>
+            <dt>When</dt>
+            <dd>{project.timeframe}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>Design and engineering, on my own</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{statusLabels[project.lifecycle]}</dd>
+          </div>
+          <div>
+            <dt>Built with</dt>
+            <dd>{project.tags.join(", ")}</dd>
+          </div>
+        </dl>
+        <div className="case__actions">
+          {project.actions.map((action, index) => (
             <a
               key={action.href}
               href={action.href}
               target="_blank"
               rel="noopener noreferrer"
-              className={index === 0 ? "primary-action" : "secondary-action"}
+              className={index === 0 ? "button button--primary" : "button"}
             >
               {action.label}
               <IconArrowUpRight size={15} aria-hidden="true" />
@@ -64,53 +57,29 @@ export function ProjectLayout({ project, children }: { project: Project; childre
         </div>
       </header>
 
-      <figure className="case-media">
-        <img
-          src={project.cover.src}
-          alt={project.cover.alt}
-          width={project.cover.width}
-          height={project.cover.height}
-          fetchPriority="high"
-          decoding="async"
-        />
+      <figure className="case__cover" style={projectTransition(project.slug)}>
+        <ProjectPicture image={project.cover} sizes="(min-width: 72rem) 72rem, 100vw" priority />
       </figure>
 
-      <div className="case-body-grid">
-        <div className="case-story">
-          <CaseSummaryRow label="Problem">{project.problem}</CaseSummaryRow>
-          <CaseSummaryRow label="Decision">{project.decision}</CaseSummaryRow>
-          <CaseSummaryRow label="Evidence">{project.evidence}</CaseSummaryRow>
-          <div className="project-prose">{children}</div>
-        </div>
+      <div className="case__body">{children}</div>
 
-        {project.evidencePoints && project.evidencePoints.length > 0 ? (
-          <aside className="case-outcomes" aria-label="Key evidence">
-            <p className="section-kicker">Key evidence</p>
-            {project.evidencePoints.map((point) => (
-              <div key={point.value + point.label}>
-                <strong>{point.value}</strong>
-                <span>{point.label}</span>
-                {point.note ? <small>{point.note}</small> : null}
-              </div>
-            ))}
-          </aside>
-        ) : null}
-      </div>
+      {next ? (
+        <nav className="case__next" aria-label="Next project">
+          <Link to="/projects/$slug" params={{ slug: next.slug }} className="next-card">
+            <span className="next-card__text">
+              <strong>Next up: {next.name}</strong>
+              <span>{next.summary}</span>
+              <span className="next-card__cta">
+                Read about {next.name} <IconArrowRight size={15} aria-hidden="true" />
+              </span>
+            </span>
+            <span className="next-card__media reveal-media" style={projectTransition(next.slug)}>
+              <ProjectPicture image={next.cover} sizes="(min-width: 48rem) 28rem, 100vw" />
+            </span>
+          </Link>
+        </nav>
+      ) : null}
     </article>
-  );
-}
-
-function CaseSummaryRow({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <section className="case-section case-section--summary">
-      <div className="case-section__label">
-        <i />
-        {label}
-      </div>
-      <div className="case-section__content">
-        <p>{children}</p>
-      </div>
-    </section>
   );
 }
 
@@ -124,46 +93,42 @@ export function ProjectSection({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="case-section scroll-mt-28">
-      <div className="case-section__label">
-        <i />
-        {sectionLabels[id] ?? title}
-      </div>
-      <div className="case-section__content">
-        <h2>{title}</h2>
-        {children}
-      </div>
+    <section id={id} className="case-section" aria-labelledby={`${id}-heading`}>
+      <h2 id={`${id}-heading`}>{title}</h2>
+      {children}
     </section>
   );
 }
 
 export function ProjectFigure({
-  src,
-  alt,
+  image,
   caption,
-  width = 1600,
-  height = 900,
+  wide = false,
 }: {
-  src: string;
-  alt: string;
+  image: ProjectImage;
   caption: string;
-  width?: number;
-  height?: number;
+  wide?: boolean;
 }) {
   return (
-    <figure className="project-figure">
-      <div className="overflow-hidden rounded-[4px] border border-edge bg-surface">
-        <img
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          loading="lazy"
-          decoding="async"
-          className="h-auto w-full"
+    <figure className={wide ? "case-figure case-figure--wide" : "case-figure"}>
+      <div className="case-figure__frame reveal-media">
+        <ProjectPicture
+          image={image}
+          sizes={wide ? "(min-width: 72rem) 64rem, 100vw" : "(min-width: 48rem) 42rem, 100vw"}
         />
       </div>
       <figcaption>{caption}</figcaption>
     </figure>
+  );
+}
+
+/** A short aside for a decision worth calling out, without breaking the reading flow. */
+export function ProjectNote({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <aside className="case-note">
+      <p>
+        <strong>{title}</strong> {children}
+      </p>
+    </aside>
   );
 }

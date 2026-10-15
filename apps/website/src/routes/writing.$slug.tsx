@@ -7,7 +7,7 @@ import { buildMetadata } from "../lib/metadata";
 export const Route = createFileRoute("/writing/$slug")({
   loader: ({ params }) => {
     const post = postBySlug(params.slug);
-    if (!post || !postComponentBySlug(params.slug)) throw notFound();
+    if (!post) throw notFound();
     return { post };
   },
   head: ({ loaderData }) =>
@@ -22,13 +22,12 @@ export const Route = createFileRoute("/writing/$slug")({
       : { meta: [] },
   component: PostPage,
   notFoundComponent: () => (
-    <div className="max-w-2xl mx-auto px-6 py-16 sm:px-8">
-      <p className="text-sm text-ink-muted">
-        No such post.{" "}
-        <Link to="/writing" className="text-accent-ink underline underline-offset-2">
-          Back to writing
-        </Link>
-      </p>
+    <div className="page message-page">
+      <h1>No post here</h1>
+      <p>I couldn&rsquo;t find anything at this address.</p>
+      <Link to="/writing" className="button button--primary">
+        See all writing
+      </Link>
     </div>
   ),
 });

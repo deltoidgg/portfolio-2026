@@ -1,13 +1,8 @@
+import projectMedia from "./project-media.json";
+
 export type ProjectLifecycle = "active" | "maintained" | "archived";
 export type ProjectKind = "experiment" | "tool" | "product" | "research";
-export type ProjectActionKind =
-  | "case-study"
-  | "live"
-  | "source"
-  | "package"
-  | "docs"
-  | "paper"
-  | "data";
+export type ProjectActionKind = "live" | "source" | "package" | "docs";
 
 export interface ProjectAction {
   kind: ProjectActionKind;
@@ -15,75 +10,60 @@ export interface ProjectAction {
   href: string;
 }
 
-export interface ProjectCover {
+export type ProjectMediaKey = keyof typeof projectMedia;
+
+/** A screenshot with responsive AVIF and WebP variants at `${src}-${width}.{avif,webp}`. */
+export interface ProjectImage {
   src: string;
   alt: string;
   width: number;
   height: number;
-}
-
-export interface ProjectEvidencePoint {
-  value: string;
-  label: string;
-  note?: string;
+  widths: number[];
 }
 
 export interface Project {
   slug: string;
   name: string;
   kind: ProjectKind;
+  /** One or two plain sentences, used on cards and as the case study standfirst. */
   summary: string;
-  problem: string;
-  decision: string;
-  evidence: string;
-  evidencePoints?: ProjectEvidencePoint[];
   timeframe: string;
   role: string;
   lifecycle: ProjectLifecycle;
   featured: boolean;
+  /** Last meaningful update, used for ordering. */
   date: string;
   tags: string[];
-  cover: ProjectCover;
+  cover: ProjectImage;
   actions: ProjectAction[];
+}
+
+export function projectImage(key: ProjectMediaKey, alt: string): ProjectImage {
+  return { src: `/projects/${key}`, alt, ...projectMedia[key] };
 }
 
 export const projects: Project[] = [
   {
     slug: "fpl",
-    name: "FPL Market Intelligence",
+    name: "FPL Lab",
     kind: "experiment",
     summary:
-      "A point-in-time Fantasy Premier League decision room that turns FPL data and betting-market prices into inspectable player forecasts before the deadline.",
-    problem:
-      "Useful FPL signals are scattered across availability updates, bookmaker markets, exchanges, and player statistics—and a latest-value dashboard hides how confidence changed.",
-    decision:
-      "Preserve every source snapshot, resolve it into one gameweek model, then expose the forecast distribution, disagreement, and scoring recipe through a deadline replay.",
-    evidence:
-      "A deployed full-stack experiment, Neon-backed replay model, source adapters, deterministic forecast pipeline, and responsive browser-audited interface.",
-    evidencePoints: [
-      { value: "Point-in-time", label: "Immutable source snapshots" },
-      { value: "Explainable", label: "Distributions and evidence recipe" },
-      { value: "Deterministic", label: "Forecast and fallback paths" },
-      { value: "Responsive", label: "Browser-audited replay interface" },
-    ],
-    timeframe: "2026–present",
+      "A Fantasy Premier League lab that turns official prices and betting odds into points forecasts, then helps you build a squad that actually fits the rules.",
+    timeframe: "2026",
     role: "Independent creator",
     lifecycle: "active",
     featured: true,
-    date: "2026-07-17",
-    tags: ["TanStack Start", "TypeScript", "Neon", "Data modelling", "Visualisation"],
-    cover: {
-      src: "/projects/fpl.webp",
-      alt: "FPL Market Intelligence deadline room showing player forecasts, market evidence, and a replay timeline",
-      width: 1440,
-      height: 900,
-    },
+    date: "2026-07-29",
+    tags: ["TanStack Start", "TypeScript", "Neon", "Cloudflare R2", "GitHub Actions"],
+    cover: projectImage(
+      "fpl/squad-hero",
+      "The FPL Lab squad builder, headed ‘Build the edge.’, with a £100m budget bar and gameweek horizon controls",
+    ),
     actions: [
-      { kind: "case-study", label: "Read case study", href: "/projects/fpl" },
-      { kind: "live", label: "Open live experiment", href: "https://fpl.wasimarif.com" },
+      { kind: "live", label: "Open the lab", href: "https://fpl.wasimarif.com" },
       {
         kind: "source",
-        label: "View source",
+        label: "Source on GitHub",
         href: "https://github.com/deltoidgg/portfolio-2026/tree/main/apps/fpl",
       },
     ],
@@ -93,36 +73,21 @@ export const projects: Project[] = [
     name: "MockPit",
     kind: "tool",
     summary:
-      "Runtime provenance devtools that show whether interface data is live, mocked, derived, hardcoded, or AI-generated before a prototype is treated as production-ready.",
-    problem:
-      "AI-assisted prototypes look finished long before their data and failure paths are real, leaving teams without a shared definition of what is safe to ship.",
-    decision:
-      "Keep provenance in a framework-neutral TypeScript core, then expose it through React, MSW, custom-element devtools, and a Playwright-aware CLI.",
-    evidence:
-      "Six public npm packages, an MIT-licensed repository, runnable documentation, redaction controls, and automated tests.",
-    evidencePoints: [
-      { value: "6 packages", label: "Published provenance tooling" },
-      { value: "MIT", label: "Open source" },
-      { value: "Redacted", label: "Safe inspection controls" },
-      { value: "Tested", label: "Automated package coverage" },
-    ],
-    timeframe: "2026–present",
+      "Devtools that show what a screen is really made of: live API data, mocks, fallbacks, hardcoded copy or AI-generated filler.",
+    timeframe: "2026",
     role: "Independent creator",
     lifecycle: "active",
     featured: true,
-    date: "2026-02-01",
+    date: "2026-05-16",
     tags: ["TypeScript", "React", "MSW", "Playwright", "Effect"],
-    cover: {
-      src: "/projects/mockpit.webp",
-      alt: "MockPit documentation showing its runtime provenance model and development tools",
-      width: 1440,
-      height: 900,
-    },
+    cover: projectImage(
+      "mockpit/docs",
+      "The MockPit docs homepage next to its devtools panel, which reports hybrid mode, the source mix and a blocked capture",
+    ),
     actions: [
-      { kind: "case-study", label: "Read case study", href: "/projects/mockpit" },
-      { kind: "docs", label: "Open documentation", href: "https://mockpit.wasimarif.com" },
-      { kind: "source", label: "View source", href: "https://github.com/deltoidgg/mockpit" },
-      { kind: "package", label: "View npm packages", href: "https://www.npmjs.com/org/mockpit" },
+      { kind: "docs", label: "Read the docs", href: "https://mockpit.wasimarif.com" },
+      { kind: "source", label: "GitHub", href: "https://github.com/deltoidgg/mockpit" },
+      { kind: "package", label: "npm", href: "https://www.npmjs.com/org/mockpit" },
     ],
   },
   {
@@ -130,68 +95,36 @@ export const projects: Project[] = [
     name: "Rewriter",
     kind: "product",
     summary:
-      "An AI-assisted reading workspace that rewrites literature for a chosen reading level and adds natural text-to-speech without losing the flow of the original story.",
-    problem:
-      "Classic literature is valuable but its vocabulary and sentence structure can exclude younger readers and adults who want a gentler entry point.",
-    decision:
-      "Make reading level, source text, and narration part of one calm workflow instead of presenting model controls or exposing a chatbot interface.",
-    evidence:
-      "A working responsive product with text transformation, speech playback, persistent reading context, and recoverable generation states.",
-    evidencePoints: [
-      { value: "Responsive", label: "Reading workspace" },
-      { value: "Recoverable", label: "Generation states" },
-      { value: "Private", label: "Reader-first product boundary" },
-    ],
-    timeframe: "2025–present",
+      "A reading app that rewrites classic novels for younger or newer readers, and reads them aloud, without losing the story.",
+    timeframe: "2025–2026",
     role: "Independent creator",
     lifecycle: "active",
     featured: true,
-    date: "2025-06-01",
-    tags: ["LLMs", "Text-to-speech", "React", "Product design"],
-    cover: {
-      src: "/projects/rewriter.webp",
-      alt: "Rewriter reading workspace with adapted text and narration controls",
-      width: 1440,
-      height: 900,
-    },
-    actions: [
-      { kind: "case-study", label: "Read case study", href: "/projects/rewriter" },
-      { kind: "live", label: "Open live product", href: "https://rewriter.wasimarif.com" },
-    ],
+    date: "2026-07-23",
+    tags: ["TanStack Start", "Gemini", "ElevenLabs", "Motion", "Upstash Redis"],
+    cover: projectImage(
+      "rewriter/library",
+      "Rewriter’s library page: a candlelit reading room with the line ‘Step into timeless stories.’ above a shelf of classic book covers",
+    ),
+    actions: [{ kind: "live", label: "Visit Rewriter", href: "https://rewriter.wasimarif.com" }],
   },
   {
     slug: "openfgc",
     name: "OpenFGC",
     kind: "product",
     summary:
-      "A fighting-game analytics product that unified fragmented Steam, Twitch, event, and player data into interfaces for event planning and sponsor conversations.",
-    problem:
-      "Smaller tournament organisers lacked the consolidated audience and player signals available to established esports organisations.",
-    decision:
-      "Separate fast, presentation-ready summaries from deeper player and event analysis so one dataset could support different decision speeds.",
-    evidence:
-      "A restored working product, an end-to-end data pipeline, and interface artifacts covering summaries, profiles, breakdowns, and replay analysis.",
-    evidencePoints: [
-      { value: "Restored", label: "Working product" },
-      { value: "End to end", label: "Data pipeline and interface" },
-      { value: "Four views", label: "Summary through investigation" },
-    ],
+      "Audience and player stats for fighting games, pulled together from Steam, Twitch and tournament data so smaller organisers had numbers to show sponsors.",
     timeframe: "2020–2021",
     role: "Independent creator",
     lifecycle: "maintained",
     featured: false,
     date: "2021-09-01",
     tags: ["React", "Next.js", "Prisma", "Data visualisation"],
-    cover: {
-      src: "/projects/openfgc.webp",
-      alt: "OpenFGC dashboard comparing fighting-game audience and player statistics",
-      width: 1440,
-      height: 900,
-    },
-    actions: [
-      { kind: "case-study", label: "Read case study", href: "/projects/openfgc" },
-      { kind: "live", label: "Open live product", href: "https://openfgc.wasimarif.com" },
-    ],
+    cover: projectImage(
+      "openfgc/overview",
+      "The OpenFGC overview: headline Steam, Twitch and tournament numbers above a table of games with 90-day trend lines",
+    ),
+    actions: [{ kind: "live", label: "Visit OpenFGC", href: "https://openfgc.wasimarif.com" }],
   },
 ];
 
@@ -200,4 +133,11 @@ export const featuredProjects = sortedProjects.filter((project) => project.featu
 
 export function projectBySlug(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug);
+}
+
+/** The project after this one in the work list, wrapping around, for the case study footer. */
+export function nextProject(slug: string): Project | undefined {
+  const index = sortedProjects.findIndex((project) => project.slug === slug);
+  if (index === -1 || sortedProjects.length < 2) return undefined;
+  return sortedProjects[(index + 1) % sortedProjects.length];
 }

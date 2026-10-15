@@ -1,5 +1,5 @@
 export const RESEARCH_ORIGIN = "https://research.wasimarif.com";
-const SITE_NAME = "Research — Wasim Arif";
+export const SITE_NAME = "Wasim Arif Research";
 
 interface ResearchMetadataInput {
   title: string;
@@ -25,7 +25,7 @@ export function buildResearchMetadata({
   type = "website",
   publishedTime,
 }: ResearchMetadataInput) {
-  const resolvedTitle = title === SITE_NAME ? title : `${title} — ${SITE_NAME}`;
+  const resolvedTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
   const canonical = new URL(path, RESEARCH_ORIGIN).toString();
   const socialImage = new URL(image, RESEARCH_ORIGIN).toString();
   const meta: MetaEntry[] = [

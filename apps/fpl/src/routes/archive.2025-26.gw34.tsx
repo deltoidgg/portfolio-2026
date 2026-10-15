@@ -11,7 +11,7 @@ export const Route = createFileRoute("/archive/2025-26/gw34")({
   loader: () => createDemoDeadlineRoom(),
   head: () =>
     buildFplMetadata({
-      title: "Deadline Intelligence Room — 2025/26 archive",
+      title: "Deadline Intelligence Room, 2025/26 archive",
       description,
       path: "/archive/2025-26/gw34",
     }),
