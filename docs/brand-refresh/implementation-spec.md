@@ -1,6 +1,6 @@
 # Portfolio Brand Refresh - Implementation Specification
 
-Status: implemented July 2026
+Status: superseded in October 2026 by [2026-10-design-notes.md](./2026-10-design-notes.md). Kept for history.
 Scope: `apps/website`, `apps/research`, and shared `packages/ui` only.
 Explicit exclusion: `apps/fpl` remains a separate product identity and must not inherit these styles.
 

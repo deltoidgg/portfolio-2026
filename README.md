@@ -1,4 +1,4 @@
-# Wasim Arif — portfolio, research, and FPL lab
+# Wasim Arif: portfolio, research and FPL lab
 
 The source for [wasimarif.com](https://wasimarif.com),
 [research.wasimarif.com](https://research.wasimarif.com), and
