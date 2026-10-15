@@ -7,7 +7,7 @@ import { buildMetadata } from "../lib/metadata";
 export const Route = createFileRoute("/projects/$slug")({
   loader: ({ params }) => {
     const project = projectBySlug(params.slug);
-    if (!project || !projectContentBySlug(params.slug)) throw notFound();
+    if (!project) throw notFound();
     return { project };
   },
   head: ({ loaderData }) =>
@@ -21,14 +21,12 @@ export const Route = createFileRoute("/projects/$slug")({
       : { meta: [] },
   component: ProjectPage,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-2xl px-6 py-20 sm:px-8">
-      <h1 className="mb-3 text-2xl font-semibold text-ink">Project not found</h1>
-      <p className="text-ink-muted">
-        This case study does not exist.{" "}
-        <Link to="/projects" className="font-medium text-accent-ink underline underline-offset-2">
-          Browse selected work
-        </Link>
-      </p>
+    <div className="page message-page">
+      <h1>No project here</h1>
+      <p>I couldn&rsquo;t find a write-up at this address.</p>
+      <Link to="/projects" className="button button--primary">
+        See all my work
+      </Link>
     </div>
   ),
 });

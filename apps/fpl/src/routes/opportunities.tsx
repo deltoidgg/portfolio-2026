@@ -57,7 +57,7 @@ export const Route = createFileRoute("/opportunities")({
   loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
   head: () =>
     buildFplMetadata({
-      title: "Opportunity Map — FPL market intelligence",
+      title: "Opportunity Map",
       description,
       path: "/opportunities",
     }),

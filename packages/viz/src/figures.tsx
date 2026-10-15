@@ -83,7 +83,7 @@ export interface GradientPoint {
   adjustedIrr: number | null;
 }
 
-/** Unadjusted band means next to adjusted IRRs — the attenuation picture. */
+/** Unadjusted band means next to adjusted IRRs: the attenuation picture. */
 export function BandGradient({ points }: { points: GradientPoint[] }) {
   const ariaLabel = `Unadjusted mean violations and adjusted IRRs by adoption band: ${points
     .map(

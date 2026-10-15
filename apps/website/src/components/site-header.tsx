@@ -1,13 +1,13 @@
-import { IconMail, IconMenu2, IconX } from "@tabler/icons-react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { IconMenu2, IconX } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { BrandMark, ThemeToggle } from "ui";
 
 const navClass =
-  "site-nav-link inline-flex min-h-11 items-center px-2 text-sm text-ink-muted transition-colors hover:text-ink";
+  "site-nav-link inline-flex min-h-11 items-center px-2 text-[0.9375rem] text-ink-muted transition-colors hover:text-ink";
+const activeProps = { className: "site-nav-link site-nav-link--active !text-ink" };
 
 export function SiteHeader() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -22,60 +22,40 @@ export function SiteHeader() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
-  const isHome = pathname === "/";
+
+  const close = () => setMenuOpen(false);
 
   return (
-    <header className="site-header sticky top-0 z-50 border-b border-edge/80 bg-canvas/88 backdrop-blur-xl">
-      <nav
-        aria-label="Primary"
-        className="mx-auto flex h-16 max-w-[var(--ui-shell-width)] items-center justify-between px-5 sm:px-8 lg:h-[5.5rem] lg:px-[var(--ui-shell-gutter)]"
-      >
+    <header className="site-header sticky top-0 z-50 border-b bg-canvas/85 backdrop-blur-xl">
+      <nav aria-label="Primary" className="shell flex h-16 items-center justify-between lg:h-20">
         <Link
           to="/"
           aria-label="Wasim Arif, home"
           className="inline-flex min-h-11 items-center rounded-sm"
-          onClick={() => setMenuOpen(false)}
+          onClick={close}
         >
           <BrandMark />
         </Link>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to="/projects"
-            className={navClass}
-            activeProps={{ className: "site-nav-link site-nav-link--active !text-ink" }}
-          >
+        <div className="hidden items-center gap-2 md:flex">
+          <Link to="/projects" className={navClass} activeProps={activeProps}>
             Work
           </Link>
-          <Link
-            to="/writing"
-            className={navClass}
-            activeProps={{ className: "site-nav-link site-nav-link--active !text-ink" }}
-          >
+          <Link to="/writing" className={navClass} activeProps={activeProps}>
             Writing
           </Link>
           <a href="https://research.wasimarif.com" className={navClass}>
             Research
           </a>
-          <Link
-            to="/about"
-            className={navClass}
-            activeProps={{ className: "site-nav-link site-nav-link--active !text-ink" }}
-          >
+          <Link to="/about" className={navClass} activeProps={activeProps}>
             About
           </Link>
-          <a
-            href="mailto:wasim.arif@live.co.uk"
-            className={
-              isHome
-                ? navClass
-                : "inline-flex min-h-10 items-center gap-2 rounded-[3px] border border-edge px-3 text-sm text-ink transition-colors hover:border-edge-strong hover:bg-surface/70"
-            }
-          >
-            {!isHome ? <IconMail size={14} aria-hidden="true" /> : null}
+          <a href="mailto:wasim.arif@live.co.uk" className={navClass}>
             Contact
           </a>
-          <ThemeToggle />
+          <span className="ml-2">
+            <ThemeToggle />
+          </span>
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
@@ -99,18 +79,21 @@ export function SiteHeader() {
       </nav>
 
       {menuOpen ? (
-        <div id="mobile-navigation" className="border-t border-edge bg-canvas px-5 py-4 md:hidden">
-          <div className="mx-auto grid max-w-[var(--ui-shell-width)] gap-1">
-            <Link to="/projects" className={navClass} onClick={() => setMenuOpen(false)}>
+        <div
+          id="mobile-navigation"
+          className="mobile-menu border-t border-edge bg-canvas md:hidden"
+        >
+          <div className="shell grid gap-1 py-4">
+            <Link to="/projects" className={navClass} onClick={close}>
               Work
             </Link>
-            <Link to="/writing" className={navClass} onClick={() => setMenuOpen(false)}>
+            <Link to="/writing" className={navClass} onClick={close}>
               Writing
             </Link>
             <a href="https://research.wasimarif.com" className={navClass}>
               Research
             </a>
-            <Link to="/about" className={navClass} onClick={() => setMenuOpen(false)}>
+            <Link to="/about" className={navClass} onClick={close}>
               About
             </Link>
             <a href="mailto:wasim.arif@live.co.uk" className={navClass}>

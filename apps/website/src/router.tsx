@@ -5,6 +5,9 @@ export function getRouter() {
   const router = createRouter({
     routeTree,
     scrollRestoration: true,
+    // cross-fades between pages and lets project screenshots morph into the case study cover;
+    // browsers without the View Transitions API just navigate normally
+    defaultViewTransition: true,
   });
 
   return router;

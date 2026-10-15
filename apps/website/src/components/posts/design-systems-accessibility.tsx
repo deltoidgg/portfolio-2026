@@ -86,18 +86,18 @@ export function DesignSystemsAccessibilityPost() {
     <>
       <PostProse>
         <p>
-          Pick a design system and you get accessibility for free. I have heard some version of that
-          line in pitch decks, conference talks, and README files for years. The components ship
-          with sensible semantics, the contrast decisions are already made, and focus management is
-          somebody else's solved problem. It sounds plausible. As far as I could find, nobody had
-          checked it against real production websites at any serious scale.
+          Pick a design system and you get accessibility for free. I&rsquo;ve heard some version of
+          that line in pitch decks, conference talks, and README files for years. The components
+          ship with sensible semantics, the contrast decisions are already made, and focus
+          management is somebody else's solved problem. It sounds plausible. As far as I could find,
+          nobody had checked it against real production websites at any serious scale.
         </p>
         <p>
           So I checked. {uswdsSummary.meta.analysedSites.toLocaleString()} US federal websites, then{" "}
           {govukSummary.meta.scannedSites.toLocaleString()} UK public sector sites I scanned myself.
           This post is the plain English version of what I found. The full treatment, with the
-          pre-registration and every regression table, lives on my research site, and I will point
-          you there at the end.
+          pre-registration and every regression table, lives on my research site, and I&rsquo;ll
+          point you there at the end.
         </p>
 
         <h2 id="what-i-measured">What I measured</h2>
@@ -177,9 +177,9 @@ export function DesignSystemsAccessibilityPost() {
         <h2 id="better-teams">Could it just be better teams?</h2>
         <p>
           Nobody assigned design systems to agencies at random. The teams that adopt one might be
-          the same teams that care about accessibility in the first place. Observational data cannot
-          fully rule that out, and the paper says so plainly. But I pre-registered three checks
-          designed to break the result, and it survived all three.
+          the same teams that care about accessibility in the first place. Observational data
+          can&rsquo;t fully rule that out, and the paper says so plainly. But I pre-registered three
+          checks designed to break the result, and it survived all three.
         </p>
         <ul>
           <li>
@@ -205,7 +205,7 @@ export function DesignSystemsAccessibilityPost() {
         </ul>
       </PostProse>
 
-      <Callout title="Honest label">
+      <Callout title="To be clear:">
         This is still a correlation. The claim is not that adopting USWDS causes exactly half the
         violations to disappear. The claim is that the association is real at estate scale, that the
         obvious confounders do not explain it, and that it points the same way every way I could
@@ -215,14 +215,15 @@ export function DesignSystemsAccessibilityPost() {
       <PostProse>
         <h2 id="replication">Then I tested it on a country the model had never seen</h2>
         <p>
-          Find a pattern in one dataset and you should worry you have quietly tuned your analysis to
-          it. So before touching any UK data, I wrote the entire UK analysis down: the detector, the
-          model, the hypotheses, and a pass-or-fail rule saying the UK estimate had to land within
-          0.20 of the US one. I locked all of it in a public pre-registration. Only then did I scan{" "}
-          {govukSummary.meta.scannedSites.toLocaleString()} UK public sector websites, central
-          government, local councils, parish councils, and the NHS, in one afternoon. The detector
-          looks for <a href="https://design-system.service.gov.uk/">govuk-frontend</a>, the design
-          system behind GOV.UK, scored as a component-for-component mirror of how GSA scores USWDS.
+          Find a pattern in one dataset and you should worry you&rsquo;ve quietly tuned your
+          analysis to it. So before touching any UK data, I wrote the entire UK analysis down: the
+          detector, the model, the hypotheses, and a pass-or-fail rule saying the UK estimate had to
+          land within 0.20 of the US one. I locked all of it in a public pre-registration. Only then
+          did I scan {govukSummary.meta.scannedSites.toLocaleString()} UK public sector websites,
+          central government, local councils, parish councils, and the NHS, in one afternoon. The
+          detector looks for <a href="https://design-system.service.gov.uk/">govuk-frontend</a>, the
+          design system behind GOV.UK, scored as a component-for-component mirror of how GSA scores
+          USWDS.
         </p>
         <p>
           One shot, no peeking. {govukSummary.meta.analysedSites.toLocaleString()} sites survived
@@ -246,12 +247,12 @@ export function DesignSystemsAccessibilityPost() {
       </Figure>
 
       <PostProse>
-        <h2 id="what-failed">What did not go my way</h2>
+        <h2 id="what-failed">What didn&rsquo;t go my way</h2>
         <p>Three predictions missed, and they are the most useful part of the study.</p>
         <ul>
           <li>
-            <strong>USWDS v3 is not measurably better than v2.</strong> I expected the newer major
-            version to show fewer violations. The point estimate goes the wrong way (
+            <strong>USWDS v3 isn&rsquo;t measurably better than v2.</strong> I expected the newer
+            major version to show fewer violations. The point estimate goes the wrong way (
             {v3.irr.toFixed(2)}) with a confidence interval wide enough ({v3.ciLow.toFixed(2)} to{" "}
             {v3.ciHigh.toFixed(2)}) to call it a wash. On this evidence the win is adopting a system
             at all, not chasing version upgrades.
@@ -260,8 +261,8 @@ export function DesignSystemsAccessibilityPost() {
             <strong>The UK partial-adoption band is a mess.</strong> Sites with a medium detection
             score showed about {ukPartial ? ukPartial.irr.toFixed(1) : "4.0"} times the violations
             of non-adopters. On inspection the band holds only 39 sites, mostly CMS templates that
-            sprinkle govuk-frontend class names onto markup that is not really the design system.
-            The detector reads partial adoption; reality is a site wearing the costume.
+            sprinkle govuk-frontend class names onto markup that isn&rsquo;t really the design
+            system. The detector reads partial adoption; reality is a site wearing the costume.
           </li>
           <li>
             <strong>My mechanism prediction failed.</strong> I predicted the violation categories
@@ -272,11 +273,11 @@ export function DesignSystemsAccessibilityPost() {
           </li>
         </ul>
 
-        <h2 id="engineering-takeaways">What I would take from it as an engineer</h2>
+        <h2 id="engineering-takeaways">What I&rsquo;d take from it as an engineer</h2>
         <ol>
           <li>
-            If you are weighing bespoke UI against a mature design system, accessibility is now a
-            measurable argument rather than a bullet point of faith. Roughly half the automated
+            If you&rsquo;re weighing bespoke UI against a mature design system, accessibility is now
+            a measurable argument rather than a bullet point of faith. Roughly half the automated
             violation count, twice, in two countries, on over{" "}
             {Math.floor(totalSites / 1000).toLocaleString()},000 production sites.
           </li>
@@ -298,14 +299,14 @@ export function DesignSystemsAccessibilityPost() {
         <p>
           Everything above is the conversational version of a pre-registered study whose data, code,
           and locked hypotheses are public. If you want the regression tables, the diagnostics, or
-          you would rather interrogate the data yourself, start here.
+          you&rsquo;d rather interrogate the data yourself, start here.
         </p>
       </PostProse>
 
       <LinkCard
         href={PAPER_URL}
         title="Read the full paper"
-        description="Do design systems deliver accessibility at scale? Methods, every estimate, the diagnostics, and the parts that did not replicate, reported as found."
+        description="Do design systems deliver accessibility at scale? Methods, every estimate, the diagnostics, and the parts that didn’t replicate, reported as found."
       />
 
       <PostProse>

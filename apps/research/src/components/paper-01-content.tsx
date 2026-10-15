@@ -52,7 +52,7 @@ const estimateColumns: Array<DataTableColumn<Estimate>> = [
     id: "ci",
     header: "95% CI",
     align: "right",
-    render: (row) => `${row.ciLow.toFixed(3)} – ${row.ciHigh.toFixed(3)}`,
+    render: (row) => `${row.ciLow.toFixed(3)}–${row.ciHigh.toFixed(3)}`,
   },
   {
     id: "p",
@@ -97,8 +97,8 @@ function IntroductionSection() {
           <ExternalA href="https://designnotes.blog.gov.uk/2024/02/14/get-to-wcag-2-2-faster-with-the-gov-uk-design-system/">
             &ldquo;get to WCAG 2.2 faster&rdquo;
           </ExternalA>
-          . That promise is plausible, widely repeated — and has never been quantified at estate
-          scale.
+          . That promise is plausible and widely repeated, but it has never been quantified at
+          estate scale.
         </p>
         <p>
           This paper asks a narrow, answerable version of the question:{" "}
@@ -108,8 +108,8 @@ function IntroductionSection() {
           </strong>{" "}
           We estimate the association twice, in two countries, under a pre-registered protocol:
           first on ~12,000 US federal websites whose USWDS adoption and axe-core violations are
-          scanned daily by GSA&rsquo;s Site Scanning programme, then — with the specification frozen
-          — once on a held-out replication sample of UK public-sector websites that we scanned
+          scanned daily by GSA&rsquo;s Site Scanning programme, then, with the specification frozen,
+          once on a held-out replication sample of UK public-sector websites that we scanned
           ourselves with an openly specified govuk-frontend detector and the same violation
           taxonomy.
         </p>
@@ -119,11 +119,11 @@ function IntroductionSection() {
           specifications, decision rules, and the analyst&rsquo;s priors were then locked in a
           public <ExternalA href={`${PAPER_DOCS}/PREREGISTRATION.md`}>pre-registration</ExternalA>{" "}
           before any confirmatory estimate was computed, and before a single UK site was scanned.
-          The UK scan recipe — domain sources, detection weights, band boundaries, violation mapping
-          — was committed before data collection, so the replication could not be tuned to the data
-          it would meet. Automated checks (axe-core) capture only a machine-detectable subset of
-          accessibility; that floor is precisely what design systems claim to raise, which makes it
-          the right yardstick for this question.
+          The UK scan recipe (domain sources, detection weights, band boundaries and violation
+          mapping) was committed before data collection, so the replication could not be tuned to
+          the data it would meet. Automated checks (axe-core) capture only a machine-detectable
+          subset of accessibility; that floor is precisely what design systems claim to raise, which
+          makes it the right yardstick for this question.
         </p>
       </Prose>
     </Section>
@@ -158,7 +158,7 @@ function DataSection() {
   return (
     <Section id="data" title="2. Data">
       <Prose>
-        <h3>2.1 United States — GSA Site Scanning</h3>
+        <h3>2.1 United States: GSA Site Scanning</h3>
         <p>
           The discovery sample is a frozen snapshot of the{" "}
           <ExternalA href="https://open.gsa.gov/api/site-scanning-api/">
@@ -177,14 +177,14 @@ function DataSection() {
       </Prose>
       <div className="my-6">
         <DataTable
-          caption={`USWDS adoption vs detected accessibility violations, ${uswdsSummary.meta.analysedSites.toLocaleString()} live federal websites (snapshot ${uswdsSummary.meta.snapshotDate.slice(0, 10)}). Unadjusted means — the motivating gradient, not the confirmatory estimate.`}
+          caption={`USWDS adoption vs detected accessibility violations, ${uswdsSummary.meta.analysedSites.toLocaleString()} live federal websites (snapshot ${uswdsSummary.meta.snapshotDate.slice(0, 10)}). Unadjusted means: the motivating gradient, not the confirmatory estimate.`}
           columns={usBandColumns}
           rows={[...uswdsSummary.bands]}
           getRowKey={(row) => row.band}
         />
       </div>
       <Prose>
-        <h3>2.2 United Kingdom — a new scan, collected for this paper</h3>
+        <h3>2.2 United Kingdom: a new scan collected for this paper</h3>
         <p>
           No UK equivalent of Site Scanning publishes per-site data, so we built one. Following the
           frozen <ExternalA href={`${PAPER_DOCS}/UK_SCAN_RECIPE.md`}>UK scan recipe</ExternalA>, we
@@ -248,7 +248,7 @@ function MethodsSection() {
           </li>
           <li>
             <strong>H4 (held-out UK replication, gating):</strong> the frozen specification applied
-            once to the UK artifact — exposure <code>govuk_count</code>, organisation-type fixed
+            once to the UK artifact, with exposure <code>govuk_count</code>, organisation-type fixed
             effects, HTTPS-hygiene and page-complexity controls, SEs clustered by registrant
             organisation. Prediction: IRR(strong vs none) &lt; 1, one-sided p &lt; .05, and the UK
             IRR within ±0.20 of the US IRR.
@@ -287,19 +287,19 @@ function UsResultsSection() {
   return (
     <Section
       id="us-results"
-      title="4. Results — United States"
+      title="4. Results: United States"
       description={`Confirmatory estimates from the frozen snapshot (${meta.nAnalysis.toLocaleString()} sites, ${meta.nClusters.toLocaleString()} agency clusters, ${meta.bootstrapDraws.toLocaleString()}-draw cluster bootstrap, seed ${meta.seed}).`}
     >
       <Prose>
-        <h3>H1 — Dose–response</h3>
+        <h3>H1: Dose–response</h3>
         <p>
           The continuous gradient is {h1.continuous.beta < 0 ? "negative" : "positive"}: each unit
           of ln(1 + uswds_count) is associated with an IRR of {fmtIrr(h1.continuous)} (
           {fmtP(h1.continuous.pOneSided)}, one-sided), holding agency and maturity controls fixed.
           Strong adoption (score ≥ 50) versus everything below that threshold gives IRR{" "}
-          {fmtIrr(h1.strongVsNone)} — {pctChange(h1.strongVsNone.irr)} detected violations —{" "}
-          {fmtP(h1.strongVsNone.pOneSided)}; the none-referenced band contrasts say the same thing
-          (likely {bandIrrById.get("likely")?.irr.toFixed(2)}, definite{" "}
+          {fmtIrr(h1.strongVsNone)}, a {pctChange(h1.strongVsNone.irr)} change in detected
+          violations ({fmtP(h1.strongVsNone.pOneSided)}); the none-referenced band contrasts say the
+          same thing (likely {bandIrrById.get("likely")?.irr.toFixed(2)}, definite{" "}
           {bandIrrById.get("definite")?.irr.toFixed(2)}; see appendix D3 on this
           operationalization). Band IRRs are{" "}
           {h1.monotoneNoneToLikely ? "weakly monotone non-increasing" : "not monotone"} from none to
@@ -313,7 +313,7 @@ function UsResultsSection() {
           estimates={[...h1.bands, h1.strongVsNone]}
         />
         <FigureCaption>
-          Figure 1 — Incidence-rate ratios vs the no-signal band, from the banded H1 PPML model with
+          Figure 1. Incidence-rate ratios vs the no-signal band, from the banded H1 PPML model with
           agency fixed effects and maturity controls. Bars are 95% CIs; the dashed line marks no
           association.
         </FigureCaption>
@@ -321,19 +321,19 @@ function UsResultsSection() {
       <div className="my-6">
         <BandGradient points={gradientPoints} />
         <FigureCaption>
-          Figure 2 — The unadjusted dose–response gradient (top) and what survives within-agency
+          Figure 2. The unadjusted dose–response gradient (top) and what survives within-agency
           adjustment (bottom). The &ldquo;none&rdquo; band is the reference (IRR 1.0).
         </FigureCaption>
       </div>
       <Prose>
-        <h3>H2 — Version contrast</h3>
+        <h3>H2: Version contrast</h3>
         <p>
           Among sites with a detected semantic version, USWDS v3 vs v2 gives IRR {fmtIrr(h2.v3VsV2)}{" "}
           ({fmtP(h2.v3VsV2.pOneSided)}, one-sided; N = {h2.v3VsV2.n.toLocaleString()}). H2 is{" "}
           <strong>{h2.supported ? "supported" : "not supported"}</strong>; as pre-registered, we
           interpret the IRR and CI rather than the p-value alone given the small contrast sample.
         </p>
-        <h3>H3 — Category specificity</h3>
+        <h3>H3: Category specificity</h3>
         <p>
           Across the 11 violation categories, the mean standardized adoption gradient is{" "}
           {h3.meanComponentBetaStd.toFixed(3)} for component-mediated categories and{" "}
@@ -345,14 +345,14 @@ function UsResultsSection() {
       <div className="my-6">
         <CategoryDotPlot points={categoryPoints} />
         <FigureCaption>
-          Figure 3 — Standardized PPML coefficients (per SD of ln-adoption) for each violation
+          Figure 3. Standardized PPML coefficients (per SD of ln-adoption) for each violation
           category, classified before estimation as component-mediated or template/content-mediated.
           Bars are 95% CIs.
         </FigureCaption>
       </div>
       <div className="my-6">
         <DataTable
-          caption="Table 2 — Headline US confirmatory estimates."
+          caption="Table 2. Headline US confirmatory estimates."
           columns={estimateColumns}
           rows={[h1.continuous, h1.strongVsNone, ...h1.bands, h2.v3VsV2]}
           getRowKey={(row) => row.label}
@@ -384,7 +384,7 @@ function DiagnosticsSection() {
               )
               .join("; ")}
             {d.adoptionOnMaturity.r2Within !== null
-              ? ` — within-agency R² ${d.adoptionOnMaturity.r2Within.toFixed(3)}.`
+              ? `; within-agency R² ${d.adoptionOnMaturity.r2Within.toFixed(3)}.`
               : "."}{" "}
             Adoption is not random; the remaining diagnostics ask whether that selection explains
             the H1 gradient.
@@ -407,8 +407,8 @@ function DiagnosticsSection() {
           <li>
             <strong>Pooled vs within-agency.</strong> The pooled IRR (
             {d.attenuation.pooledIrr.toFixed(2)}) attenuates to {d.attenuation.feIrr.toFixed(2)}{" "}
-            under agency fixed effects — {Math.round(d.attenuation.shrinkagePct)}% of the distance
-            to the null.{" "}
+            under agency fixed effects, {Math.round(d.attenuation.shrinkagePct)}% of the distance to
+            the null.{" "}
             {d.attenuation.collapsed
               ? "By the pre-registered threshold (>75%), the association is primarily between-agency infrastructure rather than site-level adoption, and the abstract says so."
               : "Below the pre-registered 75% collapse threshold: a within-agency, site-level association survives."}
@@ -424,8 +424,8 @@ function DiagnosticsSection() {
               : "The bounds include zero: selection on unobservables comparable to the observed controls could account for the estimate."}
           </li>
           <li>
-            <strong>DAP subset.</strong> Within Digital Analytics Program participants — a uniformly
-            &ldquo;engaged&rdquo; subsample — the continuous gradient is IRR {fmtIrr(d.dapSubset)} (
+            <strong>DAP subset.</strong> Within Digital Analytics Program participants, a uniformly
+            &ldquo;engaged&rdquo; subsample, the continuous gradient is IRR {fmtIrr(d.dapSubset)} (
             {fmtP(d.dapSubset.pOneSided)}, N = {d.dapSubset.n.toLocaleString()}).
           </li>
           <li>
@@ -459,16 +459,16 @@ function UkReplicationSection() {
         <p>
           Strong govuk-frontend adoption versus everything below the strong threshold gives IRR{" "}
           {fmtIrr(h4.strongVsNone)} ({fmtP(h4.strongVsNone.pOneSided)}, one-sided), with
-          organisation-type fixed effects and the pre-registered controls — the same contrast
-          construction as the US headline, keeping the comparison window like-for-like. The
+          organisation-type fixed effects and the pre-registered controls, using the same contrast
+          construction as the US headline so that the comparison window is like-for-like. The
           continuous gradient is {fmtIrr(h4.continuous)} per unit of ln(1 + govuk_count). The
           direction prediction {h4.directionSupported ? "replicates" : "does not replicate"}.
         </p>
         <p>
           The pre-registered magnitude window asked whether the UK IRR lands within ±
           {comparison.window.toFixed(2)} of the US estimate. US: {comparison.usIrr.toFixed(2)}; UK:{" "}
-          {comparison.ukIrr.toFixed(2)}; absolute difference {comparison.absDiff.toFixed(2)} —{" "}
-          <strong>{comparison.withinWindow ? "within" : "outside"} the window</strong>. H4 is{" "}
+          {comparison.ukIrr.toFixed(2)}; absolute difference {comparison.absDiff.toFixed(2)}, which
+          is <strong>{comparison.withinWindow ? "within" : "outside"} the window</strong>. H4 is{" "}
           <strong>{ukResults.supported ? "supported" : "not supported"}</strong> under the locked
           decision rule
           {ukResults.supported
@@ -483,14 +483,14 @@ function UkReplicationSection() {
           window={comparison.window}
         />
         <FigureCaption>
-          Figure 4 — Strong-adoption IRRs, US (agency FE) and UK (organisation-type FE). The shaded
+          Figure 4. Strong-adoption IRRs, US (agency FE) and UK (organisation-type FE). The shaded
           band is the pre-registered ±{comparison.window.toFixed(2)} replication window around the
           US estimate.
         </FigureCaption>
       </div>
       <div className="my-6">
         <DataTable
-          caption="Table 3 — UK confirmatory estimates (H4)."
+          caption="Table 3. UK confirmatory estimates (H4)."
           columns={estimateColumns}
           rows={[h4.continuous, h4.strongVsNone, ...h4.bands]}
           getRowKey={(row) => row.label}
@@ -501,14 +501,14 @@ function UkReplicationSection() {
           <p>
             One band breaks the pattern, and it is the one the pre-registration flagged as the
             riskiest: <strong>partial</strong> adoption (score 25–49) shows IRR{" "}
-            {fmtIrr(partialBand)} — <em>more</em> violations than the none band. This is the
+            {fmtIrr(partialBand)}, meaning <em>more</em> violations than the none band. This is the
             &ldquo;council CMS noise&rdquo; stratum: platforms that embed fragments of
             govuk-frontend styling without its components land here, disproportionately local
             authorities and parish-council CMS products whose underlying templates differ from
             genuine adopters in every other way too. The dose–response claim in the UK is carried by
-            the likely and definite bands — sites where detection is unambiguous — exactly as the
-            structural score construction intends. We report the reversal rather than smooth it; it
-            is the clearest single illustration of why band-level detection noise is listed as a
+            the likely and definite bands, where detection is unambiguous, exactly as the structural
+            score construction intends. We report the reversal rather than smooth it; it is the
+            clearest single illustration of why band-level detection noise is listed as a
             limitation.
           </p>
         </Prose>
@@ -560,13 +560,13 @@ function DeviationsSection() {
   return (
     <Section
       id="deviations"
-      title="Appendix — Deviations from the pre-registration"
+      title="Appendix: deviations from the pre-registration"
       description="Every departure from the locked protocol, logged before the confirmatory analyses ran. Full log in the repository."
     >
       <Prose>
         <ul>
           <li>
-            <strong>D1 — Calibration-list repair (before any analysis).</strong> Eight of the 24
+            <strong>D1. Calibration-list repair (before any analysis).</strong> Eight of the 24
             pre-declared calibration entries were wrong about the world, not about the detector:
             dead hostnames, WAF-blocked sites, and two sites whose adoption status was mislabelled.
             They were replaced with verified equivalents; no detector weights, thresholds, or band
@@ -574,7 +574,7 @@ function DeviationsSection() {
             non-adopters.
           </li>
           <li>
-            <strong>D2 — www fallback for apex connection failures (during the scan).</strong> Many
+            <strong>D2. www fallback for apex connection failures (during the scan).</strong> Many
             UK estates serve only the <code>www.</code> host while the apex domain refuses
             connections. Where an apex attempt failed at connection level, the scanner retried once
             with the <code>www.</code> prefix and flagged the row (<code>used_www_fallback</code>).
@@ -583,10 +583,10 @@ function DeviationsSection() {
           </li>
           <li>
             <strong>
-              D3 — Labelling of the headline contrast (after the US run, before any UK estimation).
+              D3. Labelling of the headline contrast (after the US run, before any UK estimation).
             </strong>{" "}
             The single-number &ldquo;strong&rdquo; contrast was implemented as a binary ≥ 50 dummy,
-            whose reference group is every site below 50 — not literally the none band. The
+            whose reference group is every site below 50, not literally the none band. The
             pre-registered banded model, estimated alongside, gives the none-referenced IRRs
             directly and they bracket the dummy estimate, so nothing turns on the choice. Labels and
             prose were corrected to say &ldquo;vs below-50&rdquo;; no model, sample, or decision
@@ -628,13 +628,13 @@ function DownloadsSection() {
     {
       label: "Pre-registration (locked)",
       href: `${PAPER_DOCS}/PREREGISTRATION.md`,
-      note: "Hypotheses, exact tests, priors, freezing protocol — locked before estimation",
+      note: "Hypotheses, exact tests, priors and freezing protocol, locked before estimation",
       external: true,
     },
     {
       label: "UK scan recipe (frozen)",
       href: `${PAPER_DOCS}/UK_SCAN_RECIPE.md`,
-      note: "Domain sources, detection weights, violation mapping — committed before scanning",
+      note: "Domain sources, detection weights and violation mapping, committed before scanning",
       external: true,
     },
     {
@@ -662,7 +662,7 @@ function DownloadsSection() {
               {item.label}
               {item.external ? <IconExternalLink size={14} aria-hidden="true" /> : null}
             </a>{" "}
-            <span className="text-ink-muted">— {item.note}</span>
+            <span className="mt-0.5 block text-ink-muted">{item.note}</span>
           </li>
         ))}
       </ul>

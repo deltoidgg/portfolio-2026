@@ -27,7 +27,7 @@ export const posts: PostMeta[] = [
       { id: "the-result", label: "The result" },
       { id: "better-teams", label: "Could it be better teams?" },
       { id: "replication", label: "Replication" },
-      { id: "what-failed", label: "What did not replicate" },
+      { id: "what-failed", label: "What didn’t replicate" },
       { id: "engineering-takeaways", label: "Engineering takeaways" },
       { id: "dig-deeper", label: "Dig deeper" },
     ],

@@ -26,11 +26,11 @@ export const papers: Paper[] = [
     question:
       "Is graded adoption of a design system associated with fewer automatically detectable accessibility violations on real production websites?",
     cardSummary:
-      "Strong design-system adoption signals were associated with roughly half as many automatically detected accessibility violations. The pre-registered model replicated on held-out UK data.",
+      "Websites with strong design-system adoption signals had roughly half as many automatically detected accessibility violations. The pre-registered model then replicated on held-out UK data.",
     abstract: [
-      "Design systems promise consistency, and their maintainers increasingly promise accessibility: components ship with semantics, focus management, and contrast decisions already made. This study quantifies that promise at estate scale under a pre-registered protocol. On a frozen snapshot of 12,252 live US federal websites from the GSA Site Scanning programme, sites with strong US Web Design System adoption signals show roughly half the automatically detectable accessibility violations of sites without them - incidence-rate ratio 0.50 (95% CI 0.38-0.65) - after agency fixed effects and digital-maturity controls, with a monotone dose-response across graded adoption bands.",
-      "With the specification frozen before a single UK site was scanned, the same model was then applied once to a held-out replication sample collected for this paper: 6,295 UK public-sector websites (central government, local authorities, parish and town councils, NHS) scanned with a govuk-frontend detector built as a structural mirror of GSA's USWDS score, plus the same axe-core ruleset. The association replicated in both direction and magnitude: IRR 0.56 (95% CI 0.47-0.67), within the pre-registered +/-0.20 window of the US estimate - consistent, at the level automated checks can measure, with the Government Digital Service's claim that the GOV.UK Design System helps services ship more accessible front ends.",
-      "Pre-registered diagnostics point to a site-level association rather than a pure good-teams artifact: the gradient survives within-agency comparison with only 20% attenuation, exceeds placebo gradients on performance metrics, and is stable under Oster-style selection bounds. Not everything replicated: USWDS v3 shows no improvement over v2, the predicted component-vs-template category specificity did not appear, and the UK partial-adoption band - where detection is noisiest - reverses sign; all three are reported as found. The design is observational and the outcome is the machine-detectable floor of accessibility, not the whole of it. All data, code, results, and the locked pre-registration are public and explorable in the browser.",
+      "Design systems promise consistency, and their maintainers increasingly promise accessibility too: components ship with semantics, focus management and contrast decisions already made. This study tests that promise at estate scale under a pre-registered protocol. On a frozen snapshot of 12,252 live US federal websites from the GSA Site Scanning programme, sites with strong US Web Design System adoption signals show roughly half the automatically detectable accessibility violations of sites without them (incidence-rate ratio 0.50, 95% CI 0.38 to 0.65) after agency fixed effects and digital-maturity controls, with a monotone dose-response across graded adoption bands.",
+      "With the specification frozen before any UK site was scanned, the same model was then applied once to a held-out replication sample collected for this paper: 6,295 UK public sector websites (central government, local authorities, parish and town councils, and the NHS), scanned with a govuk-frontend detector built as a structural mirror of GSA's USWDS score and the same axe-core ruleset. The association replicated in both direction and magnitude (IRR 0.56, 95% CI 0.47 to 0.67), within the pre-registered ±0.20 window of the US estimate. At the level automated checks can measure, this is consistent with the Government Digital Service's claim that the GOV.UK Design System helps services ship more accessible front ends.",
+      "Pre-registered diagnostics point to a site-level association rather than a pure good-teams artifact. The gradient survives within-agency comparison with only 20% attenuation, exceeds placebo gradients on performance metrics, and is stable under Oster-style selection bounds. Not everything replicated: USWDS v3 shows no improvement over v2, the predicted difference between component-mediated and template-mediated violation categories did not appear, and the UK partial-adoption band, where detection is noisiest, reverses sign. All three are reported as found. The design is observational, and the outcome is the machine-detectable floor of accessibility rather than the whole of it. All data, code, results and the locked pre-registration are public and can be explored in the browser.",
     ],
     datasetId: "uswds-a11y",
     preregistrationHref:
@@ -40,4 +40,14 @@ export const papers: Paper[] = [
 
 export function paperBySlug(slug: string): Paper | undefined {
   return papers.find((paper) => paper.slug === slug);
+}
+
+/** "2026-06-30" becomes "30 June 2026", fixed to UTC so the server and browser agree. */
+export function formatPaperDate(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }

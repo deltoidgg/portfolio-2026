@@ -244,7 +244,7 @@ function Recipe({ player, point }: { player: RoomPlayer; point: ForecastPoint })
           </div>
           <div className="room-range-copy">
             <b>
-              {point.p10.toFixed(1)}—{point.p90.toFixed(1)}
+              {point.p10.toFixed(1)}–{point.p90.toFixed(1)}
             </b>
             <span>80% interval</span>
           </div>
@@ -428,7 +428,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
             <h1 className="room-display">The market moved. Your team should know why.</h1>
             <p className="room-hero-copy">
               Rewind the final 48 hours before the deadline. Every step updates the same player
-              distributions, ranking, and evidence recipe—without hiding disagreement between
+              distributions, ranking, and evidence recipe, without hiding disagreement between
               sources.
             </p>
           </div>
@@ -499,7 +499,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                     <span>
                       <span className="room-player-name">{player.playerName}</span>
                       <span className="room-player-meta">
-                        {player.teamKey} · {player.position} · {point.p10.toFixed(1)}—
+                        {player.teamKey} · {player.position} · {point.p10.toFixed(1)}–
                         {point.p90.toFixed(1)}
                       </span>
                     </span>

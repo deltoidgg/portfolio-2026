@@ -467,7 +467,7 @@ function PlayerInspector({
             <header>
               <span>Outcome range</span>
               <b>
-                {player.p10} — {player.p90}
+                {player.p10}–{player.p90}
               </b>
             </header>
             <div>
@@ -789,7 +789,7 @@ export function OpportunityMapExperience({
                   : "Prices and ownership are not official yet."}
             </strong>{" "}
             {officialPrices
-              ? "Prices are locked until the GW1 deadline. Forecast uncertainty reflects minutes, roles, fixtures and market evidence—not price estimates."
+              ? "Prices are locked until the GW1 deadline. Forecast uncertainty reflects minutes, roles, fixtures and market evidence, not price estimates."
               : partialPrices
                 ? "Published values are used player by player; unavailable values remain visibly withheld."
                 : `Value views use clearly marked estimates and will switch to live data when FPL publishes its ${map.season.label} player list.`}

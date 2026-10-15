@@ -1,3 +1,5 @@
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import serifLatin from "@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url";
 import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
@@ -11,7 +13,7 @@ const personJsonLd = JSON.stringify({
   "@type": "Person",
   name: "Wasim Arif",
   url: "https://wasimarif.com",
-  jobTitle: "Software engineer",
+  jobTitle: "Product and design engineer",
   address: { "@type": "PostalAddress", addressLocality: "London", addressCountry: "GB" },
   sameAs: [
     "https://github.com/deltoidgg",
@@ -26,22 +28,37 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Wasim Arif" },
-      { name: "theme-color", content: "#020810", media: "(prefers-color-scheme: dark)" },
-      { name: "theme-color", content: "#f5f2ea", media: "(prefers-color-scheme: light)" },
+      { name: "theme-color", content: "#101112", media: "(prefers-color-scheme: dark)" },
+      { name: "theme-color", content: "#f6f3ec", media: "(prefers-color-scheme: light)" },
       {
         name: "description",
         content:
-          "London-based software engineer working across product and design engineering, from AI services and developer tooling to accessible interfaces, data visualisation, and open research.",
+          "Wasim Arif is a product and design engineer in London. Projects, writing and research.",
       },
     ],
     links: [
+      // the hero and body text use these two files, so fetch them alongside the CSS
+      {
+        rel: "preload",
+        href: serifLatin,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: geistLatin,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "icon", href: "/favicon.ico" },
       {
         rel: "alternate",
         type: "application/rss+xml",
-        title: "Wasim Arif — Writing",
+        title: "Writing by Wasim Arif",
         href: "/rss.xml",
       },
     ],
@@ -53,17 +70,14 @@ export const Route = createRootRoute({
 
 function NotFoundPage() {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-24 sm:px-8">
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.16em] text-accent-ink">404</p>
-      <h1 className="mb-4 text-3xl font-semibold tracking-tight text-ink">Page not found</h1>
-      <p className="mb-7 leading-relaxed text-ink-muted">
-        The address may have changed, or the page may never have existed.
+    <div className="page message-page">
+      <h1>Nothing here</h1>
+      <p>
+        That page doesn&rsquo;t exist, or it moved. Sorry about that. The homepage is a good place
+        to start again.
       </p>
-      <Link
-        to="/"
-        className="inline-flex min-h-10 items-center font-medium text-ink underline underline-offset-4"
-      >
-        Return home
+      <Link to="/" className="button button--primary">
+        Go to the homepage
       </Link>
     </div>
   );
@@ -71,27 +85,15 @@ function NotFoundPage() {
 
 function ErrorPage({ reset }: { reset: () => void }) {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-24 sm:px-8" role="alert">
-      <p className="mb-3 font-mono text-xs uppercase tracking-[0.16em] text-danger">Error</p>
-      <h1 className="mb-4 text-3xl font-semibold tracking-tight text-ink">
-        This page did not load
-      </h1>
-      <p className="mb-7 leading-relaxed text-ink-muted">
-        Try the request again. If it keeps failing, the homepage remains available.
-      </p>
-      <div className="flex flex-wrap gap-5">
-        <button
-          type="button"
-          onClick={reset}
-          className="min-h-10 rounded-md bg-ink px-4 py-2 font-medium text-canvas"
-        >
+    <div className="page message-page" role="alert">
+      <h1>Something went wrong</h1>
+      <p>This page didn&rsquo;t load properly. Trying again usually sorts it out.</p>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" onClick={reset} className="button button--primary">
           Try again
         </button>
-        <Link
-          to="/"
-          className="inline-flex min-h-10 items-center font-medium text-ink underline underline-offset-4"
-        >
-          Return home
+        <Link to="/" className="button">
+          Go to the homepage
         </Link>
       </div>
     </div>
@@ -108,7 +110,7 @@ function RootComponent() {
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-GB" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: personJsonLd }} />
@@ -121,7 +123,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         >
           Skip to content
         </a>
-        <div className="min-h-screen flex flex-col">
+        <div className="flex min-h-screen flex-col">
           <SiteHeader />
           <main id="main" className="flex-1">
             {children}

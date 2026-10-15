@@ -1,65 +1,79 @@
+import { projectImage } from "../../content/projects";
 import { ProjectFigure, ProjectSection } from "./project-layout";
 
 export function OpenFGCProject() {
   return (
     <>
-      <ProjectSection id="context" title="One audience, fragmented signals">
+      <ProjectSection id="background" title="The numbers were out there, just not in one place">
         <p>
-          During the shift from offline to online events, smaller fighting-game tournament
-          organisers had to explain audience value to sponsors using data spread across tournament,
-          Steam, Twitch, and player sources. OpenFGC explored how those signals could become a
-          coherent planning and presentation tool.
+          When the pandemic pushed fighting game tournaments online, smaller organisers suddenly had
+          to pitch sponsors without the audience data bigger leagues take for granted. The
+          information existed, spread across Steam player counts, Twitch viewers and tournament
+          results. Nobody had pulled it together.
         </p>
         <p>
-          I owned the product framing, interface design, and MVP implementation. The work is
-          retained as an earlier end-to-end product case study: it demonstrates the decisions and
-          system that were built, without claiming adoption or business impact that was not
-          measured.
+          OpenFGC did that. I handled the product side, the design and the build. It&rsquo;s an
+          older project now, but it&rsquo;s still a good example of taking messy sources and turning
+          them into something you can actually use in a meeting.
         </p>
       </ProjectSection>
 
-      <ProjectSection id="information" title="Separate summary from investigation">
+      <ProjectSection id="overview" title="An overview you could put in a deck">
         <p>
-          The core information-architecture decision was a two-speed product. A compact overview
-          exposed the figures an organiser might need in a sponsor conversation; player profiles and
-          breakdown views supported deeper comparisons and event planning.
+          The front page lines up every game with players on Steam right now, Twitch viewers,
+          tournament entrants and 90-day trends for each, plus a simple score to rank them. It was
+          designed so an organiser could grab the handful of numbers a sponsor would ask about in a
+          few seconds.
+        </p>
+        <p>
+          I&rsquo;ve restored the original at openfgc.wasimarif.com, so it&rsquo;s still there to
+          poke at.
+        </p>
+      </ProjectSection>
+
+      <ProjectSection id="depth" title="Quick answers up front, detail underneath">
+        <p>
+          The main design decision was splitting quick summaries from deeper digging. The overview
+          was for sponsor conversations. Player profiles and breakdowns were for planning an event
+          or comparing players properly, and they kept all the underlying detail without cluttering
+          the front page. These views come from the original designs.
         </p>
         <ProjectFigure
-          src="/projects/openfgc-profile.webp"
-          alt="OpenFGC player profile with audience and performance summaries"
-          caption="Player profiles brought audience and performance signals into one comparable view instead of mirroring the structure of each source API."
+          image={projectImage(
+            "openfgc/profile",
+            "An OpenFGC player profile design for Knee, with season ranking, win rate, a skills radar, recent EVO 2018 matches, rival records and character matchups",
+          )}
+          caption="A player profile from the original designs: results, match history, rivals and character matchups in one place."
+          wide
+        />
+        <ProjectFigure
+          image={projectImage(
+            "openfgc/breakdown",
+            "An OpenFGC breakdown design comparing Paul Phoenix against Jin Kazama, with a table of moves, frame data and success rates, plus hit distribution and stage win rates",
+          )}
+          caption="The breakdown view went a level deeper, down to moves, frame data and stage win rates."
+          wide
         />
       </ProjectSection>
 
-      <ProjectSection id="visualisation" title="Design the question before the chart">
+      <ProjectSection id="looking-back" title="Looking back">
         <p>
-          The interface prioritised comparisons that could change a decision: player reach, game
-          activity, event performance, and the relationship between participants and likely
-          viewership. Decorative metrics were kept out of the summary layer and available only when
-          a user moved into analysis.
+          The build showed that the messy inputs could be cleaned up into one model that both the
+          overview and the detailed views could share. What it didn&rsquo;t prove was impact. I
+          never measured whether it helped anyone land a sponsor or run a better event, so I
+          don&rsquo;t claim it did.
         </p>
         <ProjectFigure
-          src="/projects/openfgc-breakdown.webp"
-          alt="OpenFGC breakdown view comparing player and event statistics"
-          caption="The deeper analysis layer preserved the underlying dimensions while the overview remained presentation-ready."
-        />
-      </ProjectSection>
-
-      <ProjectSection id="retrospective" title="What the prototype proved—and did not prove">
-        <p>
-          The build proved that the fragmented inputs could be normalised into a usable product
-          model and that summary and analyst views could share that model. It did not establish a
-          measured improvement in event outcomes, sponsor conversion, or organiser productivity.
-        </p>
-        <ProjectFigure
-          src="/projects/openfgc-replay.webp"
-          alt="OpenFGC replay analysis interface"
-          caption="Replay analysis extended the same data model into match-level investigation without crowding the primary planning workflow."
+          image={projectImage(
+            "openfgc/replay",
+            "An OpenFGC match replay design, with the Tokyo Masters grand final score, a health-difference chart and a timeline of lows, mids, highs, throws and movement next to the match video",
+          )}
+          caption="A replay analysis design that took the same data all the way down to individual rounds."
+          wide
         />
         <p>
-          Restoring the original deployment at a maintained subdomain keeps the interaction
-          inspectable. If I resumed product development, the next step would be organiser interviews
-          and task-based validation before adding more metrics.
+          If I picked it back up, I&rsquo;d start by sitting down with a few organisers and watching
+          them use it before adding a single extra stat.
         </p>
       </ProjectSection>
     </>

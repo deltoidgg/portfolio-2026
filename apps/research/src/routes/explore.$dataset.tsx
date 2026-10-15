@@ -1,6 +1,5 @@
-import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
+import { IconArrowLeft, IconDownload } from "@tabler/icons-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Badge } from "ui";
 import { BandExplorer } from "../components/band-explorer";
 import { datasetById } from "../content/datasets";
 import { explorerConfigs } from "../content/explorers";
@@ -25,13 +24,12 @@ export const Route = createFileRoute("/explore/$dataset")({
       : { meta: [] },
   component: ExplorePage,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8">
-      <p className="text-sm text-ink-muted">
-        No such dataset.{" "}
-        <Link to="/" className="text-accent-ink underline underline-offset-2">
-          Back to the lab
-        </Link>
-      </p>
+    <div className="page message-page">
+      <h1>Dataset not found</h1>
+      <p>There is no dataset at this address.</p>
+      <Link to="/" className="button button--primary">
+        Go to the research index
+      </Link>
     </div>
   ),
 });
@@ -42,31 +40,27 @@ function ExplorePage() {
   const navigate = Route.useNavigate();
 
   return (
-    <div className="explorer-page mx-auto max-w-[var(--ui-page-width)] px-5 py-10 sm:px-8 lg:px-0 lg:py-16">
-      <Link
-        to="/"
-        className="mb-9 inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink"
-      >
-        <IconArrowLeft size={15} aria-hidden="true" />
-        Back to the lab
+    <div className="page explorer">
+      <Link to="/" className="back-link">
+        <IconArrowLeft size={16} aria-hidden="true" />
+        All research
       </Link>
 
-      <header className="explorer-hero">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <p className="section-kicker">Interactive dataset</p>
-          <Badge>{dataset.rows}</Badge>
-        </div>
+      <header className="explorer__header">
         <h1>{dataset.name}</h1>
         <p>{dataset.description}</p>
-        <div className="explorer-meta">
-          <span>
+        <ul className="explorer__meta">
+          <li>{dataset.rows}</li>
+          <li>
             Source: <a href={dataset.source.href}>{dataset.source.label}</a>
-          </span>
-          <span>Queries run locally via DuckDB-WASM</span>
-          <a href={dataset.parquetUrl} download>
-            Download Parquet <IconExternalLink size={13} aria-hidden="true" />
-          </a>
-        </div>
+          </li>
+          <li>Queries run in your browser with DuckDB</li>
+          <li>
+            <a href={dataset.parquetUrl} download>
+              Download the Parquet file <IconDownload size={14} aria-hidden="true" />
+            </a>
+          </li>
+        </ul>
       </header>
 
       {explorerConfigs[dataset.id] ? (

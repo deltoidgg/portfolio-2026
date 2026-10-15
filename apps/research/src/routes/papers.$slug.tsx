@@ -1,9 +1,9 @@
 import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Badge, Prose, Section } from "ui";
+import { Prose, Section, useActiveSection } from "ui";
 import { paperContentRegistry } from "../components/paper-content-registry";
 import { datasetById } from "../content/datasets";
-import { paperBySlug, type PaperStatus } from "../content/papers";
+import { formatPaperDate, paperBySlug, type PaperStatus } from "../content/papers";
 import { buildResearchMetadata, RESEARCH_ORIGIN } from "../lib/metadata";
 
 export const Route = createFileRoute("/papers/$slug")({
@@ -25,13 +25,12 @@ export const Route = createFileRoute("/papers/$slug")({
       : { meta: [] },
   component: PaperPage,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-3xl px-6 py-16 sm:px-8">
-      <p className="text-sm text-ink-muted">
-        No such paper.{" "}
-        <Link to="/" className="text-accent-ink underline underline-offset-2">
-          Back to the lab
-        </Link>
-      </p>
+    <div className="page message-page">
+      <h1>Paper not found</h1>
+      <p>There is no paper at this address.</p>
+      <Link to="/" className="button button--primary">
+        Go to the research index
+      </Link>
     </div>
   ),
 });
@@ -72,52 +71,52 @@ function PaperPage() {
   });
 
   return (
-    <article className="research-paper-page mx-auto max-w-[var(--ui-shell-width)] px-5 pb-4 pt-10 sm:px-8 lg:px-[var(--ui-shell-gutter)] lg:pt-14">
+    <article className="page paper">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-      <Link
-        to="/"
-        className="mb-9 inline-flex min-h-11 items-center gap-2 text-sm text-ink-muted transition-colors hover:text-ink"
-      >
-        <IconArrowLeft size={15} aria-hidden="true" />
-        All papers
+      <Link to="/" className="back-link">
+        <IconArrowLeft size={16} aria-hidden="true" />
+        All research
       </Link>
 
-      <div className="research-paper-layout">
+      <div className="paper__layout">
         {content ? <PaperContents /> : null}
 
-        <div className="research-paper-main">
-          <header className="research-paper-hero">
-            <div className="mb-5 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-[0.13em] text-ink-subtle">
-              <Badge tone={paper.status === "published" ? "accent" : "warn"}>
-                {statusLabels[paper.status]}
-              </Badge>
-              <span>{paper.displayNumber}</span>
-              {paper.publishedAt ? <time dateTime={paper.publishedAt}>June 2026</time> : null}
-            </div>
+        <div className="paper__main">
+          <header className="paper__header">
+            <p className="paper__meta">
+              {paper.displayNumber} <span aria-hidden="true">·</span> {statusLabels[paper.status]}
+              {paper.publishedAt ? (
+                <>
+                  {" "}
+                  <time dateTime={paper.publishedAt}>{formatPaperDate(paper.publishedAt)}</time>
+                </>
+              ) : null}{" "}
+              <span aria-hidden="true">·</span> Wasim Arif
+            </p>
             <h1>{paper.title}</h1>
-            <p>{paper.question}</p>
+            <p className="paper__question">{paper.question}</p>
           </header>
 
           <dl className="paper-summary">
             <div>
-              <dt>Finding</dt>
+              <dt>Main finding</dt>
               <dd>
                 Strong adoption signals were associated with 50% fewer detected violations in the
-                US; the held-out UK estimate was 44% fewer.
+                US. The held-out UK estimate was 44% fewer.
               </dd>
             </div>
             <div>
               <dt>Why it matters</dt>
               <dd>
-                The result is consistent with design systems acting as accessibility infrastructure
-                while remaining observational rather than causal.
+                The result is consistent with design systems working as accessibility
+                infrastructure, although the design is observational rather than causal.
               </dd>
             </div>
             <div>
-              <dt>What I built</dt>
+              <dt>What was built</dt>
               <dd>
-                A detector and scanner, ETL pipeline, pre-registered analysis, publication system,
-                and in-browser explorer.
+                A detector and scanner, an ETL pipeline, the pre-registered analysis, this
+                publication and the in-browser explorers.
               </dd>
             </div>
           </dl>
@@ -139,22 +138,34 @@ function PaperPage() {
   );
 }
 
+const paperSectionIds = paperSections.map(([id]) => id);
+
 function PaperContents() {
+  const active = useActiveSection(paperSectionIds);
+
+  const list = (
+    <ol className="toc">
+      {paperSections.map(([id, label]) => (
+        <li key={id}>
+          <a href={"#" + id} aria-current={active === id ? "location" : undefined}>
+            {label}
+          </a>
+        </li>
+      ))}
+    </ol>
+  );
+
   return (
-    <aside className="paper-contents">
-      <details open>
-        <summary>Paper contents</summary>
-        <nav aria-label="Paper contents">
-          <ol>
-            {paperSections.map(([id, label]) => (
-              <li key={id}>
-                <a href={"#" + id}>{label}</a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+    <div className="paper__rail">
+      <details className="paper__contents-mobile">
+        <summary>Contents</summary>
+        {list}
       </details>
-    </aside>
+      <nav className="paper__contents" aria-label="Paper contents">
+        <h2>Contents</h2>
+        {list}
+      </nav>
+    </div>
   );
 }
 

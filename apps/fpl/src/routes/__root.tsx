@@ -16,7 +16,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "FPL Lab — Wasim Arif" },
+      { title: "FPL Lab by Wasim Arif" },
       {
         name: "description",
         content:

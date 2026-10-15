@@ -5,6 +5,8 @@ export function getRouter() {
   const router = createRouter({
     routeTree,
     scrollRestoration: true,
+    // cross-fades between pages where the View Transitions API is available
+    defaultViewTransition: true,
   });
 
   return router;

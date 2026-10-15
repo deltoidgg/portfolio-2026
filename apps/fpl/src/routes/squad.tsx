@@ -27,7 +27,7 @@ export const Route = createFileRoute("/squad")({
   loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
   head: () =>
     buildFplMetadata({
-      title: "Squad & Transfer Lab — FPL market intelligence",
+      title: "Squad & Transfer Lab",
       description:
         "Build and improve a valid £100m FPL squad with official prices, market-informed expected points, fixture context, and feasible replacement paths.",
       path: "/squad",
