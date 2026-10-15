@@ -7,6 +7,7 @@
   "scripts": {
     "check-links": "node src/check-links.ts",
     "install-browser": "playwright install --with-deps chromium",
+    "project-media": "node src/project-media.ts",
     "test": "node src/audit.ts",
     "visual": "node src/visual.ts"
   },

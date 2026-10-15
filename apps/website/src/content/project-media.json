@@ -1,0 +1,72 @@
+{
+  "fpl/archive": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "fpl/map": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "fpl/squad": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "fpl/squad-hero": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "mockpit/devtools": {
+    "width": 1316,
+    "height": 1160,
+    "widths": [640, 1316]
+  },
+  "mockpit/docs": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "openfgc/breakdown": {
+    "width": 1600,
+    "height": 900,
+    "widths": [640, 1280, 1600]
+  },
+  "openfgc/overview": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "openfgc/profile": {
+    "width": 1600,
+    "height": 900,
+    "widths": [640, 1280, 1600]
+  },
+  "openfgc/replay": {
+    "width": 1600,
+    "height": 900,
+    "widths": [640, 1280, 1600]
+  },
+  "rewriter/book": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/library": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/preferences": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/reader": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  }
+}
