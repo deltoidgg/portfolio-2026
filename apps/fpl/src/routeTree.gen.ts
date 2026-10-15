@@ -9,14 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SquadRouteImport } from './routes/squad'
-import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as SquadRouteImport } from './routes/squad'
 import { Route as Archive202526Gw34RouteImport } from './routes/archive.2025-26.gw34'
 
-const SquadRoute = SquadRouteImport.update({
-  id: '/squad',
-  path: '/squad',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -24,9 +24,9 @@ const OpportunitiesRoute = OpportunitiesRouteImport.update({
   path: '/opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SquadRoute = SquadRouteImport.update({
+  id: '/squad',
+  path: '/squad',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Archive202526Gw34Route = Archive202526Gw34RouteImport.update({
@@ -71,11 +71,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/squad': {
-      id: '/squad'
-      path: '/squad'
-      fullPath: '/squad'
-      preLoaderRoute: typeof SquadRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities': {
@@ -85,11 +85,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/squad': {
+      id: '/squad'
+      path: '/squad'
+      fullPath: '/squad'
+      preLoaderRoute: typeof SquadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/archive/2025-26/gw34': {
