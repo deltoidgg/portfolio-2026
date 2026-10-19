@@ -87,9 +87,11 @@ a {
     scale var(--ui-fast) var(--ui-ease);
 }
 
-.button:hover {
-  border-color: var(--ui-ink-subtle);
-  background: var(--ui-surface);
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    border-color: var(--ui-ink-subtle);
+    background: var(--ui-surface);
+  }
 }
 
 .button:active {
@@ -102,9 +104,11 @@ a {
   color: var(--ui-canvas);
 }
 
-.button--primary:hover {
-  border-color: var(--ui-ink-muted);
-  background: var(--ui-ink-muted);
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:hover {
+    border-color: var(--ui-ink-muted);
+    background: var(--ui-ink-muted);
+  }
 }
 
 .button svg,
@@ -117,13 +121,24 @@ a {
   transition: translate var(--ui-base) var(--ui-ease-out);
 }
 
-.button:hover svg,
-.section-head__link:hover svg,
-.study__links a:hover svg,
-.project-row:hover .project-row__cta svg,
-.next-card:hover .next-card__cta svg,
-.link-list a:hover svg {
-  translate: 3px 0;
+@media (hover: hover) and (pointer: fine) {
+  .button:hover svg,
+  .section-head__link:hover svg,
+  .study__links a:hover svg,
+  .project-row:hover .project-row__cta svg,
+  .next-card:hover .next-card__cta svg,
+  .link-list a:hover svg {
+    translate: 3px 0;
+  }
+}
+
+/* touch has no hover, so cards get a quick pressed state instead */
+:is(.work-card, .project-row, .post-row, .next-card, .link-list a) {
+  transition: opacity var(--ui-fast) ease;
+}
+
+:is(.work-card, .project-row, .post-row, .next-card, .link-list a):active {
+  opacity: 0.75;
 }
 
 .back-link {
@@ -140,12 +155,14 @@ a {
   transition: translate var(--ui-base) var(--ui-ease-out);
 }
 
-.back-link:hover {
-  color: var(--ui-ink);
-}
+@media (hover: hover) and (pointer: fine) {
+  .back-link:hover {
+    color: var(--ui-ink);
+  }
 
-.back-link:hover svg {
-  translate: -3px 0;
+  .back-link:hover svg {
+    translate: -3px 0;
+  }
 }
 
 /* Screenshots sit in a rounded frame so light and dark captures both read as objects */
@@ -192,10 +209,12 @@ a {
   aspect-ratio: 16 / 10;
 }
 
-.work-card:hover .work-card__media img,
-.project-row:hover .project-row__media img,
-.next-card:hover .next-card__media img {
-  scale: 1.025;
+@media (hover: hover) and (pointer: fine) {
+  .work-card:hover .work-card__media img,
+  .project-row:hover .project-row__media img,
+  .next-card:hover .next-card__media img {
+    scale: 1.025;
+  }
 }
 
 .link-list {
@@ -229,9 +248,11 @@ a {
   font-size: 0.9375rem;
 }
 
-.link-list a:hover strong {
-  text-decoration: underline;
-  text-decoration-color: var(--ui-accent-edge);
+@media (hover: hover) and (pointer: fine) {
+  .link-list a:hover strong {
+    text-decoration: underline;
+    text-decoration-color: var(--ui-accent-edge);
+  }
 }
 
 /* Header */
@@ -259,21 +280,39 @@ a {
     scale var(--ui-base) var(--ui-ease-out);
 }
 
-.site-nav-link:hover::after,
 .site-nav-link--active::after {
   opacity: 1;
   scale: 1 1;
 }
 
-.mobile-menu {
-  animation: menu-in var(--ui-base) var(--ui-ease-out);
+@media (hover: hover) and (pointer: fine) {
+  .site-nav-link:hover::after {
+    opacity: 1;
+    scale: 1 1;
+  }
 }
 
-@keyframes menu-in {
-  from {
-    opacity: 0;
-    translate: 0 -0.5rem;
-  }
+/* stays mounted so it can fade out as well as in, and floats so opening it never shoves the page down */
+.mobile-menu {
+  position: absolute;
+  inset: 100% 0 auto;
+  visibility: hidden;
+  opacity: 0;
+  translate: 0 -0.5rem;
+  transition:
+    opacity var(--ui-fast) ease,
+    translate var(--ui-fast) var(--ui-ease),
+    visibility 0s linear var(--ui-fast);
+}
+
+.mobile-menu[data-open="true"] {
+  visibility: visible;
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity var(--ui-base) var(--ui-ease-out),
+    translate var(--ui-base) var(--ui-ease-out),
+    visibility 0s;
 }
 
 /* Home */
@@ -349,8 +388,10 @@ a {
   transition: color var(--ui-fast) ease;
 }
 
-.section-head__link:hover {
-  color: var(--ui-ink);
+@media (hover: hover) and (pointer: fine) {
+  .section-head__link:hover {
+    color: var(--ui-ink);
+  }
 }
 
 .work-grid {
@@ -416,11 +457,13 @@ a {
   color: var(--ui-ink-muted);
 }
 
-.work-card:hover .work-card__title strong,
-.project-row:hover .project-row__text strong,
-.post-row:hover strong,
-.next-card:hover strong {
-  text-decoration-line: underline;
+@media (hover: hover) and (pointer: fine) {
+  .work-card:hover .work-card__title strong,
+  .project-row:hover .project-row__text strong,
+  .post-row:hover strong,
+  .next-card:hover strong {
+    text-decoration-line: underline;
+  }
 }
 
 .study {
@@ -460,8 +503,10 @@ a {
   transition: text-decoration-color var(--ui-fast) ease;
 }
 
-.study__links a:hover {
-  text-decoration-color: var(--ui-accent);
+@media (hover: hover) and (pointer: fine) {
+  .study__links a:hover {
+    text-decoration-color: var(--ui-accent);
+  }
 }
 
 .study__chart {
@@ -562,8 +607,10 @@ a {
   transition: text-decoration-color var(--ui-fast) ease;
 }
 
-.hello__email:hover {
-  text-decoration-color: var(--ui-accent);
+@media (hover: hover) and (pointer: fine) {
+  .hello__email:hover {
+    text-decoration-color: var(--ui-accent);
+  }
 }
 
 .hello__elsewhere {
@@ -580,10 +627,12 @@ a {
   text-decoration-thickness: 1px;
 }
 
-.hello__elsewhere a:hover,
-.page-intro a:hover,
-.about__bio a:hover {
-  text-decoration-color: var(--ui-accent);
+@media (hover: hover) and (pointer: fine) {
+  .hello__elsewhere a:hover,
+  .page-intro a:hover,
+  .about__bio a:hover {
+    text-decoration-color: var(--ui-accent);
+  }
 }
 
 /* Index pages */
@@ -892,6 +941,10 @@ a {
   font-size: 0.9375rem;
 }
 
+.article__byline time {
+  white-space: nowrap;
+}
+
 .article__rail {
   grid-column: 1;
   grid-row: 2;
@@ -925,8 +978,10 @@ a {
     border-color var(--ui-base) var(--ui-ease);
 }
 
-.toc a:hover {
-  color: var(--ui-ink);
+@media (hover: hover) and (pointer: fine) {
+  .toc a:hover {
+    color: var(--ui-ink);
+  }
 }
 
 .toc a[aria-current="location"] {
@@ -984,23 +1039,14 @@ a {
   margin-bottom: 1.25rem;
 }
 
-.habits {
-  display: grid;
-  gap: 1rem;
-  padding-left: 1.2rem;
+.about__prose p {
   color: var(--ui-ink-muted);
   font-size: 1.0625rem;
-  line-height: 1.7;
-  list-style: disc;
+  line-height: 1.75;
 }
 
-.habits li::marker {
-  color: var(--ui-ink-subtle);
-}
-
-.habits strong {
-  color: var(--ui-ink);
-  font-weight: 600;
+.about__prose p + p {
+  margin-top: 1.25rem;
 }
 
 /* Not found and errors */
@@ -1092,15 +1138,21 @@ a {
     animation: rise 420ms var(--ui-ease-out) both;
   }
 
-  .intro > :nth-child(2) {
+  /* inner pages only move, never fade: the heading is usually the largest paint on screen,
+     and a fade would hold back when the browser counts the page as loaded */
+  :is(.page-intro, .case__header, .article__header) > * {
+    animation: lift 420ms var(--ui-ease-out) both;
+  }
+
+  :is(.intro, .page-intro, .case__header, .article__header) > :nth-child(2) {
     animation-delay: 40ms;
   }
 
-  .intro > :nth-child(3) {
+  :is(.intro, .page-intro, .case__header, .article__header) > :nth-child(3) {
     animation-delay: 70ms;
   }
 
-  .intro > :nth-child(4) {
+  :is(.intro, .page-intro, .case__header, .article__header) > :nth-child(4) {
     animation-delay: 100ms;
   }
 
@@ -1157,6 +1209,12 @@ a {
 @keyframes rise {
   from {
     opacity: 0;
+    translate: 0 0.75rem;
+  }
+}
+
+@keyframes lift {
+  from {
     translate: 0 0.75rem;
   }
 }

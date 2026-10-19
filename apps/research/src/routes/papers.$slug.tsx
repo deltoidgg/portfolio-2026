@@ -83,18 +83,18 @@ function PaperPage() {
 
         <div className="paper__main">
           <header className="paper__header">
+            <h1>{paper.title}</h1>
+            <p className="paper__question">{paper.question}</p>
             <p className="paper__meta">
-              {paper.displayNumber} <span aria-hidden="true">·</span> {statusLabels[paper.status]}
+              By Wasim Arif <span aria-hidden="true">·</span> {paper.displayNumber}{" "}
+              <span aria-hidden="true">·</span> {statusLabels[paper.status]}
               {paper.publishedAt ? (
                 <>
                   {" "}
                   <time dateTime={paper.publishedAt}>{formatPaperDate(paper.publishedAt)}</time>
                 </>
-              ) : null}{" "}
-              <span aria-hidden="true">·</span> Wasim Arif
+              ) : null}
             </p>
-            <h1>{paper.title}</h1>
-            <p className="paper__question">{paper.question}</p>
           </header>
 
           <dl className="paper-summary">

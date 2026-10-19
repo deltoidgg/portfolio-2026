@@ -60,6 +60,10 @@
 :focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: 3px;
+}
+
+/* only plain text links get softened corners, so round or pill controls keep their shape on focus */
+a:not([class]):focus-visible {
   border-radius: 3px;
 }
 

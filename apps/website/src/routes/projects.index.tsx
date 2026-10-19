@@ -5,7 +5,7 @@ import { sortedProjects } from "../content/projects";
 import { buildMetadata } from "../lib/metadata";
 
 const description =
-  "Things I've designed and built on my own: a reading app, a Fantasy Premier League lab, devtools and a fighting game stats site.";
+  "Things I’ve designed and built on my own: a reading app, a Fantasy Premier League lab, devtools and a fighting game stats site.";
 
 export const Route = createFileRoute("/projects/")({
   head: () =>
