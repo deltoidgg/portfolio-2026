@@ -34,9 +34,19 @@ interface MediaEntry {
   widths: number[];
 }
 
-const rewriter = "https://rewriter.wasimarif.com";
-const fpl = "https://fpl.wasimarif.com";
+// Point an origin at a local build to capture a redesign before it ships. Vite Task strips
+// environment variables, so run the script directly from tools/site-quality in that case:
+//   FPL_ORIGIN=http://127.0.0.1:4190 node src/project-media.ts fpl
+const rewriter = process.env.REWRITER_ORIGIN ?? "https://rewriter.wasimarif.com";
+const fpl = process.env.FPL_ORIGIN ?? "https://fpl.wasimarif.com";
 const squadUrl = `${fpl}/squad?horizon=3&dataset=current`;
+
+/** Make the sticky header opaque so scrolled content never shows through it. */
+const solidHeader = (page: Page) =>
+  page.addStyleTag({
+    content:
+      ".fpl-site-header { background: #071018 !important; backdrop-filter: none !important; }",
+  });
 
 const captures: Capture[] = [
   { slug: "rewriter", name: "library", url: `${rewriter}/` },
@@ -57,9 +67,11 @@ const captures: Capture[] = [
     name: "squad",
     url: squadUrl,
     prepare: async (page) => {
-      await page.getByRole("button", { name: /Suggest a valid squad/i }).click();
+      await page.getByRole("button", { name: /Suggest a squad/i }).click();
       await page.waitForTimeout(2000);
-      await page.evaluate(() => window.scrollTo(0, 360));
+      await solidHeader(page);
+      // park the pitch just under the sticky header so the squad fills the frame
+      await page.evaluate(() => window.scrollTo(0, 374));
     },
   },
   {
@@ -71,7 +83,8 @@ const captures: Capture[] = [
       const player = page.locator("circle[aria-label*='Haaland'], circle[aria-label]").first();
       await player.click({ force: true });
       await page.waitForTimeout(1200);
-      await page.evaluate(() => window.scrollTo(0, 470));
+      await solidHeader(page);
+      await page.evaluate(() => window.scrollTo(0, 352));
     },
   },
   { slug: "fpl", name: "archive", url: `${fpl}/archive/2025-26/gw34` },
