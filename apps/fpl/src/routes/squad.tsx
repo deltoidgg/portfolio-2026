@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { SquadLab } from "../components/squad-lab.tsx";
 import "../squad-lab.css";
 import { buildFplMetadata } from "../lib/metadata.ts";
@@ -7,6 +7,7 @@ import {
   loadOpportunityDataset,
   opportunityMapFromDataset,
 } from "../lib/opportunity-data.ts";
+import { useWarmHorizons } from "../lib/warm-horizons.ts";
 
 type SquadSearch = {
   horizon: 1 | 3 | 5;
@@ -23,13 +24,15 @@ function validateSearch(search: Record<string, unknown>): SquadSearch {
 
 export const Route = createFileRoute("/squad")({
   validateSearch,
-  loaderDeps: ({ search }) => ({ dataset: search.dataset }),
-  loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
+  loaderDeps: ({ search }) => ({ dataset: search.dataset, horizon: search.horizon }),
+  loader: ({ deps }) => loadOpportunityDataset(deps.dataset, deps.horizon),
+  staleTime: 60_000,
+  preloadStaleTime: 60_000,
   head: () =>
     buildFplMetadata({
-      title: "Squad & Transfer Lab",
+      title: "Squad lab",
       description:
-        "Build and improve a valid £100m FPL squad with official prices, market-informed expected points, fixture context, and feasible replacement paths.",
+        "Build or improve a valid £100m FPL squad using official prices and forecast points, with fixtures and a range of outcomes for every player.",
       path: "/squad",
     }),
   component: SquadPage,
@@ -39,13 +42,18 @@ function SquadPage() {
   const dataset = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const router = useRouter();
   const map = opportunityMapFromDataset(dataset, search.horizon);
+  useWarmHorizons(search.horizon, (horizon) =>
+    router.preloadRoute({ to: "/squad", search: { ...search, horizon } }),
+  );
 
   return (
     <>
       {isStaleOpportunityDataset(dataset) ? (
         <p className="squad-stale" role="status">
-          Showing the last validated 2026/27 forecast while the live artifact is unavailable.
+          The live forecast isn’t available right now, so this is the latest one that passed our
+          checks.
         </p>
       ) : null}
       <SquadLab

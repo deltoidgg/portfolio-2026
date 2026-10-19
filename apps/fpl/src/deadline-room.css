@@ -15,9 +15,7 @@
   min-height: calc(100vh - 3.5rem);
   overflow: hidden;
   color: var(--room-ink);
-  background:
-    linear-gradient(90deg, transparent 49.93%, rgb(117 229 211 / 0.045) 50%, transparent 50.07%),
-    radial-gradient(circle at 52% 0%, rgb(44 108 124 / 0.24), transparent 35rem), var(--room-canvas);
+  background: var(--room-canvas);
   color-scheme: dark;
 }
 
@@ -26,7 +24,7 @@
 }
 
 .room-display {
-  font-family: "Barlow Condensed", ui-sans-serif, sans-serif;
+  font-family: var(--ui-font-display);
   font-stretch: condensed;
 }
 
@@ -36,77 +34,41 @@
   padding: 1.5rem clamp(1rem, 2.2vw, 2.5rem) 2.5rem;
 }
 
-.room-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--room-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.room-kicker::before {
-  width: 1.75rem;
-  height: 1px;
-  content: "";
-  background: currentColor;
-}
-
 .room-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 1.5rem;
+  gap: 1.25rem 2rem;
   align-items: end;
-  padding-block: 0.75rem 1.4rem;
+  padding-block: 1.5rem;
   border-bottom: 1px solid var(--room-line);
 }
 
 .room-hero h1 {
-  max-width: 15ch;
-  margin-top: 0.7rem;
-  font-size: clamp(2.5rem, 6vw, 5.6rem);
-  font-weight: 500;
-  line-height: 0.84;
-  letter-spacing: -0.035em;
-  text-transform: uppercase;
+  margin: 0;
+  font-size: clamp(2.8rem, 5.2vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .room-hero-copy {
-  max-width: 34rem;
-  margin-top: 1rem;
+  max-width: 40rem;
+  margin: 0.75rem 0 0;
   color: var(--room-muted);
-  font-size: 0.9rem;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .room-mode-stack {
   display: grid;
   justify-items: end;
-  gap: 0.65rem;
+  gap: 0.2rem;
   min-width: 13rem;
-  font-family: var(--ui-font-mono);
-  font-size: 0.7rem;
-  color: var(--room-muted);
-}
-
-.room-live-mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--room-cyan);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.room-live-mark::before {
-  width: 0.5rem;
-  height: 0.5rem;
-  content: "";
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 0 0.3rem rgb(117 229 211 / 0.1);
+  color: var(--room-subtle);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  text-align: right;
 }
 
 .room-toolbar {
@@ -126,28 +88,31 @@
 }
 
 .room-fixture,
-.room-icon-button,
-.room-source-chip {
+.room-icon-button {
   border: 1px solid var(--room-line);
   color: var(--room-muted);
   background: transparent;
   transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease;
+    color var(--ui-fast) ease,
+    border-color var(--ui-fast) ease,
+    background-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
+}
+
+.room-fixture:active,
+.room-icon-button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .room-fixture {
-  min-height: 2.3rem;
-  padding: 0.45rem 0.7rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.85rem;
   white-space: nowrap;
-  font-family: var(--ui-font-mono);
-  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
 }
 
-.room-fixture:hover,
-.room-fixture[aria-pressed="true"],
-.room-icon-button:hover:not(:disabled) {
+.room-fixture[aria-pressed="true"] {
   color: var(--room-ink);
   border-color: var(--room-line-strong);
   background: var(--room-panel-raised);
@@ -155,8 +120,8 @@
 
 .room-icon-button {
   display: inline-flex;
-  min-width: 2.35rem;
-  min-height: 2.35rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   align-items: center;
   justify-content: center;
 }
@@ -193,10 +158,8 @@
 
 .room-panel-title {
   color: var(--room-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-panel-index {
@@ -204,8 +167,8 @@
   align-items: center;
   gap: 0.3rem;
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-signal-tape {
@@ -230,10 +193,9 @@
 .room-signal small {
   overflow: hidden;
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -243,7 +205,7 @@
   color: var(--room-ink);
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1.35rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -251,7 +213,7 @@
 .room-signal strong {
   overflow: hidden;
   color: var(--room-muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -283,29 +245,19 @@
 .room-consensus span,
 .room-consensus small {
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-consensus strong {
   color: var(--room-ink);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
 }
 
 .room-consensus-band {
   position: relative;
   height: 0.3rem;
   background: var(--room-line);
-}
-
-.room-consensus-band::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  content: "";
-  background: linear-gradient(90deg, transparent, rgb(117 229 211 / 0.2), transparent);
 }
 
 .room-consensus-band span,
@@ -335,11 +287,10 @@
 .room-consensus-values b {
   grid-column: 1 / -1;
   color: var(--room-amber);
-  font-family: var(--ui-font-mono);
-  font-size: 0.5rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   font-weight: 500;
   text-align: right;
-  text-transform: uppercase;
 }
 
 .room-decision-strip {
@@ -351,24 +302,22 @@
   padding: 0.55rem 1rem;
   border-bottom: 1px solid var(--room-line);
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.56rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-decision-strip > span:first-child {
-  color: var(--room-amber);
-  text-transform: uppercase;
+  color: var(--room-muted);
 }
 
 .room-decision-label {
   margin-left: 0.45rem;
-  color: var(--room-amber) !important;
-  text-transform: uppercase;
+  color: var(--room-muted) !important;
 }
 
 .room-decision-strip strong {
   color: var(--room-ink);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -396,13 +345,14 @@
   transition: background-color 160ms ease;
 }
 
-.room-player:hover,
 .room-player[aria-pressed="true"] {
-  background: linear-gradient(90deg, var(--room-cyan-soft), transparent 72%);
+  background: var(--room-cyan-soft);
+  box-shadow: inset 2px 0 0 var(--room-cyan);
 }
 
-.room-player[aria-pressed="true"] {
-  box-shadow: inset 2px 0 0 var(--room-cyan);
+/* the tint lifts the background a little, so the quieter text steps up to keep its contrast */
+.room-player[aria-pressed="true"] :is(.room-rank, .room-player-meta) {
+  color: var(--room-muted);
 }
 
 .room-rank {
@@ -416,7 +366,7 @@
 .room-player-name {
   display: block;
   overflow: hidden;
-  font-size: 0.86rem;
+  font-size: 0.875rem;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -426,9 +376,8 @@
   display: block;
   margin-top: 0.2rem;
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-player-points {
@@ -440,15 +389,15 @@
   color: var(--room-ink);
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1.7rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .room-delta {
   color: var(--room-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-delta[data-negative="true"] {
@@ -463,29 +412,21 @@
 
 .room-source-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.55rem;
   align-items: center;
   color: var(--room-muted);
-  font-size: 0.68rem;
+  font-size: 0.875rem;
 }
 
-.room-source-dot {
-  width: 0.42rem;
-  height: 0.42rem;
-  border-radius: 50%;
-  background: var(--room-cyan);
-}
-
-.room-source-dot[data-awaiting="true"] {
-  background: var(--room-subtle);
-  opacity: 0.45;
+.room-source-row[data-awaiting="true"] > span:first-child {
+  color: var(--room-subtle);
 }
 
 .room-source-row span:last-child {
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-chart-wrap {
@@ -501,9 +442,10 @@
 }
 
 .room-chart-label {
-  fill: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 10px;
+  fill: var(--room-muted);
+  font-variant-numeric: tabular-nums;
+  /* set from the component so labels stay near 12px however wide the chart is drawn */
+  font-size: var(--chart-label, 12px);
 }
 
 .room-event-strip {
@@ -522,20 +464,20 @@
 
 .room-event-time {
   color: var(--room-amber);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-event h3 {
   margin-top: 0.35rem;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
 .room-event p {
   margin-top: 0.25rem;
   color: var(--room-subtle);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -546,7 +488,7 @@
   padding: 1rem;
   border-top: 1px solid var(--room-line);
   color: var(--room-subtle);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 .room-recipe {
@@ -565,7 +507,7 @@
 .room-recipe-score strong {
   font-family: "Barlow Condensed", sans-serif;
   font-size: 4rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 0.8;
   letter-spacing: -0.035em;
   font-variant-numeric: tabular-nums;
@@ -573,8 +515,8 @@
 
 .room-recipe-score span {
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-range-copy {
@@ -583,26 +525,26 @@
 
 .room-range-copy b {
   display: block;
-  color: var(--room-amber);
-  font-family: var(--ui-font-mono);
-  font-size: 0.72rem;
+  color: var(--room-ink);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .room-recipe h2 {
   margin-top: 1.1rem;
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: 1.55rem;
-  font-weight: 500;
-  line-height: 1;
-  text-transform: uppercase;
+  font-family: var(--ui-font-display);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.1;
 }
 
 .room-recipe-detail {
   margin-top: 0.65rem;
   color: var(--room-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .room-component-list {
@@ -613,32 +555,28 @@
 
 .room-recipe-flow {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1px;
-  margin-top: 1.2rem;
-  background: var(--room-line);
+  margin: 1.2rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--room-line);
+  list-style: none;
 }
 
-.room-recipe-flow > span {
-  display: grid;
-  gap: 0.2rem;
-  padding: 0.55rem;
-  color: var(--room-muted);
-  font-size: 0.56rem;
-  background: var(--room-canvas);
-}
-
-.room-recipe-flow b {
-  color: var(--room-amber);
-  font-family: var(--ui-font-mono);
-  font-size: 0.48rem;
-  font-weight: 500;
+.room-recipe-flow > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--room-line);
+  color: var(--room-ink);
+  font-size: 0.875rem;
 }
 
 .room-recipe-flow small {
-  color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.48rem;
+  color: var(--room-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
+  text-align: right;
 }
 
 .room-quote-ledger {
@@ -654,8 +592,8 @@
   align-items: center;
   padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--room-line);
-  font-family: var(--ui-font-mono);
-  font-size: 0.54rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-quote-ledger span,
@@ -677,14 +615,13 @@
   gap: 0.35rem 0.7rem;
   margin-top: 0.8rem;
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.52rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-latent-rates span {
   flex-basis: 100%;
-  color: var(--room-amber);
-  text-transform: uppercase;
+  color: var(--room-muted);
 }
 
 .room-latent-rates b {
@@ -698,7 +635,7 @@
   gap: 0.55rem;
   align-items: center;
   color: var(--room-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .room-component-track {
@@ -713,32 +650,17 @@
   background: var(--room-cyan);
 }
 
-.room-component-row:nth-child(3n + 2) .room-component-fill {
-  background: var(--room-amber);
-}
-
-.room-component-row:nth-child(3n) .room-component-fill {
-  background: var(--room-blue);
-}
-
 .room-component-value {
   color: var(--room-ink);
-  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
   text-align: right;
 }
 
 .room-evidence-sources {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 1rem;
-}
-
-.room-source-chip {
-  padding: 0.28rem 0.4rem;
-  font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
-  text-transform: uppercase;
+  margin: 1rem 0 0;
+  color: var(--room-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 .room-confidence {
@@ -750,28 +672,26 @@
   padding-top: 0.85rem;
   border-top: 1px solid var(--room-line);
   color: var(--room-subtle);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .room-confidence strong {
   color: var(--room-ink);
-  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
 
 .room-exact {
   border-top: 1px solid var(--room-line);
   color: var(--room-muted);
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
 }
 
 .room-exact summary {
   min-height: 2.75rem;
   padding: 0.8rem 1rem;
   cursor: pointer;
-  font-family: var(--ui-font-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
 }
 
 .room-table-search {
@@ -781,15 +701,14 @@
   gap: 1rem;
   padding: 0 1rem 0.75rem;
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-table-search input {
   width: min(14rem, 55%);
-  min-height: 2rem;
-  padding: 0.35rem 0.55rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.65rem;
   border: 1px solid var(--room-line);
   border-radius: 0;
   color: var(--room-ink);
@@ -816,13 +735,12 @@
   padding: 0.55rem;
   border: 1px solid var(--room-line);
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-compare-tray > span {
-  color: var(--room-amber);
-  text-transform: uppercase;
+  color: var(--room-muted);
 }
 
 .room-compare-tray button,
@@ -867,7 +785,6 @@
 .room-table thead button {
   padding: 0;
   cursor: pointer;
-  text-transform: uppercase;
 }
 
 .room-table thead button[aria-pressed="true"] {
@@ -913,10 +830,9 @@
 
 .room-table th {
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   font-weight: 500;
-  text-transform: uppercase;
 }
 
 .room-deadline-rail {
@@ -940,17 +856,24 @@
 }
 
 .room-pin-button {
-  min-height: 2.35rem;
-  padding-inline: 0.7rem;
+  min-height: 2.75rem;
+  padding-inline: 0.9rem;
   border: 1px solid var(--room-line);
   color: var(--room-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
   background: transparent;
+  transition:
+    color var(--ui-fast) ease,
+    border-color var(--ui-fast) ease,
+    background-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
 }
 
-.room-pin-button:hover,
+.room-pin-button:active {
+  transform: scale(0.97);
+}
+
 .room-pin-button[aria-pressed="true"] {
   color: var(--room-canvas);
   border-color: var(--room-amber);
@@ -971,21 +894,20 @@
   display: block;
   font-family: "Barlow Condensed", sans-serif;
   font-size: 1.55rem;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
-  text-transform: uppercase;
 }
 
 .room-rail-readout span {
   color: var(--room-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .room-error {
   color: var(--room-coral);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 76rem) {
@@ -1022,11 +944,12 @@
   }
 
   .room-hero h1 {
-    font-size: clamp(3.2rem, 18vw, 5.1rem);
+    font-size: clamp(2.6rem, 13vw, 3.4rem);
   }
 
   .room-mode-stack {
     justify-items: start;
+    text-align: left;
   }
 
   .room-grid {
@@ -1049,7 +972,7 @@
   }
 
   .room-source-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .room-chart-wrap {
@@ -1101,9 +1024,33 @@
   }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .room-fixture:not([aria-pressed="true"]):hover,
+  .room-icon-button:hover:not(:disabled) {
+    color: var(--room-ink);
+    border-color: var(--room-line-strong);
+    background: var(--room-panel-raised);
+  }
+
+  .room-player:not([aria-pressed="true"]):hover {
+    background: var(--room-panel-raised);
+  }
+
+  .room-pin-button:not([aria-pressed="true"]):hover {
+    color: var(--room-ink);
+    border-color: var(--room-line-strong);
+    background: var(--room-panel-raised);
+  }
+
+  .room-table tbody tr:hover {
+    background: rgb(255 255 255 / 0.02);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .room-fixture,
   .room-icon-button,
+  .room-pin-button,
   .room-player {
     transition: none;
   }
