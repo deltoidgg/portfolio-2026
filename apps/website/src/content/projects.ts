@@ -57,7 +57,7 @@ export const projects: Project[] = [
     tags: ["TanStack Start", "TypeScript", "Neon", "Cloudflare R2", "GitHub Actions"],
     cover: projectImage(
       "fpl/squad-hero",
-      "The FPL Lab squad builder, headed ‘Build the edge.’, with a £100m budget bar and gameweek horizon controls",
+      "The FPL Lab squad builder, with a £100m budget bar and gameweek horizon controls above an empty pitch",
     ),
     actions: [
       { kind: "live", label: "Open the lab", href: "https://fpl.wasimarif.com" },

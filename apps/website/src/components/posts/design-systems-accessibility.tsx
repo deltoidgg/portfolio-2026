@@ -45,6 +45,7 @@ function AdoptionBandChart() {
   return (
     <PlotBox
       label={ariaLabel}
+      height={250}
       render={(Plot, node) => {
         node.replaceChildren(
           Plot.plot({
@@ -89,7 +90,7 @@ export function DesignSystemsAccessibilityPost() {
           Pick a design system and you get accessibility for free. I&rsquo;ve heard some version of
           that line in pitch decks, conference talks, and README files for years. The components
           ship with sensible semantics, the contrast decisions are already made, and focus
-          management is somebody else's solved problem. It sounds plausible. As far as I could find,
+          management is somebody else’s solved problem. It sounds plausible. As far as I could find,
           nobody had checked it against real production websites at any serious scale.
         </p>
         <p>
@@ -110,7 +111,7 @@ export function DesignSystemsAccessibilityPost() {
           of accessibility violations that axe-core finds on the page.
         </p>
         <p>
-          Axe-core is the engine behind Lighthouse's accessibility audit, so a violation here means
+          Axe-core is the engine behind Lighthouse’s accessibility audit, so a violation here means
           the machine-checkable kind: missing form labels, broken contrast, bad ARIA, images without
           alt text. No scanner can tell you whether your focus order makes sense to an actual
           person. Keep that in mind for everything below. This is the floor of accessibility, not
@@ -185,7 +186,7 @@ export function DesignSystemsAccessibilityPost() {
           <li>
             <strong>The within-agency estimate barely moved.</strong> If team quality explained
             everything, the association should collapse once you stop comparing across agencies and
-            only compare each agency's sites with each other. It shrank by about{" "}
+            only compare each agency’s sites with each other. It shrank by about{" "}
             {Math.round(attenuation.shrinkagePct)}% and then held.
           </li>
           <li>
@@ -197,7 +198,7 @@ export function DesignSystemsAccessibilityPost() {
             {placebos.clsBetaStd.toFixed(2)} and {placebos.lcpBetaStd.toFixed(2)}).
           </li>
           <li>
-            <strong>Selection bounds.</strong> There is a standard method, Oster's, that asks how
+            <strong>Selection bounds.</strong> There is a standard method, Oster’s, that asks how
             strong an unobserved team-quality effect would need to be to wipe the result out. The
             answer is: stronger than everything I did control for, combined. Even then the estimate
             stays clearly negative.
@@ -289,7 +290,7 @@ export function DesignSystemsAccessibilityPost() {
           <li>
             The floor is cheap to measure. My scan of{" "}
             {govukSummary.meta.scannedSites.toLocaleString()} sites took one afternoon on one laptop
-            with open tooling, and your estate is smaller than a country's. Point axe-core at it.
+            with open tooling, and your estate is smaller than a country’s. Point axe-core at it.
             Just remember that passing the scanner is the start of accessibility work, not the end
             of it.
           </li>

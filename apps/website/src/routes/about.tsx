@@ -10,25 +10,6 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
-const habits = [
-  {
-    title: "Show your working.",
-    copy: "If a number is on screen, you should be able to find out where it came from. That goes for dashboards, forecasts and research alike.",
-  },
-  {
-    title: "Build accessibility in, don’t bolt it on.",
-    copy: "Good semantics, focus handling and readable contrast are much cheaper at the start than in a last-minute audit.",
-  },
-  {
-    title: "Sweat the in-between bits.",
-    copy: "The place where data, design and code meet is usually where a product either feels great or falls apart.",
-  },
-  {
-    title: "Be honest about what’s unproven.",
-    copy: "Working software is one thing. Whether it actually helped anyone is a different question, and I try not to blur the two.",
-  },
-];
-
 function AboutPage() {
   return (
     <div className="page about">
@@ -70,15 +51,20 @@ function AboutPage() {
         </p>
       </div>
 
-      <section className="about__section" aria-labelledby="habits-heading">
+      <section className="about__section about__prose" aria-labelledby="habits-heading">
         <h2 id="habits-heading">How I like to work</h2>
-        <ul className="habits">
-          {habits.map((habit) => (
-            <li key={habit.title}>
-              <strong>{habit.title}</strong> {habit.copy}
-            </li>
-          ))}
-        </ul>
+        <p>
+          If a number is on screen, I want to be able to say where it came from, whether it&rsquo;s
+          a dashboard, a forecast or a research result. I build accessibility in from the start too.
+          Good semantics, focus handling and readable contrast cost far less early on than they do
+          in a last-minute audit.
+        </p>
+        <p>
+          I spend a lot of time in the gaps where data, design and code meet, because that&rsquo;s
+          usually where a product either feels great or falls apart. And I try to be upfront about
+          what&rsquo;s unproven. Working software is one thing, whether it actually helped anyone is
+          another, and I don&rsquo;t like blurring the two.
+        </p>
       </section>
 
       <section className="about__section" aria-labelledby="more-heading">
