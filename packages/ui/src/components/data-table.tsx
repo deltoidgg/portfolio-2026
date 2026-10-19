@@ -36,7 +36,9 @@ export function DataTable<Row>({
       aria-label={scrollLabel ?? caption}
       tabIndex={0}
       className={cn(
-        "overflow-x-auto rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        // the 2px of padding (pulled back with a negative margin) stops the scroll container
+        // clipping the overhang of a capital T at the start of the caption
+        "-mx-0.5 overflow-x-auto rounded-sm px-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         className,
       )}
     >
