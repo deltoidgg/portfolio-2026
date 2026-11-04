@@ -24,9 +24,9 @@ describe("project registry", () => {
 
   test("features current product work and keeps availability separate from lifecycle", () => {
     expect(featuredProjects.map((project) => project.slug)).toEqual([
+      "rewriter",
       "join-the-conversation",
       "fpl",
-      "rewriter",
     ]);
 
     for (const project of projects) {
@@ -55,7 +55,7 @@ describe("project registry", () => {
   });
 
   test("links each case study to the next one, wrapping at the end", () => {
-    const order = ["join-the-conversation", "fpl", "rewriter", "mockpit", "openfgc"];
+    const order = ["rewriter", "join-the-conversation", "fpl", "mockpit", "openfgc"];
     order.forEach((slug, index) => {
       expect(nextProject(slug)?.slug).toBe(order[(index + 1) % order.length]);
     });
