@@ -104,8 +104,7 @@ const joinCaptures: Capture[] = [
 ];
 
 // Rewriter's themes run their scenes in WebGL, which headless Chromium draws in software, so
-// these force the scene on and let it move. Until the themes are deployed, point
-// REWRITER_ORIGIN at a dev server (`vp dev --port 3150` in apps/web) and run this directly.
+// these force the scene on and let it move.
 const rewriterOrigin = (path: string) => `${rewriter}${path}`;
 const rewriterThemes = ["starlight", "paper-worlds", "living-ink", "lantern"] as const;
 const chapter = "/books/treasure-island/chapter-1";

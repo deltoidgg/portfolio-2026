@@ -50,11 +50,10 @@ export function RewriterProject() {
 
       <ProjectSection id="status" title="Where it’s at">
         <p>
-          It&rsquo;s live with 103 public-domain books, and the themes are the newest part. The job
-          I still haven&rsquo;t done is testing with real readers at each level, so I don&rsquo;t
-          claim the age bands are right. There&rsquo;s an evaluation set that checks sentence
-          length, reading grade, names and added commentary, but that tests the text, not the
-          reader.
+          It&rsquo;s live with 103 public-domain books and all four themes. The job I still
+          haven&rsquo;t done is testing with real readers at each level, so I don&rsquo;t claim the
+          age bands are right. There&rsquo;s an evaluation set that checks sentence length, reading
+          grade, names and added commentary, but that tests the text, not the reader.
         </p>
         <p>
           I also haven&rsquo;t measured the theme scenes on a range of real hardware. Headless
