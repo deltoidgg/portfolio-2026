@@ -6,6 +6,7 @@ import { featuredProjects, nextProject, projectBySlug, projects } from "../src/c
 describe("project registry", () => {
   test("exposes the agreed case studies with unique slugs and content", () => {
     expect(projects.map((project) => project.slug)).toEqual([
+      "join-the-conversation",
       "fpl",
       "mockpit",
       "rewriter",
@@ -22,12 +23,19 @@ describe("project registry", () => {
   });
 
   test("features current product work and keeps availability separate from lifecycle", () => {
-    expect(featuredProjects.map((project) => project.slug)).toEqual(["fpl", "rewriter", "mockpit"]);
+    expect(featuredProjects.map((project) => project.slug)).toEqual([
+      "join-the-conversation",
+      "fpl",
+      "rewriter",
+    ]);
 
     for (const project of projects) {
-      expect(["active", "maintained", "archived"]).toContain(project.lifecycle);
+      expect(["in-development", "active", "maintained", "archived"]).toContain(project.lifecycle);
       expect(project.role).toBe("Independent creator");
-      expect(project.actions.length).toBeGreaterThan(0);
+      // only unreleased work may go without a link to try it or read the source
+      if (project.lifecycle !== "in-development") {
+        expect(project.actions.length).toBeGreaterThan(0);
+      }
       expect(project.summary).not.toMatch(/—/);
     }
   });
@@ -47,7 +55,7 @@ describe("project registry", () => {
   });
 
   test("links each case study to the next one, wrapping at the end", () => {
-    const order = ["fpl", "rewriter", "mockpit", "openfgc"];
+    const order = ["join-the-conversation", "fpl", "rewriter", "mockpit", "openfgc"];
     order.forEach((slug, index) => {
       expect(nextProject(slug)?.slug).toBe(order[(index + 1) % order.length]);
     });

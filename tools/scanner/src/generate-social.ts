@@ -33,8 +33,15 @@ const cards: SocialCard[] = [
   {
     output: join(website, "projects.png"),
     title: "Work",
-    detail: "A reading app, a Fantasy Premier League lab, devtools and a fighting game stats site.",
+    detail:
+      "A listening assistant, a reading app, a Fantasy Premier League lab, devtools and a fighting game stats site.",
     image: "rewriter/library",
+  },
+  {
+    output: join(website, "join-the-conversation.png"),
+    title: "Join the Conversation",
+    detail: "Hold a key and ask about whatever your computer just played.",
+    image: "join/home",
   },
   {
     output: join(website, "fpl.png"),
