@@ -30,6 +30,10 @@ interface Capture {
   viewport?: { width: number; height: number };
   /** Keep the page background transparent, for overlays like Join's bar. */
   transparent?: boolean;
+  /** Let the page animate, for themes whose scenes only draw in full motion. */
+  motion?: boolean;
+  /** localStorage entries to set after it is cleared, before the page loads. */
+  storage?: Record<string, string>;
 }
 
 interface MediaEntry {
@@ -99,19 +103,122 @@ const joinCaptures: Capture[] = [
   })),
 ];
 
-const captures: Capture[] = [
-  { slug: "rewriter", name: "library", url: `${rewriter}/` },
-  { slug: "rewriter", name: "book", url: `${rewriter}/books/emma` },
-  { slug: "rewriter", name: "reader", url: `${rewriter}/books/emma/volume-1-chapter-1` },
+// Rewriter's themes run their scenes in WebGL, which headless Chromium draws in software, so
+// these force the scene on and let it move.
+const rewriterOrigin = (path: string) => `${rewriter}${path}`;
+const rewriterThemes = ["starlight", "paper-worlds", "living-ink", "lantern"] as const;
+const chapter = "/books/treasure-island/chapter-1";
+/** Skips the first-visit "Pick your look" prompt. */
+const promptSeen = { "rewriter:theme-prompt": "asked" };
+/** Gives a theme's scene time to start and fade in over its CSS backdrop. */
+const settle = (page: Page) => page.waitForTimeout(2500);
+
+const rewriterCaptures: Capture[] = [
+  ...rewriterThemes.map((theme) => ({
+    slug: "rewriter",
+    name: `theme-${theme}`,
+    url: rewriterOrigin(`/?theme=${theme}&scene=force&effects=full`),
+    motion: true,
+    storage: promptSeen,
+    prepare: settle,
+  })),
+  {
+    // a first visit, with no theme chosen yet
+    slug: "rewriter",
+    name: "prompt",
+    url: rewriterOrigin("/?scene=force&effects=full"),
+    motion: true,
+    prepare: settle,
+  },
+  {
+    slug: "rewriter",
+    name: "shelf",
+    url: rewriterOrigin("/?theme=starlight&scene=force&effects=full"),
+    motion: true,
+    storage: promptSeen,
+    prepare: async (page) => {
+      const heading = page.getByRole("heading", { name: "On the shelf" });
+      const top = await heading.evaluate((element) => element.getBoundingClientRect().top);
+      await page.evaluate((y) => window.scrollBy(0, y - 56), top);
+      await page.waitForTimeout(1200);
+    },
+  },
+  ...(["starlight", "paper-worlds"] as const).map((theme) => ({
+    slug: "rewriter",
+    name: `reader-${theme}`,
+    url: rewriterOrigin(`${chapter}?theme=${theme}&scene=force&effects=full`),
+    motion: true,
+    storage: promptSeen,
+    prepare: settle,
+  })),
+  {
+    slug: "rewriter",
+    name: "curl",
+    url: rewriterOrigin(`${chapter}?theme=starlight&scene=force&effects=full`),
+    motion: true,
+    storage: promptSeen,
+    prepare: async (page) => {
+      await page.waitForSelector(".reader-book-stage[data-turn-engine='webgl']");
+      const box = (await page.locator(".reader-page-viewport").boundingBox())!;
+      // pick the right-hand page up by its outer edge and hold it partway over
+      const x = box.x + box.width - 2;
+      const y = box.y + box.height * 0.8;
+      await page.mouse.move(x, y);
+      await page.waitForTimeout(500);
+      await page.mouse.down();
+      for (let step = 1; step <= 12; step += 1) {
+        await page.mouse.move(x - 380 * (step / 12), y - 90 * (step / 12));
+        await page.waitForTimeout(30);
+      }
+      await page.waitForTimeout(700);
+    },
+  },
   {
     slug: "rewriter",
     name: "preferences",
-    url: `${rewriter}/books/emma/volume-1-chapter-1`,
+    url: rewriterOrigin(`${chapter}?theme=starlight&scene=force&effects=full`),
+    motion: true,
+    storage: promptSeen,
     prepare: async (page) => {
       await page.getByRole("button", { name: "Open reading preferences" }).click();
       await page.waitForTimeout(800);
     },
   },
+  {
+    // Lantern Room's ember transition, caught partway through a rewrite in the home page demo
+    slug: "rewriter",
+    name: "rewrite-lantern",
+    url: rewriterOrigin("/?theme=lantern&scene=force&effects=full"),
+    motion: true,
+    storage: promptSeen,
+    clip: { x: 80, y: 300, width: 1280, height: 600 },
+    prepare: async (page) => {
+      const passage = page.locator("[data-demo-passage]").first();
+      const top = await passage.evaluate((element) => element.getBoundingClientRect().top);
+      await page.evaluate((y) => window.scrollBy(0, y - 460), top);
+      await page.waitForTimeout(1500);
+      // the transition is cut off after 900 ms, which a 2x software-rendered screenshot can
+      // outlast, so hold back the cut-off and freeze every animation at the same moment instead
+      await page.evaluate(() => {
+        const schedule = window.setTimeout;
+        window.setTimeout = ((handler: TimerHandler, delay?: number, ...rest: unknown[]) =>
+          (delay ?? 0) >= 800 ? 0 : schedule(handler, delay, ...rest)) as typeof window.setTimeout;
+      });
+      await page.getByText("Ages 6 to 8", { exact: true }).first().click();
+      await page.waitForSelector("[data-demo-passage] [data-word]", { state: "attached" });
+      await page.evaluate(() => {
+        for (const animation of document.getAnimations()) {
+          animation.pause();
+          animation.currentTime = 300;
+        }
+      });
+      await page.waitForTimeout(200);
+    },
+  },
+];
+
+const captures: Capture[] = [
+  ...rewriterCaptures,
   { slug: "fpl", name: "squad-hero", url: squadUrl },
   {
     slug: "fpl",
@@ -186,7 +293,11 @@ async function readManifest(): Promise<Record<string, MediaEntry>> {
 }
 
 const only = process.argv.slice(2);
-const selected = captures.filter((capture) => only.length === 0 || only.includes(capture.slug));
+const onlyName = process.env.CAPTURE_NAME;
+const selected = captures.filter(
+  (capture) =>
+    (only.length === 0 || only.includes(capture.slug)) && (!onlyName || capture.name === onlyName),
+);
 if (only.includes("join") && !joinOrigin) {
   console.warn("Skipping join: set JOIN_ORIGIN to its renderer dev server (see above).");
 }
@@ -198,15 +309,19 @@ try {
     const context = await browser.newContext({
       viewport: capture.viewport ?? { width: 1440, height: 900 },
       deviceScaleFactor: 2,
-      reducedMotion: "reduce",
+      reducedMotion: capture.motion ? "no-preference" : "reduce",
     });
     const page = await context.newPage();
-    await page.addInitScript(() => localStorage.clear());
+    await page.addInitScript((entries) => {
+      localStorage.clear();
+      for (const [key, value] of Object.entries(entries)) localStorage.setItem(key, value);
+    }, capture.storage ?? {});
     await page.goto(capture.url, { waitUntil: "networkidle", timeout: 60_000 });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(1500);
     await capture.prepare?.(page);
-    await page.waitForTimeout(600);
+    // a moving capture is timed by its own prepare step
+    if (!capture.motion) await page.waitForTimeout(600);
     const image = await page.screenshot({
       clip: capture.clip,
       omitBackground: capture.transparent,

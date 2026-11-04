@@ -829,7 +829,7 @@ a {
 
 .pipeline {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--steps, 5), minmax(0, 1fr));
   gap: 0.75rem;
   counter-reset: step;
 }
@@ -1079,8 +1079,8 @@ a {
   box-shadow: 0 1px 0 var(--ui-edge);
 }
 
-/* Join: the context window explorer */
-.context-window__choices {
+/* Pill-shaped radio choices, shared by the interactive figures */
+.choices {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1090,25 +1090,25 @@ a {
   padding: 0;
 }
 
-.context-window__choices legend {
+.choices legend {
   float: left;
   margin-right: 0.6rem;
   color: var(--ui-ink-muted);
   font-size: 0.9rem;
 }
 
-.context-window__choices label {
+.choices label {
   position: relative;
 }
 
-.context-window__choices input {
+.choices input {
   position: absolute;
   inset: 0;
   opacity: 0;
   cursor: pointer;
 }
 
-.context-window__choices label span {
+.choices label span {
   display: inline-flex;
   min-height: 2.25rem;
   align-items: center;
@@ -1123,17 +1123,18 @@ a {
     color var(--ui-fast) ease;
 }
 
-.context-window__choices input:checked + span {
+.choices input:checked + span {
   border-color: var(--ui-ink);
   background: var(--ui-ink);
   color: var(--ui-canvas);
 }
 
-.context-window__choices input:focus-visible + span {
+.choices input:focus-visible + span {
   outline: 2px solid var(--ui-accent);
   outline-offset: 3px;
 }
 
+/* Join: the context window explorer */
 .context-window__timeline {
   position: relative;
   height: 4.25rem;
@@ -1208,7 +1209,7 @@ a {
   white-space: pre-wrap;
 }
 
-/* Join: process diagram */
+/* A hub and the parts it talks to */
 .architecture__hub {
   display: grid;
   gap: 0.3rem;
@@ -1421,7 +1422,7 @@ a {
   border-radius: 0 0.6rem 0.6rem 0;
 }
 
-/* Join: light and dark comparison */
+/* Two screenshots of one screen, split by a slider */
 .theme-compare__frame {
   position: relative;
 }
@@ -1478,6 +1479,330 @@ a {
   outline-offset: 3px;
 }
 
+/* Rewriter: one paragraph at each reading level */
+.levels__passage {
+  display: grid;
+  margin-top: 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--ui-surface);
+  padding: 1.25rem 1.4rem;
+}
+
+.levels__passage p {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--ui-ink);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  text-wrap: pretty;
+  transition:
+    opacity var(--ui-base) var(--ui-ease-out),
+    visibility var(--ui-base);
+}
+
+.levels__passage p[data-active="false"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.levels__readout {
+  margin: 1rem 0 0.5rem;
+  color: var(--ui-ink-muted);
+  font-size: 0.9rem;
+}
+
+.levels__chart {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.levels__chart th {
+  width: 6.5rem;
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  color: var(--ui-ink-subtle);
+  font-size: 0.8125rem;
+  font-weight: 450;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.levels__chart tr[data-active="true"] th {
+  color: var(--ui-ink);
+  font-weight: 600;
+}
+
+.levels__chart td {
+  padding-block: 0.3rem;
+}
+
+.levels__strip {
+  display: flex;
+  gap: 2px;
+}
+
+.levels__strip span {
+  height: 0.6rem;
+  min-width: 2px;
+  border-radius: 4px;
+  background: var(--ui-edge-strong);
+  transition: background-color var(--ui-fast) ease;
+}
+
+.levels__chart tr[data-active="true"] .levels__strip span {
+  background: var(--ui-accent);
+}
+
+/* Rewriter: the theme picker */
+.theme-picker__choices {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  border: 0;
+  padding: 0;
+}
+
+.theme-picker__choices label {
+  position: relative;
+}
+
+.theme-picker__choices input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.theme-picker__choices label > span {
+  display: block;
+  height: 100%;
+  border: 1px solid var(--ui-edge-strong);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--ui-ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  transition: border-color var(--ui-fast) ease;
+}
+
+.theme-picker__choices strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--ui-ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.theme-picker__choices input:checked + span {
+  border-color: var(--ui-ink);
+  box-shadow: inset 0 0 0 1px var(--ui-ink);
+}
+
+.theme-picker__choices input:focus-visible + span {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 3px;
+}
+
+.theme-picker__stage {
+  display: grid;
+}
+
+.theme-picker__shot {
+  grid-area: 1 / 1;
+  transition:
+    opacity var(--ui-base) var(--ui-ease-out),
+    visibility var(--ui-base);
+}
+
+.theme-picker__shot[data-active="false"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.theme-picker__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Rewriter: a chapter rewritten part by part */
+.segments__control {
+  display: block;
+  color: var(--ui-ink-muted);
+  font-size: 0.9rem;
+}
+
+.segments__range {
+  width: 100%;
+  margin: 0.6rem 0 1rem;
+  accent-color: var(--ui-ink);
+}
+
+.segments__bar {
+  position: relative;
+  display: flex;
+  gap: 2px;
+}
+
+.segments__bar > span:not(.segments__marker) {
+  display: flex;
+  min-width: 0;
+  min-height: 2.5rem;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 4px;
+  padding-inline: 0.6rem;
+  color: var(--ui-ink-muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  transition:
+    background-color var(--ui-fast) ease,
+    color var(--ui-fast) ease;
+}
+
+.segments [data-state="read"] {
+  --swatch: var(--ui-accent);
+}
+
+.segments [data-state="ahead"] {
+  --swatch: var(--ui-accent-soft);
+}
+
+.segments [data-state="waiting"] {
+  --swatch: var(--ui-surface);
+}
+
+.segments__bar > span[data-state] {
+  background: var(--swatch);
+}
+
+.segments__bar > span[data-state="read"] {
+  color: var(--ui-canvas);
+}
+
+.segments__bar > span[data-state="ahead"] {
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+  color: var(--ui-ink);
+}
+
+.segments__bar > span[data-state="waiting"] {
+  box-shadow: inset 0 0 0 1px var(--ui-edge-strong);
+}
+
+.segments__marker {
+  position: absolute;
+  top: -0.35rem;
+  bottom: -0.35rem;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ui-ink);
+  translate: -1px 0;
+  pointer-events: none;
+}
+
+.segments__key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ui-ink-subtle);
+  font-size: 0.8125rem;
+}
+
+.segments__key li::before {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.4rem;
+  border-radius: 3px;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px var(--ui-edge-strong);
+  content: "";
+  vertical-align: -0.1rem;
+}
+
+.segments__key li[data-state="ahead"]::before {
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+
+.segments__readout {
+  min-height: 3.2em;
+  margin: 0.9rem 0 0;
+  color: var(--ui-ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Rewriter: what the daily budget does as it fills */
+.budget__bar {
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  gap: 2px;
+}
+
+.budget__bar span {
+  height: 0.75rem;
+  border-radius: 4px;
+}
+
+.budget__bar [data-zone="ahead"] {
+  background: var(--ui-accent);
+}
+
+.budget__bar [data-zone="demand"] {
+  background: var(--ui-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+
+.budget__zones {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.budget__zones > div {
+  display: grid;
+  grid-template-columns: 0.75rem minmax(0, 1fr);
+  column-gap: 0.6rem;
+}
+
+.budget__zones > div::before {
+  grid-row: 1 / 3;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-top: 0.3rem;
+  border-radius: 3px;
+  content: "";
+}
+
+.budget__zones [data-zone="ahead"]::before {
+  background: var(--ui-accent);
+}
+
+.budget__zones [data-zone="demand"]::before {
+  background: var(--ui-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+
+.budget__zones [data-zone="cap"]::before {
+  border: 1px solid var(--ui-edge-strong);
+}
+
+.budget__zones dt {
+  color: var(--ui-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.budget__zones dd {
+  margin: 0.2rem 0 0;
+  color: var(--ui-ink-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 @media (max-width: 56rem) {
   .bar-demo__layout {
     grid-template-columns: minmax(0, 1fr);
@@ -1485,6 +1810,10 @@ a {
 
   .bar-demo__stage {
     max-width: 28rem;
+  }
+
+  .theme-picker__choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .architecture__spokes {
@@ -1501,6 +1830,10 @@ a {
   .palette__list,
   .architecture__spokes {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .levels__chart th {
+    width: 5rem;
   }
 
   .latency__table thead tr {

@@ -18,6 +18,7 @@ const targets = [
       "/projects/fpl",
       "/projects/mockpit",
       "/projects/rewriter",
+      "/projects/rewriter?tab=technical",
       "/projects/openfgc",
       "/writing",
       "/writing/design-systems-accessibility",

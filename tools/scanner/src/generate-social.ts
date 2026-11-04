@@ -35,7 +35,7 @@ const cards: SocialCard[] = [
     title: "Work",
     detail:
       "A listening assistant, a reading app, a Fantasy Premier League lab, devtools and a fighting game stats site.",
-    image: "rewriter/library",
+    image: "rewriter/theme-starlight",
   },
   {
     output: join(website, "join-the-conversation.png"),
@@ -60,7 +60,7 @@ const cards: SocialCard[] = [
     output: join(website, "rewriter.png"),
     title: "Rewriter",
     detail: "Classic novels rewritten for younger readers, and read aloud.",
-    image: "rewriter/reader",
+    image: "rewriter/reader-starlight",
   },
   {
     output: join(website, "openfgc.png"),

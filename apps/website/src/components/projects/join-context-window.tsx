@@ -85,7 +85,7 @@ export function JoinContextWindow() {
 
   return (
     <figure className="case-figure case-figure--wide context-window">
-      <fieldset className="context-window__choices">
+      <fieldset className="choices">
         <legend>Context for each question</legend>
         {choices.map((choice) => (
           <label key={choice}>

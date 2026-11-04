@@ -124,12 +124,7 @@
     "height": 900,
     "widths": [640, 1280, 1600]
   },
-  "rewriter/book": {
-    "width": 1920,
-    "height": 1200,
-    "widths": [640, 1280, 1920]
-  },
-  "rewriter/library": {
+  "rewriter/curl": {
     "width": 1920,
     "height": 1200,
     "widths": [640, 1280, 1920]
@@ -139,7 +134,47 @@
     "height": 1200,
     "widths": [640, 1280, 1920]
   },
-  "rewriter/reader": {
+  "rewriter/prompt": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/reader-paper-worlds": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/reader-starlight": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/rewrite-lantern": {
+    "width": 1920,
+    "height": 900,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/shelf": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/theme-lantern": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/theme-living-ink": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/theme-paper-worlds": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "rewriter/theme-starlight": {
     "width": 1920,
     "height": 1200,
     "widths": [640, 1280, 1920]

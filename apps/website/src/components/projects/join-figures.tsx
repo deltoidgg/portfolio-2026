@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { projectImage } from "../../content/projects";
-import { ProjectPicture } from "../project-picture";
+import { ArchitectureFigure, CompareSlider, PipelineFigure } from "./case-figures";
 
 const processes = [
   {
@@ -29,28 +28,12 @@ const processes = [
 
 export function JoinArchitecture() {
   return (
-    <figure className="case-figure case-figure--wide architecture">
-      <div className="architecture__hub">
-        <strong>Electron main process</strong>
-        <span>
-          One Effect runtime: capture, transcription, asking, models, storage and settings. It owns
-          every bit of state.
-        </span>
-      </div>
-      <ul className="architecture__spokes">
-        {processes.map((process) => (
-          <li key={process.name}>
-            <span className="architecture__via">{process.via}</span>
-            <strong>{process.name}</strong>
-            <span>{process.detail}</span>
-          </li>
-        ))}
-      </ul>
-      <figcaption>
-        The processes and what they talk over. The windows can only send typed requests, so none of
-        them can reach the file system or an API key.
-      </figcaption>
-    </figure>
+    <ArchitectureFigure
+      hub="Electron main process"
+      hubDetail="One Effect runtime: capture, transcription, asking, models, storage and settings. It owns every bit of state."
+      parts={processes}
+      caption="The processes and what they talk over. The windows can only send typed requests, so none of them can reach the file system or an API key."
+    />
   );
 }
 
@@ -172,43 +155,20 @@ export function JoinPalette() {
 }
 
 export function JoinThemeCompare() {
-  const [split, setSplit] = useState(50);
   return (
-    <figure className="case-figure case-figure--wide theme-compare">
-      <div className="case-figure__frame theme-compare__frame">
-        <ProjectPicture
-          image={projectImage(
-            "join/home-dark",
-            "The home screen in the dark theme, black cherry with a berry accent",
-          )}
-          sizes="(min-width: 72rem) 64rem, 100vw"
-        />
-        <div className="theme-compare__top" style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}>
-          <ProjectPicture
-            image={projectImage(
-              "join/home",
-              "The same home screen in the light theme, warm porcelain with a burgundy accent",
-            )}
-            sizes="(min-width: 72rem) 64rem, 100vw"
-          />
-        </div>
-        <span className="theme-compare__handle" style={{ left: `${split}%` }} aria-hidden="true" />
-        <input
-          className="theme-compare__input"
-          type="range"
-          min={0}
-          max={100}
-          value={split}
-          onChange={(event) => setSplit(Number(event.target.value))}
-          aria-label="How much of the light theme to show"
-          aria-valuetext={`${split}% light, ${100 - split}% dark`}
-        />
-      </div>
-      <figcaption>
-        Home in light and dark, with sample data. Drag across it to compare. In dark, the accent
-        moves up to berry so buttons glow against black cherry instead of sinking into it.
-      </figcaption>
-    </figure>
+    <CompareSlider
+      under={projectImage(
+        "join/home-dark",
+        "The home screen in the dark theme, black cherry with a berry accent",
+      )}
+      over={projectImage(
+        "join/home",
+        "The same home screen in the light theme, warm porcelain with a burgundy accent",
+      )}
+      label="How much of the light theme to show"
+      describe={(split) => `${split}% light, ${100 - split}% dark`}
+      caption="Home in light and dark, with sample data. Drag across it to compare. In dark, the accent moves up to berry so buttons glow against black cherry instead of sinking into it."
+    />
   );
 }
 
@@ -239,19 +199,10 @@ const manifestSteps = [
 
 export function JoinManifestSteps() {
   return (
-    <figure className="case-figure case-figure--wide">
-      <ol className="pipeline" aria-label="How a model manifest gets to the app">
-        {manifestSteps.map((step) => (
-          <li key={step.title} className="pipeline__step">
-            <strong>{step.title}</strong>
-            <span>{step.detail}</span>
-          </li>
-        ))}
-      </ol>
-      <figcaption>
-        How the list of downloadable models gets from me to the app. A broken or hostile server can
-        at worst send the app back to the list it shipped with.
-      </figcaption>
-    </figure>
+    <PipelineFigure
+      label="How a model manifest gets to the app"
+      steps={manifestSteps}
+      caption="How the list of downloadable models gets from me to the app. A broken or hostile server can at worst send the app back to the list it shipped with."
+    />
   );
 }
