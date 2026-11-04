@@ -158,11 +158,11 @@ export function JoinThemeCompare() {
   return (
     <CompareSlider
       under={projectImage(
-        "join/home-dark",
+        "join/home",
         "The home screen in the dark theme, black cherry with a berry accent",
       )}
       over={projectImage(
-        "join/home",
+        "join/home-light",
         "The same home screen in the light theme, warm porcelain with a burgundy accent",
       )}
       label="How much of the light theme to show"

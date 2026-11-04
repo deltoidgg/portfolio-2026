@@ -69,14 +69,15 @@ const barCanvas = { width: 525, height: 500 };
 const barStates = ["hearing", "asking", "handsfree", "thinking", "answered", "notice"] as const;
 
 const joinCaptures: Capture[] = [
-  { slug: "join", name: "home", url: joinApp("theme=light&view=home") },
-  { slug: "join", name: "home-dark", url: joinApp("theme=dark&view=home") },
-  { slug: "join", name: "transcript", url: joinApp("theme=light&view=transcript") },
-  { slug: "join", name: "models", url: joinApp("theme=light&view=models") },
+  { slug: "join", name: "home", url: joinApp("theme=dark&view=home") },
+  // the dark theme is the one shown everywhere else; this is only for the light and dark compare
+  { slug: "join", name: "home-light", url: joinApp("theme=light&view=home") },
+  { slug: "join", name: "transcript", url: joinApp("theme=dark&view=transcript") },
+  { slug: "join", name: "models", url: joinApp("theme=dark&view=models") },
   {
     slug: "join",
     name: "privacy",
-    url: joinApp("theme=light&view=settings"),
+    url: joinApp("theme=dark&view=settings"),
     prepare: async (page) => {
       await page.getByRole("button", { name: "Privacy", exact: true }).click();
       await page.waitForTimeout(600);
@@ -85,13 +86,13 @@ const joinCaptures: Capture[] = [
   ...(["Welcome", "Privacy", "TryIt"] as const).map((step) => ({
     slug: "join",
     name: `onboarding-${step.toLowerCase()}`,
-    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=light&step=${step}`,
+    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=dark&step=${step}`,
   })),
   {
     // the video player from setup, at the same scale as the bar, as a backdrop for the bar demo
     slug: "join",
     name: "player",
-    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=light&step=TryIt`,
+    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=dark&step=TryIt`,
     clip: { x: 411, y: 276, width: 618, height: 504 },
   },
   ...barStates.map((scenario) => ({
