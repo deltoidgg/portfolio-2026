@@ -5,6 +5,9 @@ import { projectBySlug } from "../content/projects";
 import { buildMetadata } from "../lib/metadata";
 
 export const Route = createFileRoute("/projects/$slug")({
+  // case studies split into tabs keep the open tab in the URL, so each one can be linked to
+  validateSearch: (search: Record<string, unknown>): { tab?: string } =>
+    typeof search.tab === "string" ? { tab: search.tab } : {},
   loader: ({ params }) => {
     const project = projectBySlug(params.slug);
     if (!project) throw notFound();

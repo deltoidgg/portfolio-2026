@@ -28,16 +28,16 @@ export function FplProject() {
           players on and off the bench.
         </p>
         <p>
-          There&rsquo;s a &ldquo;Suggest a valid squad&rdquo; button too. Honestly it&rsquo;s a
-          simple greedy picker rather than a proper optimiser, but it gets you a sensible starting
-          point to tinker with.
+          There&rsquo;s a &ldquo;Suggest a squad&rdquo; button too. Honestly it&rsquo;s a simple
+          greedy picker rather than a proper optimiser, but it gets you a sensible starting point to
+          tinker with.
         </p>
         <ProjectFigure
           image={projectImage(
             "fpl/squad",
-            "A suggested squad on the pitch, each player card showing expected points, price, range and ownership, next to a player pool and a price frontier chart",
+            "A suggested squad on the pitch, each player card showing expected points, price, range and ownership, next to a player pool and a value-for-money chart",
           )}
-          caption="A suggested squad. Each card shows expected points, the likely range and how much the sources agree, and the chart on the right shows what extra points cost at each price."
+          caption="A suggested squad. Each card shows expected points, the likely range and how much the sources agree. The chart on the right shows how the best value changes as the price goes up."
           wide
         />
         <p>

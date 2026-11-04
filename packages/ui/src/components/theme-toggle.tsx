@@ -29,7 +29,7 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={label}
       title={label}
-      className="grid h-10 w-10 place-items-center rounded-full text-ink-muted transition-colors duration-200 hover:bg-surface hover:text-ink"
+      className="grid h-10 w-10 place-items-center rounded-full text-ink-muted transition-[color,background-color,scale] duration-200 hover:bg-surface hover:text-ink active:scale-90"
     >
       <svg
         className="theme-toggle__icon theme-toggle__icon--sun"

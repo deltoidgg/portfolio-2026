@@ -10,7 +10,8 @@ permissions:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    # pinned because Playwright 1.60 can't install Chromium on ubuntu-latest (26.04) yet
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6

@@ -5,6 +5,7 @@ import { nextProject, type Project, type ProjectImage } from "../../content/proj
 import { ProjectPicture, projectTransition } from "../project-picture";
 
 const statusLabels = {
+  "in-development": "In development, not released yet",
   active: "Live, still working on it",
   maintained: "Live, no longer in development",
   archived: "Archived",
@@ -41,20 +42,22 @@ export function ProjectLayout({ project, children }: { project: Project; childre
             <dd>{project.tags.join(", ")}</dd>
           </div>
         </dl>
-        <div className="case__actions">
-          {project.actions.map((action, index) => (
-            <a
-              key={action.href}
-              href={action.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={index === 0 ? "button button--primary" : "button"}
-            >
-              {action.label}
-              <IconArrowUpRight size={15} aria-hidden="true" />
-            </a>
-          ))}
-        </div>
+        {project.actions.length > 0 ? (
+          <div className="case__actions">
+            {project.actions.map((action, index) => (
+              <a
+                key={action.href}
+                href={action.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={index === 0 ? "button button--primary" : "button"}
+              >
+                {action.label}
+                <IconArrowUpRight size={15} aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        ) : null}
       </header>
 
       <figure className="case__cover" style={projectTransition(project.slug)}>

@@ -19,6 +19,81 @@
     "height": 1200,
     "widths": [640, 1280, 1920]
   },
+  "join/bar-answered": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/bar-asking": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/bar-handsfree": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/bar-hearing": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/bar-notice": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/bar-thinking": {
+    "width": 1050,
+    "height": 1000,
+    "widths": [640, 1050]
+  },
+  "join/home": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/home-dark": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/models": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/onboarding-privacy": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/onboarding-tryit": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/onboarding-welcome": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/player": {
+    "width": 1236,
+    "height": 1008,
+    "widths": [640, 1236]
+  },
+  "join/privacy": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
+  "join/transcript": {
+    "width": 1920,
+    "height": 1200,
+    "widths": [640, 1280, 1920]
+  },
   "mockpit/devtools": {
     "width": 1316,
     "height": 1160,

@@ -1,11 +1,8 @@
 import {
-  IconActivity,
   IconAlertTriangle,
   IconChartDots3,
   IconCircleCheck,
   IconClock,
-  IconDatabase,
-  IconInfoCircle,
   IconList,
   IconPlayerPause,
   IconPlayerPlay,
@@ -51,21 +48,21 @@ const modes = {
   forecast: {
     label: "Forecast",
     x: "Projected points",
-    y: "Haul probability",
+    y: "Chance of a big haul",
     xFormat: (value: number) => value.toFixed(1),
     yFormat: (value: number) => `${Math.round(value * 100)}%`,
   },
   value: {
     label: "Value",
-    x: "Projected points / £m",
+    x: "Projected points per £m",
     y: "Projected points",
     xFormat: (value: number) => value.toFixed(2),
     yFormat: (value: number) => value.toFixed(1),
   },
   opportunity: {
     label: "Opportunity",
-    x: "Projected points / £m",
-    y: "Ownership rank gap",
+    x: "Projected points per £m",
+    y: "Forecast rank vs ownership rank",
     xFormat: (value: number) => value.toFixed(2),
     yFormat: (value: number) => (value > 0 ? `+${Math.round(value)}` : `${Math.round(value)}`),
   },
@@ -78,13 +75,13 @@ function playerPrice(player: OpportunityPlayer): number | undefined {
 }
 
 function priceLabel(player: OpportunityPlayer): string {
-  if (player.price.status === "unpublished") return "Not published";
+  if (player.price.status === "unpublished") return "Not published yet";
   if (player.price.status === "official") return `£${player.price.value.toFixed(1)}m`;
   return `~£${player.price.midpoint.toFixed(1)}m`;
 }
 
 function ownershipLabel(player: OpportunityPlayer): string {
-  if (player.ownership.status === "unavailable") return "Not published";
+  if (player.ownership.status === "unavailable") return "Not published yet";
   return `${player.ownership.value.toFixed(1)}%`;
 }
 
@@ -198,6 +195,16 @@ function OpportunityPlot({
   }, [hovered, players, selected, size, xScale, yScale]);
 
   const labelled = players.find((player) => player.registrationKey === (hovered ?? selected));
+  // sit the label beside its dot, flipping to the left near the right edge so it never covers it
+  const labelWidth = 190;
+  const labelPoint = labelled
+    ? { x: xScale(labelled.xValue), y: yScale(labelled.yValue) }
+    : { x: 0, y: 0 };
+  const labelX =
+    labelPoint.x + 16 + labelWidth > size.width - 8
+      ? Math.max(8, labelPoint.x - 16 - labelWidth)
+      : labelPoint.x + 16;
+  const labelY = Math.min(Math.max(32, labelPoint.y - 23), size.height - 56);
   const xTicks = xScale.ticks(size.width < 560 ? 4 : 6);
   const yTicks = yScale.ticks(size.width < 560 ? 4 : 6);
 
@@ -325,14 +332,14 @@ function OpportunityPlot({
         {labelled ? (
           <g
             className="opportunity-point-label"
-            transform={`translate(${Math.min(size.width - 180, xScale(labelled.xValue) + 14)} ${Math.max(32, yScale(labelled.yValue) - 17)})`}
+            transform={`translate(${labelX} ${labelY})`}
             aria-hidden="true"
           >
-            <rect width="166" height="38" rx="2" />
-            <text x="9" y="15">
+            <rect width={labelWidth} height="48" rx="2" />
+            <text x="10" y="20">
               {labelled.name}
             </text>
-            <text className="point-label-value" x="9" y="29">
+            <text className="point-label-value" x="10" y="38">
               {labelled.displayExpectedPoints.toFixed(1)} xP · {labelled.team}
             </text>
           </g>
@@ -366,8 +373,8 @@ function PlayerList({
             <th>Player</th>
             <th>{horizon}-GW xP</th>
             <th>Price</th>
-            <th>Haul</th>
-            <th>60+</th>
+            <th>Big haul</th>
+            <th>Plays 60+</th>
           </tr>
         </thead>
         <tbody>
@@ -378,7 +385,6 @@ function PlayerList({
             >
               <th scope="row">
                 <button type="button" onClick={() => onSelect(player)}>
-                  <i style={{ backgroundColor: positionColour[player.position] }} />
                   <span>
                     {player.name}
                     <small>
@@ -392,8 +398,8 @@ function PlayerList({
               </th>
               <td data-label={`${horizon}-GW xP`}>{player.displayExpectedPoints.toFixed(1)}</td>
               <td data-label="Price">{priceLabel(player)}</td>
-              <td data-label="Haul">{Math.round(player.haulProbability * 100)}%</td>
-              <td data-label="60+">{Math.round(player.sixtyMinuteProbability * 100)}%</td>
+              <td data-label="Big haul">{Math.round(player.haulProbability * 100)}%</td>
+              <td data-label="Plays 60+">{Math.round(player.sixtyMinuteProbability * 100)}%</td>
             </tr>
           ))}
         </tbody>
@@ -428,7 +434,7 @@ function PlayerInspector({
         >
           <div className="inspector-head">
             <span>
-              {player.position} / {player.team}
+              {player.position} · {player.team}
             </span>
             <button type="button" onClick={onClose} aria-label="Close player details">
               <IconX size={17} />
@@ -437,14 +443,17 @@ function PlayerInspector({
           <h2>{player.name}</h2>
           <p className="inspector-summary">
             <strong>{player.displayExpectedPoints.toFixed(1)}</strong>
-            <span>projected points over {player.gameweeks.length} gameweeks</span>
+            <span>
+              projected points over {player.gameweeks.length}{" "}
+              {player.gameweeks.length === 1 ? "gameweek" : "gameweeks"}
+            </span>
           </p>
           <div className="inspector-stat-grid">
             <div>
               <span>Price</span>
               <b>{priceLabel(player)}</b>
               <small>
-                {player.price.status === "estimated" ? "estimated band" : player.price.status}
+                {player.price.status === "estimated" ? "estimated range" : player.price.status}
               </small>
             </div>
             <div>
@@ -453,19 +462,19 @@ function PlayerInspector({
               <small>{player.ownership.status}</small>
             </div>
             <div>
-              <span>Haul ≥10</span>
+              <span>10+ point haul</span>
               <b>{Math.round(player.haulProbability * 100)}%</b>
-              <small>model probability</small>
+              <small>model estimate</small>
             </div>
             <div>
-              <span>Starts 60+</span>
+              <span>Plays 60+ minutes</span>
               <b>{Math.round(player.sixtyMinuteProbability * 100)}%</b>
-              <small>minutes prior</small>
+              <small>model estimate</small>
             </div>
           </div>
           <section className="inspector-range" aria-label="Forecast interval">
             <header>
-              <span>Outcome range</span>
+              <span>Range of outcomes</span>
               <b>
                 {player.p10}–{player.p90}
               </b>
@@ -482,14 +491,14 @@ function PlayerInspector({
               />
             </div>
             <footer>
-              <span>P10</span>
+              <span>Low (P10)</span>
               <span>Median</span>
               <span>Mean</span>
-              <span>P90</span>
+              <span>High (P90)</span>
             </footer>
           </section>
           <section className="inspector-weeks">
-            <h3>Gameweek shape</h3>
+            <h3>Gameweek by gameweek</h3>
             {player.gameweeks.map((gameweek) => (
               <div key={gameweek.gameweek}>
                 <span>
@@ -521,9 +530,7 @@ function PlayerInspector({
             </span>
           </div>
           <details>
-            <summary>
-              <IconDatabase size={15} /> Forecast provenance
-            </summary>
+            <summary>How this forecast was made</summary>
             <dl>
               <div>
                 <dt>Model</dt>
@@ -541,7 +548,7 @@ function PlayerInspector({
               </div>
               <div>
                 <dt>Inputs</dt>
-                <dd>{player.provenance.inputBatchIds.length} immutable batches</dd>
+                <dd>{player.provenance.inputBatchIds.length} input batches</dd>
               </div>
             </dl>
           </details>
@@ -551,9 +558,10 @@ function PlayerInspector({
         </motion.aside>
       ) : (
         <aside className="opportunity-inspector inspector-placeholder">
-          <IconChartDots3 size={24} />
-          <h2>Select a player</h2>
-          <p>Inspect the forecast range, availability, source coverage, and per-gameweek shape.</p>
+          <h2>Pick a player</h2>
+          <p>
+            Choose a dot on the chart to see their range of outcomes, availability and fixtures.
+          </p>
         </aside>
       )}
     </AnimatePresence>
@@ -564,11 +572,10 @@ function SourceHealth({ map }: { map: OpportunityMap }) {
   return (
     <details className="source-health">
       <summary>
-        <IconActivity size={15} />
-        Source health
+        Data sources
         <span>
-          {map.sourceHealth.filter((source) => source.status === "fresh").length}/
-          {map.sourceHealth.length} fresh
+          {map.sourceHealth.filter((source) => source.status === "fresh").length} of{" "}
+          {map.sourceHealth.length} up to date
         </span>
       </summary>
       <div>
@@ -606,6 +613,8 @@ export function OpportunityMapExperience({
 }) {
   const reduceMotion = useReducedMotion();
   const [playing, setPlaying] = useState(false);
+  // on phones the filters sit behind a button so the list is one scroll away
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const compareKeys = useMemo(
     () => new Set((state.compare ?? "").split(",").filter(Boolean)),
     [state.compare],
@@ -745,41 +754,35 @@ export function OpportunityMapExperience({
   });
   const minimumPrice = Math.min(...priceValues, 4);
   const maximumPrice = Math.max(...priceValues, 15);
+  const activeFilterCount = [
+    state.position !== "ALL",
+    state.team !== undefined,
+    state.maxPrice !== undefined,
+    state.minSixty > 0,
+  ].filter(Boolean).length;
 
   return (
     <div className="opportunity-page" data-view={state.view}>
       <div className="opportunity-shell">
         <header className="opportunity-hero">
           <div>
-            <p className="opportunity-kicker">{map.season.label} / Market intelligence</p>
-            <h1 aria-label="Discovery Map">
-              Discovery
-              <br />
-              Map
-            </h1>
+            <h1>Opportunity map</h1>
             <p className="opportunity-lede">
-              Find price-point alternatives and ownership gaps, then move the players that matter
-              into the Squad Lab.
+              Find players who look cheap for what they’re expected to score, or who aren’t owned as
+              widely as their forecast suggests.
             </p>
           </div>
           <div className="opportunity-hero-status">
-            <span className="scenario-badge">
-              <IconInfoCircle size={14} />
+            <span>
               {map.season.lifecycle === "active"
-                ? "Live season"
-                : `${map.season.label} pre-season · live data`}
+                ? `${map.season.label} season`
+                : `${map.season.label} pre-season`}
             </span>
-            <strong>{map.players.length}</strong>
-            <small>players modelled</small>
-            <strong>
-              {map.sourceHealth.reduce((sum, source) => sum + source.coverage, 0).toFixed(1)}
-            </strong>
-            <small>source-equivalents</small>
+            <span>{map.players.length} players</span>
           </div>
         </header>
 
         <section className="opportunity-notice" aria-label="Data availability note">
-          <IconAlertTriangle size={17} />
           <p>
             <strong>
               {officialPrices
@@ -789,10 +792,10 @@ export function OpportunityMapExperience({
                   : "Prices and ownership are not official yet."}
             </strong>{" "}
             {officialPrices
-              ? "Prices are locked until the GW1 deadline. Forecast uncertainty reflects minutes, roles, fixtures and market evidence, not price estimates."
+              ? "Prices are locked until the GW1 deadline. The uncertainty in each forecast comes from minutes, roles, fixtures and market odds, not from price estimates."
               : partialPrices
-                ? "Published values are used player by player; unavailable values remain visibly withheld."
-                : `Value views use clearly marked estimates and will switch to live data when FPL publishes its ${map.season.label} player list.`}
+                ? "Where FPL has published a price or ownership figure it’s used, and the rest is left blank rather than guessed."
+                : `Value views use estimates, marked with a ~, until FPL publishes its ${map.season.label} player list. They’ll switch to real prices then.`}
           </p>
           <SourceHealth map={map} />
         </section>
@@ -833,6 +836,15 @@ export function OpportunityMapExperience({
               autoComplete="off"
             />
           </label>
+          <button
+            type="button"
+            className="filters-toggle"
+            aria-expanded={filtersOpen}
+            aria-controls="opportunity-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+          >
+            {activeFilterCount > 0 ? `Filters (${activeFilterCount})` : "Filters"}
+          </button>
           <div className="opportunity-segment view-toggle" role="group" aria-label="View">
             <button
               type="button"
@@ -856,7 +868,12 @@ export function OpportunityMapExperience({
         </div>
 
         <div className="opportunity-workbench">
-          <aside className="opportunity-filter-rail" aria-label="Player filters">
+          <aside
+            id="opportunity-filters"
+            className="opportunity-filter-rail"
+            aria-label="Player filters"
+            data-open={filtersOpen}
+          >
             <fieldset>
               <legend>Position</legend>
               <div className="position-filter">
@@ -884,10 +901,13 @@ export function OpportunityMapExperience({
                 ))}
               </select>
             </label>
-            <label className="price-filter">
-              Maximum price{" "}
-              <output>{state.maxPrice ? `£${state.maxPrice.toFixed(1)}m` : "Any"}</output>
+            <div className="filter-field price-filter">
+              <label htmlFor="filter-max-price">Maximum price</label>
+              <output htmlFor="filter-max-price">
+                {state.maxPrice ? `£${state.maxPrice.toFixed(1)}m` : "Any"}
+              </output>
               <input
+                id="filter-max-price"
                 type="range"
                 min={minimumPrice}
                 max={maximumPrice}
@@ -906,10 +926,12 @@ export function OpportunityMapExperience({
               >
                 No price cap
               </button>
-            </label>
-            <label>
-              60-minute chance <output>{Math.round(state.minSixty * 100)}%+</output>
+            </div>
+            <div className="filter-field">
+              <label htmlFor="filter-min-sixty">Plays 60+ minutes</label>
+              <output htmlFor="filter-min-sixty">{Math.round(state.minSixty * 100)}%+</output>
               <input
+                id="filter-min-sixty"
                 type="range"
                 min="0"
                 max="0.95"
@@ -917,7 +939,7 @@ export function OpportunityMapExperience({
                 value={state.minSixty}
                 onChange={(event) => onStateChange({ minSixty: Number(event.target.value) })}
               />
-            </label>
+            </div>
             <button
               className="clear-filters"
               type="button"
@@ -941,7 +963,8 @@ export function OpportunityMapExperience({
                 </span>
               ))}
               <span id="opportunity-encoding-key" className="encoding-key">
-                Point size = haul chance · halo = source agreement
+                Bigger dots have a better chance of a big haul. The glow shows how much the sources
+                agree.
               </span>
             </div>
           </aside>
@@ -949,15 +972,16 @@ export function OpportunityMapExperience({
           <section className="opportunity-stage">
             <div className="stage-head">
               <div>
-                <span>{modes[state.mode].label} view</span>
-                <strong>{players.length} visible</strong>
+                <strong>
+                  {players.length} {players.length === 1 ? "player" : "players"} shown
+                </strong>
               </div>
               <p>
                 {state.mode === "forecast"
-                  ? "High and right combines projected output with explosive upside."
+                  ? "Further right means more projected points. Higher means a better chance of a big haul."
                   : state.mode === "value"
-                    ? "High and right combines volume with budget efficiency."
-                    : "High and right surfaces forecast-backed players with low expected ownership."}
+                    ? "Further right means more points per £m. Higher means more points overall."
+                    : "Further right means more points per £m. Higher means the forecast rates them above how widely they’re owned."}
               </p>
             </div>
             <div className="map-view">
@@ -1038,7 +1062,7 @@ export function OpportunityMapExperience({
               aria-label="Player comparison"
             >
               <header>
-                <span>Compare / {compareKeys.size} of 3</span>
+                <span>Comparing {compareKeys.size} of 3</span>
                 <button type="button" onClick={() => onStateChange({ compare: undefined })}>
                   Clear
                 </button>
@@ -1048,11 +1072,10 @@ export function OpportunityMapExperience({
                   .filter((player) => compareKeys.has(player.registrationKey))
                   .map((player) => (
                     <article key={player.registrationKey}>
-                      <i style={{ backgroundColor: positionColour[player.position] }} />
                       <span>
                         <b>{player.name}</b>
                         <small>
-                          {player.team} · {priceLabel(player)} ·{" "}
+                          {player.position} · {player.team} · {priceLabel(player)} ·{" "}
                           {player.gameweeks[0]
                             ? gameweekFixtureLabel(player.gameweeks[0])
                             : "No fixture"}
@@ -1082,13 +1105,12 @@ export function OpportunityMapExperience({
         </p>
 
         <footer className="opportunity-method">
-          <IconDatabase size={16} />
           <p>
-            <strong>What this model knows.</strong> Fixture-level goal rates, player minutes and
-            event priors are converted through a versioned FPL rules engine. The map preserves its
-            cut-off and input batches so every result can be replayed.
+            The forecasts turn expected goals, minutes and bonus points into FPL points using a
+            versioned copy of the game’s rules. Each snapshot keeps its cut-off time and inputs, so
+            any number on the map can be reproduced.
           </p>
-          <span>market-xp / v2</span>
+          <span>market-xp v2</span>
         </footer>
       </div>
     </div>

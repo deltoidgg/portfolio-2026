@@ -15,7 +15,7 @@ export function Prose({ children, className }: ProseProps) {
     <div
       className={cn(
         "text-ink-muted text-base leading-7",
-        "[&_h3]:text-ink [&_h3]:text-base [&_h3]:font-medium [&_h3]:mt-8 [&_h3]:mb-3",
+        "[&_h3]:text-ink [&_h3]:text-[1.0625rem] [&_h3]:font-semibold [&_h3]:mt-10 [&_h3]:mb-3",
         "[&_h3]:max-w-[70ch] [&_p]:mb-5 [&_p]:max-w-[70ch] [&_li]:max-w-[70ch]",
         "[&_a]:text-accent-ink [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent",
         "[&_strong]:text-ink [&_strong]:font-medium",

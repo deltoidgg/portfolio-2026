@@ -69,6 +69,11 @@ function LabIndex() {
         <h2 id="papers-heading">Papers</h2>
         {papers.map((paper) => (
           <article key={paper.slug} className="paper-entry">
+            <h3>
+              <Link to="/papers/$slug" params={{ slug: paper.slug }}>
+                {paper.title}
+              </Link>
+            </h3>
             <p className="paper-entry__meta">
               {paper.displayNumber}
               {paper.publishedAt ? (
@@ -79,11 +84,6 @@ function LabIndex() {
                 </>
               ) : null}
             </p>
-            <h3>
-              <Link to="/papers/$slug" params={{ slug: paper.slug }}>
-                {paper.title}
-              </Link>
-            </h3>
             <p className="paper-entry__summary">{paper.cardSummary}</p>
             <dl className="paper-entry__results">
               <div>
@@ -163,6 +163,7 @@ function LabIndex() {
               <a href={document.href}>
                 <strong>{document.title}</strong>
                 <span>{document.copy}</span>
+                <IconArrowUpRight size={15} aria-hidden="true" />
               </a>
             </li>
           ))}

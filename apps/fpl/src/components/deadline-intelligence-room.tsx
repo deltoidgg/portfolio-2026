@@ -1,15 +1,13 @@
 import {
   IconChevronLeft,
   IconChevronRight,
-  IconClock,
-  IconDatabase,
   IconPlayerPause,
   IconPlayerPlay,
 } from "@tabler/icons-react";
 import { sourceStatusAt } from "market-intelligence";
 import type { Annotation, DeadlineRoom, ForecastPoint, RoomPlayer } from "market-intelligence";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 const plot = { left: 48, right: 742, top: 26, bottom: 294 } as const;
 
@@ -90,6 +88,22 @@ function DeadlineChart({
   selectedIndex: number;
   pinnedIndex: number | null;
 }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  // the chart is drawn 800 units wide and scaled to its container, so work out how many
+  // units a 12px label needs to stay readable on narrow screens
+  const [labelSize, setLabelSize] = useState(12);
+  useEffect(() => {
+    const node = svgRef.current;
+    if (!node) return;
+    const measure = () => {
+      const width = node.getBoundingClientRect().width;
+      if (width > 0) setLabelSize(Math.max(12, Math.round((12 * 800) / width)));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   const allPoints = room.players.flatMap((player) =>
     player.series.flatMap((point) => [point.p10, point.p90]),
   );
@@ -113,8 +127,10 @@ function DeadlineChart({
 
   return (
     <svg
+      ref={svgRef}
       className="room-chart"
-      viewBox="0 0 800 330"
+      style={{ "--chart-label": `${labelSize}px` } as CSSProperties}
+      viewBox="0 0 800 342"
       role="img"
       aria-label={`Expected-points trajectories. ${selectedPlayer.playerName} is selected at ${current.expectedPoints.toFixed(1)} points.`}
     >
@@ -125,7 +141,13 @@ function DeadlineChart({
         return (
           <g key={tick}>
             <line x1={plot.left} x2={plot.right} y1={tickY} y2={tickY} stroke="var(--room-line)" />
-            <text x={plot.left - 10} y={tickY + 3} textAnchor="end" className="room-chart-label">
+            <text
+              x={plot.left - 10}
+              y={tickY}
+              dy="0.35em"
+              textAnchor="end"
+              className="room-chart-label"
+            >
               {tick.toFixed(0)}
             </text>
           </g>
@@ -204,13 +226,15 @@ function DeadlineChart({
           <text
             key={point.observedAt}
             x={tickX}
-            y={318}
+            y={332}
             textAnchor={
               index === 0 ? "start" : index === room.timeline.length - 1 ? "end" : "middle"
             }
             className="room-chart-label"
           >
-            {index === 0 || index === room.timeline.length - 1 || index === selectedIndex
+            {index === 0 ||
+            index === room.timeline.length - 1 ||
+            (index === selectedIndex && index > 2 && index < room.timeline.length - 3)
               ? formatCountdown(point.minutesToDeadline)
               : "·"}
           </text>
@@ -246,39 +270,39 @@ function Recipe({ player, point }: { player: RoomPlayer; point: ForecastPoint })
             <b>
               {point.p10.toFixed(1)}–{point.p90.toFixed(1)}
             </b>
-            <span>80% interval</span>
+            <span>80% range</span>
           </div>
         </div>
         <h2>{point.evidence.headline}</h2>
         <p className="room-recipe-detail">{point.evidence.detail}</p>
       </div>
       <div>
-        <div className="room-recipe-flow" aria-label="Odds to points transformation">
-          <span>
-            <b>01</b> Quotes
-            <small>{recipe?.quotes.length ?? 0} raw prices</small>
-          </span>
-          <span>
-            <b>02</b> Consensus
+        <ol className="room-recipe-flow" aria-label="From odds to points">
+          <li>
+            Odds
+            <small>{recipe?.quotes.length ?? 0} bookmaker prices</small>
+          </li>
+          <li>
+            Consensus
             <small>
               {primaryConsensus
-                ? `${percent(primaryConsensus.probability)} · ${percent(primaryConsensus.spread)} spread`
-                : "prior only"}
+                ? `${percent(primaryConsensus.probability)}, sources ${percent(primaryConsensus.spread)} apart`
+                : "no odds yet"}
             </small>
-          </span>
-          <span>
-            <b>03</b> Minutes
+          </li>
+          <li>
+            Minutes
             <small>
               {recipe
                 ? `${recipe.minutes.expectedMinutes.toFixed(0)} expected`
-                : (availability?.value ?? "prior only")}
+                : (availability?.value ?? "no odds yet")}
             </small>
-          </span>
-          <span>
-            <b>04</b> FPL rules
+          </li>
+          <li>
+            FPL points
             <small>{point.expectedPoints.toFixed(1)} xP</small>
-          </span>
-        </div>
+          </li>
+        </ol>
         {recipe && recipe.quotes.length > 0 ? (
           <div className="room-quote-ledger" aria-label="Raw market quote transformation">
             {recipe.quotes.map((quote) => (
@@ -292,11 +316,11 @@ function Recipe({ player, point }: { player: RoomPlayer; point: ForecastPoint })
         ) : null}
         {recipe ? (
           <div className="room-latent-rates">
-            <span>Latent / allocation</span>
-            <b>λG {recipe.rates.goal.toFixed(2)}</b>
-            <b>λA {recipe.rates.assist.toFixed(2)}</b>
-            <b>CS {percent(recipe.rates.cleanSheet)}</b>
-            <b>60+ {percent(recipe.minutes.sixtyMinuteProbability)}</b>
+            <span>Model rates</span>
+            <b>Goals {recipe.rates.goal.toFixed(2)}</b>
+            <b>Assists {recipe.rates.assist.toFixed(2)}</b>
+            <b>Clean sheet {percent(recipe.rates.cleanSheet)}</b>
+            <b>Plays 60+ {percent(recipe.minutes.sixtyMinuteProbability)}</b>
           </div>
         ) : null}
         <div className="room-component-list" aria-label={`${player.playerName} points recipe`}>
@@ -314,15 +338,13 @@ function Recipe({ player, point }: { player: RoomPlayer; point: ForecastPoint })
             </div>
           ))}
         </div>
-        <div className="room-evidence-sources" aria-label="Evidence sources">
-          {(point.evidence.sourceKeys ?? []).map((source) => (
-            <span className="room-source-chip" key={source}>
-              {source}
-            </span>
-          ))}
-        </div>
+        {(point.evidence.sourceKeys ?? []).length > 0 ? (
+          <p className="room-evidence-sources">
+            Based on {(point.evidence.sourceKeys ?? []).join(", ")}
+          </p>
+        ) : null}
         <div className="room-confidence">
-          <span>Evidence confidence</span>
+          <span>Confidence</span>
           <strong>{Math.round((point.evidence.confidence ?? 0) * 100)}%</strong>
         </div>
       </div>
@@ -424,18 +446,15 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
       <div className="room-frame">
         <header className="room-hero">
           <div>
-            <p className="room-kicker">FPL market intelligence</p>
-            <h1 className="room-display">The market moved. Your team should know why.</h1>
+            <h1 className="room-display">Deadline room</h1>
             <p className="room-hero-copy">
-              Rewind the final 48 hours before the deadline. Every step updates the same player
-              distributions, ranking, and evidence recipe, without hiding disagreement between
-              sources.
+              Replay the last 48 hours before the GW{room.gameweek} deadline. Step through and watch
+              each forecast shift as odds and team news change. Where sources disagree, it shows up
+              here instead of getting averaged away.
             </p>
           </div>
           <div className="room-mode-stack">
-            <span className="room-live-mark">
-              {room.dataMode === "neon" ? "Neon replay" : "Demo replay"}
-            </span>
+            <span>{room.dataMode === "neon" ? "Recorded data" : "Demo data"}</span>
             <span>
               GW{room.gameweek} · {room.season} · {room.sources.length} sources
             </span>
@@ -477,8 +496,8 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
         <div className="room-grid">
           <aside className="room-panel" aria-label="Player watchlist and sources">
             <div className="room-panel-head">
-              <span className="room-panel-title">Player watch</span>
-              <span className="room-panel-index">Rank / xP</span>
+              <span className="room-panel-title">Players</span>
+              <span className="room-panel-index">Expected points</span>
             </div>
             <div className="room-player-list">
               {rankedPlayers.map((player) => {
@@ -495,7 +514,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                     onClick={() => setSelectedPlayerKey(player.playerKey)}
                     key={player.playerKey}
                   >
-                    <span className="room-rank">{String(point.rank).padStart(2, "0")}</span>
+                    <span className="room-rank">{point.rank}</span>
                     <span>
                       <span className="room-player-name">{player.playerName}</span>
                       <span className="room-player-meta">
@@ -514,19 +533,18 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
               })}
             </div>
             <div className="room-panel-head">
-              <span className="room-panel-title">Source mesh</span>
-              <IconDatabase size={15} aria-hidden="true" />
+              <span className="room-panel-title">Sources</span>
+              <span className="room-panel-index">Captures so far</span>
             </div>
             <div className="room-source-list">
               {room.sources.map((source) => {
                 const status = sourceStatusAt(source, selectedTime.observedAt);
                 return (
-                  <div className="room-source-row" key={source.key}>
-                    <span className="room-source-dot" data-awaiting={!status} aria-hidden="true" />
+                  <div className="room-source-row" data-awaiting={!status} key={source.key}>
                     <span>{source.label}</span>
                     <span>
                       {status
-                        ? `${status.captureCount} · ${formatCountdown(
+                        ? `${status.captureCount}, last ${formatCountdown(
                             Math.max(
                               0,
                               Math.round(
@@ -535,7 +553,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                               ),
                             ),
                           )}`
-                        : "awaiting"}
+                        : "not started"}
                     </span>
                   </div>
                 );
@@ -545,10 +563,9 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
 
           <section className="room-panel" aria-label="Deadline forecast timeline">
             <div className="room-panel-head">
-              <span className="room-panel-title">Forecast trajectories</span>
+              <span className="room-panel-title">Forecasts over time</span>
               <span className="room-panel-index">
-                <IconClock size={13} aria-hidden="true" />{" "}
-                {formatCountdown(selectedTime.minutesToDeadline)}
+                {formatCountdown(selectedTime.minutesToDeadline)} to deadline
               </span>
             </div>
             <div
@@ -567,7 +584,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
             {selectedConsensus ? (
               <div className="room-consensus" aria-label="Cross-source market consensus">
                 <div>
-                  <span>Cross-source consensus</span>
+                  <span>Where the sources agree</span>
                   <strong>{selectedConsensus.label}</strong>
                   <small>{selectedConsensus.adjustmentMethod}</small>
                 </div>
@@ -585,23 +602,23 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
               </div>
             ) : null}
             <div className="room-decision-strip">
-              <span>Captain lean</span>
+              <span>Captain pick</span>
               <strong>{leader?.playerName ?? "No player"}</strong>
               <span>
                 {runnerUp
-                  ? `${lead.toFixed(1)} xP clear of ${runnerUp.playerName}`
-                  : "No comparison"}
+                  ? `${lead.toFixed(1)} xP ahead of ${runnerUp.playerName}`
+                  : "Nobody to compare with"}
               </span>
-              <span className="room-decision-label">Transfer response</span>
+              <span className="room-decision-label">Transfer idea</span>
               <strong>
                 {leader?.playerKey === selectedPlayer.playerKey
-                  ? `Hold ${selectedPlayer.playerName}`
-                  : `Shortlist ${leader?.playerName ?? selectedPlayer.playerName}`}
+                  ? `Keep ${selectedPlayer.playerName}`
+                  : `Look at ${leader?.playerName ?? selectedPlayer.playerName}`}
               </strong>
               <span>
                 {leader?.playerKey === selectedPlayer.playerKey
-                  ? "No higher-xP player in this watchlist"
-                  : `${transferLead.toFixed(1)} xP over ${selectedPlayer.playerName}; check budget and squad context`}
+                  ? "Nobody else on this list is forecast higher"
+                  : `${transferLead.toFixed(1)} xP more than ${selectedPlayer.playerName}. Check it fits your budget first.`}
               </span>
               {pinnedTime && pinnedPoint ? (
                 <span className="room-pinned-delta">
@@ -639,12 +656,12 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                 </motion.div>
               ) : (
                 <div className="room-empty-event" key="empty">
-                  No material move yet. This is the opening consensus snapshot.
+                  Nothing has moved yet. This is the opening snapshot.
                 </div>
               )}
             </AnimatePresence>
             <details className="room-exact">
-              <summary>Exact values at this snapshot</summary>
+              <summary>All values at this snapshot</summary>
               <label className="room-table-search">
                 <span>Filter players</span>
                 <input
@@ -656,7 +673,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
               </label>
               {comparedPlayers.length > 0 ? (
                 <div className="room-compare-tray" aria-live="polite">
-                  <span>Compare tray</span>
+                  <span>Comparing</span>
                   {comparedPlayers.map((player) => (
                     <button
                       type="button"
@@ -681,7 +698,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                       xP
                     </strong>
                   ) : (
-                    <small>Select one more player</small>
+                    <small>Pick one more to compare</small>
                   )}
                 </div>
               ) : null}
@@ -694,11 +711,11 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                       {(
                         [
                           ["expectedPoints", "xP"],
-                          ["p10", "P10"],
+                          ["p10", "Low (P10)"],
                           ["p50", "Median"],
-                          ["p90", "P90"],
+                          ["p90", "High (P90)"],
                           ["rank", "Rank"],
-                          ["minutes", "60+"],
+                          ["minutes", "Plays 60+"],
                         ] as const
                       ).map(([key, label]) => (
                         <th
@@ -715,9 +732,9 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
                           </button>
                         </th>
                       ))}
-                      <th scope="col">Distribution</th>
-                      <th scope="col">Freshness</th>
-                      <th scope="col">Δ pin/open</th>
+                      <th scope="col">Spread</th>
+                      <th scope="col">Time to deadline</th>
+                      <th scope="col">Change since pin or open</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -783,7 +800,7 @@ export function DeadlineIntelligenceRoom({ initialRoom }: { initialRoom: Deadlin
 
           <aside className="room-panel room-recipe-panel" aria-label="Odds to points explanation">
             <div className="room-panel-head">
-              <span className="room-panel-title">Odds → points recipe</span>
+              <span className="room-panel-title">How odds become points</span>
               <span className="room-panel-index">{selectedPlayer.playerName}</span>
             </div>
             <Recipe player={selectedPlayer} point={selectedPoint} />

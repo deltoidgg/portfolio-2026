@@ -26,6 +26,10 @@ interface Capture {
   prepare?: (page: Page) => Promise<void>;
   /** Crop in CSS pixels, applied to the 2x screenshot. */
   clip?: { x: number; y: number; width: number; height: number };
+  /** Defaults to 1440 × 900. */
+  viewport?: { width: number; height: number };
+  /** Keep the page background transparent, for overlays like Join's bar. */
+  transparent?: boolean;
 }
 
 interface MediaEntry {
@@ -34,9 +38,66 @@ interface MediaEntry {
   widths: number[];
 }
 
-const rewriter = "https://rewriter.wasimarif.com";
-const fpl = "https://fpl.wasimarif.com";
+// Point an origin at a local build to capture a redesign before it ships. Vite Task strips
+// environment variables, so run the script directly from tools/site-quality in that case:
+//   FPL_ORIGIN=http://127.0.0.1:4190 node src/project-media.ts fpl
+const rewriter = process.env.REWRITER_ORIGIN ?? "https://rewriter.wasimarif.com";
+const fpl = process.env.FPL_ORIGIN ?? "https://fpl.wasimarif.com";
 const squadUrl = `${fpl}/squad?horizon=3&dataset=current`;
+
+/** Make the sticky header opaque so scrolled content never shows through it. */
+const solidHeader = (page: Page) =>
+  page.addStyleTag({
+    content:
+      ".fpl-site-header { background: #071018 !important; backdrop-filter: none !important; }",
+  });
+
+// Join the Conversation is a desktop app, so its screens come from the renderer's dev server,
+// which fakes the main process with sample data. Start it first, then run this script directly:
+//   (cd ../join-conversation/apps/desktop && vp dev)
+//   JOIN_ORIGIN=http://127.0.0.1:5173 node src/project-media.ts join
+const joinOrigin = process.env.JOIN_ORIGIN;
+const joinApp = (query: string) => `${joinOrigin}/app.html?panel=off&${query}`;
+const joinBar = (scenario: string) =>
+  `${joinOrigin}/widget.html?panel=off&theme=dark&scenario=${scenario}`;
+/** The bar's window is a fixed 525 × 500 transparent canvas, so every state lines up. */
+const barCanvas = { width: 525, height: 500 };
+const barStates = ["hearing", "asking", "handsfree", "thinking", "answered", "notice"] as const;
+
+const joinCaptures: Capture[] = [
+  { slug: "join", name: "home", url: joinApp("theme=light&view=home") },
+  { slug: "join", name: "home-dark", url: joinApp("theme=dark&view=home") },
+  { slug: "join", name: "transcript", url: joinApp("theme=light&view=transcript") },
+  { slug: "join", name: "models", url: joinApp("theme=light&view=models") },
+  {
+    slug: "join",
+    name: "privacy",
+    url: joinApp("theme=light&view=settings"),
+    prepare: async (page) => {
+      await page.getByRole("button", { name: "Privacy", exact: true }).click();
+      await page.waitForTimeout(600);
+    },
+  },
+  ...(["Welcome", "Privacy", "TryIt"] as const).map((step) => ({
+    slug: "join",
+    name: `onboarding-${step.toLowerCase()}`,
+    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=light&step=${step}`,
+  })),
+  {
+    // the video player from setup, at the same scale as the bar, as a backdrop for the bar demo
+    slug: "join",
+    name: "player",
+    url: `${joinOrigin}/onboarding/harness.html?panel=off&theme=light&step=TryIt`,
+    clip: { x: 411, y: 276, width: 618, height: 504 },
+  },
+  ...barStates.map((scenario) => ({
+    slug: "join",
+    name: `bar-${scenario}`,
+    url: joinBar(scenario),
+    viewport: barCanvas,
+    transparent: true,
+  })),
+];
 
 const captures: Capture[] = [
   { slug: "rewriter", name: "library", url: `${rewriter}/` },
@@ -57,9 +118,11 @@ const captures: Capture[] = [
     name: "squad",
     url: squadUrl,
     prepare: async (page) => {
-      await page.getByRole("button", { name: /Suggest a valid squad/i }).click();
+      await page.getByRole("button", { name: /Suggest a squad/i }).click();
       await page.waitForTimeout(2000);
-      await page.evaluate(() => window.scrollTo(0, 360));
+      await solidHeader(page);
+      // park the pitch just under the sticky header so the squad fills the frame
+      await page.evaluate(() => window.scrollTo(0, 374));
     },
   },
   {
@@ -71,7 +134,8 @@ const captures: Capture[] = [
       const player = page.locator("circle[aria-label*='Haaland'], circle[aria-label]").first();
       await player.click({ force: true });
       await page.waitForTimeout(1200);
-      await page.evaluate(() => window.scrollTo(0, 470));
+      await solidHeader(page);
+      await page.evaluate(() => window.scrollTo(0, 352));
     },
   },
   { slug: "fpl", name: "archive", url: `${fpl}/archive/2025-26/gw34` },
@@ -83,6 +147,7 @@ const captures: Capture[] = [
     clip: { x: 729, y: 101, width: 658, height: 580 },
   },
   { slug: "openfgc", name: "overview", url: "https://openfgc.wasimarif.com/" },
+  ...(joinOrigin ? joinCaptures : []),
 ];
 
 async function encode(source: Buffer, slug: string, name: string): Promise<MediaEntry> {
@@ -122,13 +187,16 @@ async function readManifest(): Promise<Record<string, MediaEntry>> {
 
 const only = process.argv.slice(2);
 const selected = captures.filter((capture) => only.length === 0 || only.includes(capture.slug));
+if (only.includes("join") && !joinOrigin) {
+  console.warn("Skipping join: set JOIN_ORIGIN to its renderer dev server (see above).");
+}
 const manifest = await readManifest();
 const browser = await chromium.launch({ headless: true });
 
 try {
   for (const capture of selected) {
     const context = await browser.newContext({
-      viewport: { width: 1440, height: 900 },
+      viewport: capture.viewport ?? { width: 1440, height: 900 },
       deviceScaleFactor: 2,
       reducedMotion: "reduce",
     });
@@ -139,7 +207,10 @@ try {
     await page.waitForTimeout(1500);
     await capture.prepare?.(page);
     await page.waitForTimeout(600);
-    const image = await page.screenshot({ clip: capture.clip });
+    const image = await page.screenshot({
+      clip: capture.clip,
+      omitBackground: capture.transparent,
+    });
     manifest[`${capture.slug}/${capture.name}`] = await encode(image, capture.slug, capture.name);
     console.log(`captured ${capture.slug}/${capture.name}`);
     await context.close();

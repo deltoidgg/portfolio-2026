@@ -303,7 +303,7 @@ const replayHeadlines = [
 ] as const;
 
 const replayDetails = [
-  "The first cross-source snapshot establishes the baseline.",
+  "The first snapshot across every source sets the baseline.",
   "Liverpool's goal expectation rises without changing the player order.",
   "Exchange prices soften for the City attack and tighten the top four.",
   "Availability uncertainty pulls Palmer below the market consensus.",
@@ -321,7 +321,7 @@ const annotationsByPoint: Partial<Record<number, Annotation[]>> = {
       sourceKey: "smarkets",
       category: "market-move",
       title: "City attack price eases",
-      detail: "Back prices lengthen across the main exchange while the spread remains stable.",
+      detail: "Back prices drift out across the main exchange and the spread holds steady.",
       impact: -0.3,
       fixtureKey: fixtures[1]?.key,
       playerKey: "player:haaland",
@@ -360,7 +360,7 @@ const annotationsByPoint: Partial<Record<number, Annotation[]>> = {
       sourceKey: "smarkets",
       category: "market-move",
       title: "Saka scorer price shortens",
-      detail: "The player market corroborates the team-total move rather than merely following it.",
+      detail: "The player market backs up the team-total move.",
       impact: 0.3,
       fixtureKey: fixtures[0]?.key,
       playerKey: "player:saka",
@@ -373,7 +373,7 @@ const annotationsByPoint: Partial<Record<number, Annotation[]>> = {
       sourceKey: "fpl",
       category: "team-news",
       title: "Role and minutes firm",
-      detail: "The final press conference removes the main start-risk branch from the forecast.",
+      detail: "The final press conference removes the biggest risk of him not starting.",
       impact: 0.4,
       fixtureKey: fixtures[0]?.key,
       playerKey: "player:saka",

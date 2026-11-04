@@ -322,7 +322,8 @@ function UsResultsSection() {
         <BandGradient points={gradientPoints} />
         <FigureCaption>
           Figure 2. The unadjusted dose–response gradient (top) and what survives within-agency
-          adjustment (bottom). The &ldquo;none&rdquo; band is the reference (IRR 1.0).
+          adjustment (bottom). The &ldquo;none&rdquo; band is the reference (IRR 1.0). Score ranges
+          for each band are in section 2.
         </FigureCaption>
       </div>
       <Prose>
@@ -472,7 +473,7 @@ function UkReplicationSection() {
           <strong>{ukResults.supported ? "supported" : "not supported"}</strong> under the locked
           decision rule
           {ukResults.supported
-            ? ", so the paper's gating claim (H1 ∧ H4) stands."
+            ? ", so the paper’s gating claim (H1 ∧ H4) stands."
             : "; per the pre-registration, the US association did not transfer in full and the paper says so plainly."}
         </p>
       </Prose>

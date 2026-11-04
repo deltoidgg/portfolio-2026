@@ -1,6 +1,6 @@
 import projectMedia from "./project-media.json";
 
-export type ProjectLifecycle = "active" | "maintained" | "archived";
+export type ProjectLifecycle = "in-development" | "active" | "maintained" | "archived";
 export type ProjectKind = "experiment" | "tool" | "product" | "research";
 export type ProjectActionKind = "live" | "source" | "package" | "docs";
 
@@ -44,6 +44,24 @@ export function projectImage(key: ProjectMediaKey, alt: string): ProjectImage {
 
 export const projects: Project[] = [
   {
+    slug: "join-the-conversation",
+    name: "Join the Conversation",
+    kind: "product",
+    summary:
+      "A desktop app that listens along to whatever your computer is playing. Hold a key, ask about what was just said, and get an answer without leaving the video, podcast or call.",
+    timeframe: "2026",
+    role: "Independent creator",
+    lifecycle: "in-development",
+    featured: true,
+    date: "2026-10-18",
+    tags: ["Electron", "FoldKit", "Effect", "whisper.cpp", "llama.cpp", "Cloudflare"],
+    cover: projectImage(
+      "join/home",
+      "Join the Conversation’s home screen: ‘Hold fn to ask about what you just heard’ above stats, a getting-started checklist and a history of questions and answers",
+    ),
+    actions: [],
+  },
+  {
     slug: "fpl",
     name: "FPL Lab",
     kind: "experiment",
@@ -57,7 +75,7 @@ export const projects: Project[] = [
     tags: ["TanStack Start", "TypeScript", "Neon", "Cloudflare R2", "GitHub Actions"],
     cover: projectImage(
       "fpl/squad-hero",
-      "The FPL Lab squad builder, headed ‘Build the edge.’, with a £100m budget bar and gameweek horizon controls",
+      "The FPL Lab squad builder, with a £100m budget bar and gameweek horizon controls above an empty pitch",
     ),
     actions: [
       { kind: "live", label: "Open the lab", href: "https://fpl.wasimarif.com" },
@@ -77,7 +95,7 @@ export const projects: Project[] = [
     timeframe: "2026",
     role: "Independent creator",
     lifecycle: "active",
-    featured: true,
+    featured: false,
     date: "2026-05-16",
     tags: ["TypeScript", "React", "MSW", "Playwright", "Effect"],
     cover: projectImage(

@@ -87,7 +87,7 @@ export function RewriterProject() {
         <ProjectFigure
           image={projectImage(
             "rewriter/preferences",
-            "The reading preferences dialog, with Pages or Continuous mode and a list of editions from Original down to Early, Developing and Independent",
+            "The reading preferences dialog, with Pages or Continuous mode and five editions from Original to Advanced",
           )}
           caption="Reading preferences. Pick pages or continuous scrolling, one of five editions, a theme, and text size and spacing."
         />

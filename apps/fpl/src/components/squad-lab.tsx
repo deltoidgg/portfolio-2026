@@ -1,13 +1,9 @@
 import {
   IconArrowsExchange,
-  IconChartDots3,
   IconChevronRight,
   IconCrown,
-  IconLock,
   IconSearch,
   IconTrash,
-  IconUsers,
-  IconWand,
   IconX,
 } from "@tabler/icons-react";
 import { line, scaleLinear } from "d3";
@@ -35,6 +31,12 @@ const positionColour: Record<Position, string> = {
   MID: "#f0c96b",
   FWD: "#ff7a73",
 };
+const positionPlural: Record<Position, string> = {
+  GKP: "goalkeepers",
+  DEF: "defenders",
+  MID: "midfielders",
+  FWD: "forwards",
+};
 
 function playerPrice(player: Player): number | undefined {
   return player.price.status === "official" ? player.price.value : undefined;
@@ -42,6 +44,17 @@ function playerPrice(player: Player): number | undefined {
 
 function ownership(player: Player): number | undefined {
   return player.ownership.status === "unavailable" ? undefined : player.ownership.value;
+}
+
+function priceText(player: Player, short = false): string {
+  const price = playerPrice(player);
+  if (price === undefined) return short ? "No price" : "No price yet";
+  return `£${price.toFixed(1)}m`;
+}
+
+function ownershipText(player: Player, digits = 0): string {
+  const value = ownership(player);
+  return value === undefined ? "ownership n/a" : `${value.toFixed(digits)}% owned`;
 }
 
 function fixtureLabel(player: Player, gameweekIndex = 0): string {
@@ -110,13 +123,14 @@ function PriceFrontier({
   return (
     <figure className="price-frontier">
       <figcaption>
-        <span>{position} price frontier</span>
+        <span>Value for money</span>
         <small>
-          The cyan edge marks xP above a £{minPrice.toFixed(1)}–£
-          {(minPrice + 0.5).toFixed(1)}m replacement option.
+          Higher means more expected points than a £{minPrice.toFixed(1)}m to £
+          {(minPrice + 0.5).toFixed(1)}m {position} would give you. The line joins the best value at
+          each price.
         </small>
       </figcaption>
-      <svg viewBox="0 0 520 205" role="img" aria-labelledby={`frontier-${position}`}>
+      <svg viewBox="0 0 520 214" role="img" aria-labelledby={`frontier-${position}`}>
         <title id={`frontier-${position}`}>
           {`${position} price versus projected points frontier`}
         </title>
@@ -141,13 +155,13 @@ function PriceFrontier({
           ))}
         </g>
         <g className="frontier-axis" aria-hidden="true">
-          <text x="38" y="199">
+          <text x="38" y="208">
             £{minPrice.toFixed(1)}m
           </text>
-          <text x="502" y="199" textAnchor="end">
+          <text x="502" y="208" textAnchor="end">
             £{maxPrice.toFixed(1)}m
           </text>
-          <text x="38" y="13">
+          <text x="38" y="14">
             +{maxPoints.toFixed(1)} xP
           </text>
         </g>
@@ -189,15 +203,16 @@ function SquadPlayerCard({
         </small>
         <span className="player-card-numbers">
           <b>{player.expectedPoints.toFixed(1)} xP</b>
-          <b>£{playerPrice(player)?.toFixed(1) ?? "—"}m</b>
+          <b>{priceText(player)}</b>
         </span>
         <small className="player-card-confidence">
-          {player.p10.toFixed(1)}–{player.p90.toFixed(1)} range ·{" "}
-          {Math.round(player.sixtyMinuteProbability * 100)}% 60+ ·{" "}
-          {ownership(player)?.toFixed(0) ?? "—"}% owned
+          Range {player.p10.toFixed(1)} to {player.p90.toFixed(1)}
+          <br />
+          {Math.round(player.sixtyMinuteProbability * 100)}% to play 60+ · {ownershipText(player)}
         </small>
         <small className="player-card-confidence">
-          {Math.round(player.marketCoverage * 100)}% market coverage ·{" "}
+          {Math.round(player.marketCoverage * 100)}% market coverage
+          <br />
           {Math.round(player.sourceAgreement * 100)}% source agreement
         </small>
       </button>
@@ -486,62 +501,44 @@ export function SquadLab({
     pressureStatus === "locked"
       ? "Prices locked until GW1"
       : pressureStatus === "active"
-        ? "Official predictor active"
-        : "Predictor calibration pending";
-  const lifecycleLabel =
-    map.season.lifecycle === "active"
-      ? "Active season"
-      : map.season.lifecycle === "prelaunch"
-        ? "Pre-season"
-        : map.season.lifecycle;
+        ? "Official predictor on"
+        : "Predictor not ready";
 
   return (
     <div className="squad-lab">
       <div className="squad-lab-shell">
         <header className="squad-lab-hero">
           <div>
-            <p className="squad-lab-kicker">
-              {map.season.label} / {lifecycleLabel} / Official prices
-            </p>
-            <h1 aria-label={preDeadline ? "Build the edge." : "Plan the move."}>
-              {preDeadline ? "Build the" : "Plan the"}
-              <br />
-              {preDeadline ? "edge." : "move."}
-            </h1>
+            <h1>Squad lab</h1>
             <p>
               {preDeadline
-                ? "Construct a valid GW1 squad at today’s exact prices. The model keeps performance uncertainty visible while the budget stays non-negotiable."
-                : "Improve your squad at today’s prices. Replacement paths preserve position, club and affordability constraints while expected gains stay probabilistic."}
+                ? "Pick a valid 15-player squad at today’s prices. Every player comes with a range of likely points, not a single guess."
+                : "Improve your squad at today’s prices. Swaps keep your position, club and budget limits intact, and expected gains come with a range."}
             </p>
           </div>
           <div className="launch-readout">
-            <span>
-              <IconLock size={14} />{" "}
-              {pressureStatus === "locked" ? "Prices locked to GW1" : "Live prices & ownership"}
-            </span>
-            <strong>{map.players.length}</strong>
-            <small>live players</small>
+            <span>{map.players.length} players</span>
             <time dateTime={map.observedAt}>
-              Captured{" "}
+              Prices captured{" "}
               {new Date(map.observedAt).toLocaleString("en-GB", {
-                day: "2-digit",
+                day: "numeric",
                 month: "short",
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </time>
-            <small className="source-freshness">
-              {freshSources}/{map.sourceHealth.length} sources fresh · {map.season.rulesetStatus}{" "}
-              rules
-            </small>
+            <span>
+              {freshSources} of {map.sourceHealth.length} sources up to date,{" "}
+              {map.season.rulesetStatus} rules
+            </span>
           </div>
         </header>
 
         <section className="budget-rail" aria-label="Squad budget">
           <div>
-            <span>Budget allocation</span>
+            <span>Budget</span>
             <strong data-negative={validation.bank < 0 || undefined}>
-              £{validation.bank.toFixed(1)}m bank
+              £{validation.bank.toFixed(1)}m left
             </strong>
           </div>
           <div className="budget-track">
@@ -581,13 +578,13 @@ export function SquadLab({
           </div>
           <p>
             {horizon === 1
-              ? "Captaincy lens: the opening fixture carries the decision."
+              ? "Looking one gameweek ahead, so the next fixture decides most of it."
               : horizon === 3
-                ? "Transfer lens: balance immediate output with the first fixture run."
-                : "Squad lens: favour durable roles and multiweek flexibility."}
+                ? "Looking three gameweeks ahead, which weighs the next match against the run after it."
+                : "Looking five gameweeks ahead, which favours players with secure roles."}
           </p>
           <button className="suggest-squad" type="button" onClick={suggestSquad}>
-            <IconWand size={16} /> Suggest a valid squad
+            Suggest a squad
           </button>
         </div>
 
@@ -595,13 +592,13 @@ export function SquadLab({
           <section className="pitch-panel" aria-labelledby="pitch-heading">
             <header>
               <div>
-                <span id="pitch-heading">My squad</span>
+                <span id="pitch-heading">Your squad</span>
                 <strong>
-                  {squad.picks.length} / {squadRules.squadSize} selected
+                  {squad.picks.length} of {squadRules.squadSize} picked
                 </strong>
               </div>
               <span data-valid={validation.valid || undefined}>
-                {validation.valid ? "Ready for GW1" : `${validation.errors.length} checks remain`}
+                {validation.valid ? "Ready for GW1" : `${validation.errors.length} checks to go`}
               </span>
             </header>
             <div className="squad-pitch">
@@ -647,7 +644,7 @@ export function SquadLab({
             <section className="bench-strip" aria-label="Bench">
               <header>
                 <span>Bench</span>
-                <small>Order 1–4</small>
+                <small>Subs come on in this order</small>
               </header>
               <div>
                 <AnimatePresence mode="popLayout">
@@ -677,11 +674,11 @@ export function SquadLab({
           <aside className="player-pool" aria-label="Player selection">
             <header>
               <div>
-                <span>{replacingPlayer ? "Choose replacement" : "Player pool"}</span>
+                <span>{replacingPlayer ? "Pick a replacement for" : "Players"}</span>
                 <strong>
                   {replacingPlayer
-                    ? `${replacingPlayer.name} · £${playerPrice(replacingPlayer)?.toFixed(1)}m`
-                    : `${pool.length} ${poolPosition}`}
+                    ? `${replacingPlayer.name} (${priceText(replacingPlayer)})`
+                    : `${pool.length} ${positionPlural[poolPosition]}`}
                 </strong>
               </div>
               {replacingPlayer ? (
@@ -743,7 +740,6 @@ export function SquadLab({
                     disabled={Boolean(issue)}
                     title={issue}
                   >
-                    <i style={{ background: positionColour[player.position] }} />
                     <span>
                       <b>{player.name}</b>
                       <small>
@@ -754,7 +750,7 @@ export function SquadLab({
                       <b>{player.expectedPoints.toFixed(1)} xP</b>
                       <small>
                         {priceDelta === undefined || pointsDelta === undefined
-                          ? `£${playerPrice(player)?.toFixed(1) ?? "—"}m · ${ownership(player)?.toFixed(1) ?? "—"}% · ${Math.round(player.sixtyMinuteProbability * 100)}% 60+`
+                          ? `${priceText(player)} · ${Math.round(player.sixtyMinuteProbability * 100)}% 60+`
                           : `${priceDelta >= 0 ? "+" : "−"}£${Math.abs(priceDelta).toFixed(1)}m · ${pointsDelta >= 0 ? "+" : "−"}${Math.abs(pointsDelta).toFixed(1)} xP`}
                       </small>
                     </span>
@@ -772,12 +768,11 @@ export function SquadLab({
 
         <section className="squad-validation" aria-label="Squad checks">
           <div>
-            <IconUsers size={17} />
             <span>
-              <b>{validation.valid ? "Squad valid" : "Squad checks"}</b>
+              <b>{validation.valid ? "Squad is valid" : "Squad checks"}</b>
               <small>
                 {validation.valid
-                  ? "Budget, formation, club limits and captaincy all pass."
+                  ? "Budget, formation, club limits and captain all check out."
                   : validation.errors[0]}
               </small>
             </span>
@@ -797,8 +792,8 @@ export function SquadLab({
         <div className="decision-grid">
           <section className="decision-panel captaincy-lab">
             <header>
-              <span>Captaincy lab</span>
-              <small>GW{map.fromGameweek} projection</small>
+              <span>Captain options</span>
+              <small>GW{map.fromGameweek} forecast</small>
             </header>
             {captaincy.length ? (
               captaincy.map(({ pick, player }, index) => (
@@ -815,13 +810,13 @@ export function SquadLab({
                 </button>
               ))
             ) : (
-              <p>Select a starting XI to compare captaincy options.</p>
+              <p>Pick a starting XI to compare captain options.</p>
             )}
           </section>
 
           <section className="decision-panel ownership-radar">
             <header>
-              <span>Price &amp; ownership radar</span>
+              <span>Ownership and price</span>
               <small>{priceRadarLabel}</small>
             </header>
             {ownershipRadar.map((player) => (
@@ -834,23 +829,22 @@ export function SquadLab({
                   <b style={{ width: `${ownership(player)}%` }} />
                 </i>
                 <strong>{ownership(player)?.toFixed(1)}%</strong>
-                <small>£{playerPrice(player)?.toFixed(1)}m</small>
+                <small>{priceText(player, true)}</small>
               </div>
             ))}
             <footer>
-              <IconLock size={13} />
               {pressureStatus === "locked"
-                ? "Transfer pressure activates only after the GW1 deadline and API verification."
+                ? "Prices can’t change before the GW1 deadline, so price pressure only starts after it."
                 : pressureStatus === "active"
-                  ? "Pressure is directional evidence, not a guaranteed price change."
-                  : "Price-pressure semantics remain hidden until the post-GW1 API is verified."}
+                  ? "Price pressure is a hint about where prices might go, not a promise."
+                  : "Price pressure stays hidden until the post-GW1 data has been checked."}
             </footer>
           </section>
 
           <section className="decision-panel fixture-run">
             <header>
-              <span>Fixture run</span>
-              <small>{horizon} gameweek horizon</small>
+              <span>Upcoming fixtures</span>
+              <small>Next {horizon === 1 ? "gameweek" : `${horizon} gameweeks`}</small>
             </header>
             {selected.slice(0, 6).map(({ player }) => (
               <div key={player.registrationKey}>
@@ -868,13 +862,11 @@ export function SquadLab({
         </div>
 
         <footer className="squad-method">
-          <IconChartDots3 size={17} />
           <p>
-            <strong>Known versus uncertain.</strong> Official FPL prices and squad constraints are
-            exact. Minutes, roles and returns remain probabilistic, built from season-labelled
-            history, fixture markets and current availability.
+            Prices and squad rules come straight from FPL, so they’re exact. Minutes, roles and
+            points are forecasts, built from past seasons, betting markets and who’s currently fit.
           </p>
-          <span>market-xp / {map.players[0]?.provenance.modelVersion ?? "—"}</span>
+          <span>market-xp {map.players[0]?.provenance.modelVersion ?? "n/a"}</span>
         </footer>
 
         <p className="sr-only" aria-live="polite">

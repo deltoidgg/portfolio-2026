@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { Analytics } from "@vercel/analytics/react";
 import type { ReactNode } from "react";
+import barlowLatin from "@fontsource/barlow-condensed/files/barlow-condensed-latin-600-normal.woff2?url";
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
 import appCss from "../styles.css?url";
 
@@ -20,11 +22,26 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Interactive Fantasy Premier League experiments using market prices, probabilistic forecasts, and point-in-time data.",
+          "Fantasy Premier League tools built on betting odds and forecast ranges: a squad builder, an opportunity map and a deadline replay.",
       },
       { name: "theme-color", content: "#071018" },
     ],
     links: [
+      // headings use Barlow Condensed and everything else uses Geist, so fetch both with the CSS
+      {
+        rel: "preload",
+        href: barlowLatin,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "preload",
+        href: geistLatin,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
@@ -37,11 +54,10 @@ export const Route = createRootRoute({
 function NotFoundPage() {
   return (
     <div className="fpl-message">
-      <p>404 / FPL Lab</p>
-      <h1>Experiment not found</h1>
-      <span>This lab is still growing. Return to the current market experiment.</span>
+      <h1>Page not found</h1>
+      <p>There’s nothing at this address. The squad lab is a good place to start.</p>
       <Link to="/squad" search={{ horizon: 3, dataset: "current" }}>
-        Open Squad Lab
+        Open the squad lab
       </Link>
     </div>
   );
@@ -50,12 +66,11 @@ function NotFoundPage() {
 function ErrorPage({ reset }: { reset: () => void }) {
   return (
     <div className="fpl-message" role="alert">
-      <p>Live data unavailable / FPL Lab</p>
-      <h1>No current snapshot is ready</h1>
-      <span>
-        The lab will not substitute estimated preseason data. Retry after the collector publishes a
-        verified 2026/27 snapshot.
-      </span>
+      <h1>The latest forecast isn’t ready</h1>
+      <p>
+        The lab won’t swap in estimated pre-season numbers for the real thing. Try again in a
+        moment, or check back once the next verified 2026/27 snapshot has been published.
+      </p>
       <button type="button" onClick={reset}>
         Try again
       </button>
@@ -109,7 +124,11 @@ function RootComponent() {
       </main>
       <footer className="fpl-site-footer">
         <span>Experimental forecasts, not betting advice.</span>
-        <a href="https://github.com/deltoidgg/portfolio-2026">Source on GitHub</a>
+        <div>
+          <a href="https://research.wasimarif.com">Research</a>
+          <a href="https://wasimarif.com">Portfolio</a>
+          <a href="https://github.com/deltoidgg/portfolio-2026">Source on GitHub</a>
+        </div>
       </footer>
     </RootDocument>
   );

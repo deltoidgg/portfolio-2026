@@ -6,6 +6,8 @@ import { BrandMark, ThemeToggle } from "ui";
 const navClass =
   "site-nav-link inline-flex min-h-11 items-center px-2 text-[0.9375rem] text-ink-muted transition-colors hover:text-ink";
 const activeProps = { className: "site-nav-link site-nav-link--active !text-ink" };
+// both icons sit on top of each other and swap, so opening the menu has a small turn instead of a snap
+const menuIcon = "col-start-1 row-start-1 transition-[opacity,scale,rotate] duration-200 ease-out";
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -67,41 +69,46 @@ export function SiteHeader() {
             aria-controls="mobile-navigation"
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
             onClick={() => setMenuOpen((open) => !open)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-sm text-ink-muted hover:text-ink"
+            className="grid h-11 w-11 place-items-center rounded-sm text-ink-muted transition-[color,scale] duration-200 hover:text-ink active:scale-90"
           >
-            {menuOpen ? (
-              <IconX size={20} aria-hidden="true" />
-            ) : (
-              <IconMenu2 size={20} aria-hidden="true" />
-            )}
+            <IconMenu2
+              size={20}
+              aria-hidden="true"
+              className={`${menuIcon} ${menuOpen ? "scale-50 -rotate-90 opacity-0" : ""}`}
+            />
+            <IconX
+              size={20}
+              aria-hidden="true"
+              className={`${menuIcon} ${menuOpen ? "" : "scale-50 rotate-90 opacity-0"}`}
+            />
           </button>
         </div>
       </nav>
 
-      {menuOpen ? (
-        <div
-          id="mobile-navigation"
-          className="mobile-menu border-t border-edge bg-canvas md:hidden"
-        >
-          <div className="shell grid gap-1 py-4">
-            <Link to="/projects" className={navClass} onClick={close}>
-              Work
-            </Link>
-            <Link to="/writing" className={navClass} onClick={close}>
-              Writing
-            </Link>
-            <a href="https://research.wasimarif.com" className={navClass}>
-              Research
-            </a>
-            <Link to="/about" className={navClass} onClick={close}>
-              About
-            </Link>
-            <a href="mailto:wasim.arif@live.co.uk" className={navClass}>
-              Contact
-            </a>
-          </div>
+      <div
+        id="mobile-navigation"
+        className="mobile-menu border-b border-edge bg-canvas md:hidden"
+        data-open={menuOpen}
+        inert={!menuOpen}
+      >
+        <div className="shell grid gap-1 py-4">
+          <Link to="/projects" className={navClass} onClick={close}>
+            Work
+          </Link>
+          <Link to="/writing" className={navClass} onClick={close}>
+            Writing
+          </Link>
+          <a href="https://research.wasimarif.com" className={navClass}>
+            Research
+          </a>
+          <Link to="/about" className={navClass} onClick={close}>
+            About
+          </Link>
+          <a href="mailto:wasim.arif@live.co.uk" className={navClass}>
+            Contact
+          </a>
         </div>
-      ) : null}
+      </div>
     </header>
   );
 }

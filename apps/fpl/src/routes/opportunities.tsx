@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import type { OpportunityReplayArtifactV1 } from "market-intelligence";
 import {
@@ -14,9 +14,10 @@ import {
   opportunityMapFromDataset,
 } from "../lib/opportunity-data.ts";
 import { defaultOpportunitySearch } from "../lib/opportunity-search.ts";
+import { useWarmHorizons } from "../lib/warm-horizons.ts";
 
 const description =
-  "Explore market-informed FPL forecasts across projected points, official price, ownership, upside, and uncertainty.";
+  "Browse FPL forecasts by projected points, price, ownership and upside, with a range of outcomes for every player.";
 
 type OpportunitySearch = OpportunityViewState & { dataset: "current" | "demo" };
 
@@ -53,11 +54,13 @@ function validateSearch(search: Record<string, unknown>): OpportunitySearch {
 
 export const Route = createFileRoute("/opportunities")({
   validateSearch,
-  loaderDeps: ({ search }) => ({ dataset: search.dataset }),
-  loader: ({ deps }) => loadOpportunityDataset(deps.dataset),
+  loaderDeps: ({ search }) => ({ dataset: search.dataset, horizon: search.horizon }),
+  loader: ({ deps }) => loadOpportunityDataset(deps.dataset, deps.horizon),
+  staleTime: 60_000,
+  preloadStaleTime: 60_000,
   head: () =>
     buildFplMetadata({
-      title: "Opportunity Map",
+      title: "Opportunity map",
       description,
       path: "/opportunities",
     }),
@@ -68,16 +71,21 @@ function OpportunityMapPage() {
   const dataset = Route.useLoaderData();
   const state = Route.useSearch();
   const navigate = Route.useNavigate();
+  const router = useRouter();
   const [replay, setReplay] = useState<OpportunityReplayArtifactV1>();
   const map = useMemo(
     () => opportunityMapFromDataset(dataset, state.horizon, replay),
     [dataset, replay, state.horizon],
   );
+  useWarmHorizons(state.horizon, (horizon) =>
+    router.preloadRoute({ to: "/opportunities", search: { ...state, horizon } }),
+  );
   return (
     <>
       {isStaleOpportunityDataset(dataset) ? (
         <p className="opportunity-stale" role="status">
-          Showing the last validated 2026/27 forecast while the live artifact is unavailable.
+          The live forecast isn’t available right now, so this is the latest one that passed our
+          checks.
         </p>
       ) : null}
       <OpportunityMapExperience

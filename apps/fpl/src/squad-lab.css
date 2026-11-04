@@ -12,10 +12,7 @@
   --lab-coral: #ff7a73;
   min-height: calc(100vh - 3.5rem);
   color: var(--lab-ink);
-  background:
-    radial-gradient(circle at 82% 0%, rgb(126 169 255 / 0.1), transparent 30rem),
-    linear-gradient(90deg, transparent 49.95%, rgb(117 229 211 / 0.025) 50%, transparent 50.05%),
-    var(--lab-bg);
+  background: var(--lab-bg);
 }
 
 .squad-lab button,
@@ -38,101 +35,38 @@
 .squad-lab-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(16rem, auto);
-  gap: 2rem;
+  gap: 1.25rem 2rem;
   align-items: end;
-  padding: 0.6rem 0 1.5rem;
+  padding: 1.5rem 0 1.5rem;
   border-bottom: 1px solid var(--lab-line);
 }
 
-.squad-lab-kicker {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin: 0;
-  color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.squad-lab-kicker::before {
-  width: 1.8rem;
-  height: 1px;
-  content: "";
-  background: currentColor;
-}
-
 .squad-lab-hero h1 {
-  margin: 0.8rem 0 0;
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: clamp(4.2rem, 9vw, 8.4rem);
-  font-weight: 500;
-  line-height: 0.73;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
+  margin: 0;
+  font-family: var(--ui-font-display);
+  font-size: clamp(2.8rem, 5.2vw, 4.25rem);
+  font-weight: 600;
+  line-height: 1;
 }
 
-.squad-lab-hero > div:first-child > p:last-child {
-  max-width: 43rem;
-  margin: 1.25rem 0 0;
+.squad-lab-hero > div:first-child > p {
+  max-width: 40rem;
+  margin: 0.75rem 0 0;
   color: var(--lab-muted);
-  font-size: 0.94rem;
-  line-height: 1.65;
+  font-size: 1rem;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .launch-readout {
   display: grid;
-  grid-template-columns: auto auto;
-  gap: 0.2rem 1rem;
-  min-width: 18rem;
+  gap: 0.2rem;
   justify-items: end;
-  font-family: var(--ui-font-mono);
-}
-
-.launch-readout > span {
-  display: inline-flex;
-  grid-column: 1 / -1;
-  min-height: 2.25rem;
-  align-items: center;
-  gap: 0.45rem;
-  margin-bottom: 1rem;
-  padding-inline: 0.65rem;
-  border: 1px solid rgb(117 229 211 / 0.35);
-  color: var(--lab-cyan);
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: rgb(117 229 211 / 0.05);
-}
-
-.launch-readout strong {
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: 3.3rem;
-  font-weight: 500;
-  line-height: 0.8;
-}
-
-.launch-readout small {
-  align-self: end;
   color: var(--lab-subtle);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-}
-
-.launch-readout time {
-  grid-column: 1 / -1;
-  margin-top: 0.8rem;
-  color: var(--lab-subtle);
-  font-size: 0.65rem;
-}
-
-.launch-readout .source-freshness {
-  grid-column: 1 / -1;
-  margin-top: 0.2rem;
-  color: var(--lab-muted);
-  font-size: 0.65rem;
-  text-transform: none;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+  text-align: right;
 }
 
 .budget-rail {
@@ -147,15 +81,13 @@
   display: grid;
   gap: 0.2rem;
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .budget-rail > div:first-child strong {
   color: var(--lab-ink);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0;
 }
@@ -183,8 +115,7 @@
 .budget-track > i {
   position: absolute;
   inset: 0 auto 0 0;
-  background: linear-gradient(90deg, #4baea6, var(--lab-cyan));
-  box-shadow: 0 0 1.5rem rgb(117 229 211 / 0.22);
+  background: var(--lab-cyan);
 }
 
 .budget-track > i[data-over] {
@@ -195,8 +126,8 @@
   position: absolute;
   top: -1.7rem;
   color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   transform: translateX(-100%);
   white-space: nowrap;
 }
@@ -206,8 +137,8 @@
   grid-column: 2;
   justify-content: space-between;
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .squad-toolbar {
@@ -231,16 +162,26 @@
   min-width: 3.5rem;
   min-height: 2.75rem;
   border: 0;
-  color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.68rem;
+  color: var(--lab-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
   cursor: pointer;
   background: transparent;
+  transition:
+    color var(--ui-fast) ease,
+    background-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
+}
+
+.horizon-control button:active,
+.pool-position-tabs button:active {
+  transform: scale(0.97);
 }
 
 .horizon-control button[aria-pressed="true"],
 .pool-position-tabs button[aria-pressed="true"] {
   color: var(--lab-bg);
+  font-weight: 600;
   background: var(--lab-cyan);
 }
 
@@ -251,8 +192,8 @@
 
 .squad-toolbar > p {
   margin: 0;
-  color: var(--lab-subtle);
-  font-size: 0.72rem;
+  color: var(--lab-muted);
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -260,19 +201,21 @@
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
-  gap: 0.45rem;
-  padding-inline: 0.8rem;
-  border: 1px solid var(--lab-line-strong);
-  color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  padding-inline: 1.1rem;
+  border: 1px solid var(--lab-cyan);
+  color: var(--lab-bg);
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  background: var(--lab-panel);
+  background: var(--lab-cyan);
+  transition:
+    background-color var(--ui-fast) ease,
+    border-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
 }
 
-.suggest-squad:hover {
-  color: var(--lab-bg);
-  background: var(--lab-cyan);
+.squad-lab .suggest-squad:active {
+  transform: scale(0.97);
 }
 
 .squad-workbench {
@@ -303,24 +246,22 @@
   display: grid;
   gap: 0.15rem;
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .pitch-panel > header strong,
 .player-pool > header strong {
   color: var(--lab-ink);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0;
 }
 
 .pitch-panel > header > span {
   color: var(--lab-amber);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .pitch-panel > header > span[data-valid] {
@@ -392,8 +333,8 @@
 
 .pitch-row > span {
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 }
@@ -444,13 +385,13 @@
 
 .player-card-position {
   color: var(--position-colour);
-  font-family: var(--ui-font-mono);
-  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .player-card-main > strong {
   overflow: hidden;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -458,7 +399,7 @@
 
 .player-card-main > small {
   color: var(--lab-subtle);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -468,8 +409,8 @@
 
 .player-card-main > .player-card-confidence {
   color: var(--lab-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .player-card-numbers {
@@ -477,8 +418,8 @@
   justify-content: space-between;
   margin-top: auto;
   color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .player-card-actions {
@@ -491,18 +432,25 @@
   min-width: 2.75rem;
   min-height: 2.75rem;
   border: 0;
-  color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.6rem;
+  color: var(--lab-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.8125rem;
   cursor: pointer;
   background: transparent;
+  transition:
+    color var(--ui-fast) ease,
+    background-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
+}
+
+.player-card-actions button:active {
+  transform: scale(0.97);
 }
 
 .player-card-actions button + button {
   border-left: 1px solid var(--lab-line);
 }
 
-.player-card-actions button:hover,
 .player-card-actions .captain-button[data-active] {
   color: var(--lab-amber);
   background: rgb(240 201 107 / 0.06);
@@ -516,11 +464,20 @@
   justify-content: center;
   gap: 0.35rem;
   border: 1px dashed var(--lab-line-strong);
-  color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.56rem;
+  color: var(--lab-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.875rem;
   cursor: pointer;
   background: rgb(7 16 24 / 0.5);
+  transition:
+    color var(--ui-fast) ease,
+    border-color var(--ui-fast) ease,
+    background-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
+}
+
+.empty-position:active {
+  transform: scale(0.97);
 }
 
 .bench-strip {
@@ -535,9 +492,8 @@
   justify-content: space-between;
   padding-inline: 1rem;
   color: var(--lab-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .bench-strip > header small {
@@ -556,7 +512,7 @@
 .bench-strip > div > p {
   margin: auto;
   color: var(--lab-subtle);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
 }
 
 .player-pool {
@@ -607,7 +563,7 @@
   border: 0;
   outline: 0;
   color: var(--lab-ink);
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   background: transparent;
 }
 
@@ -621,15 +577,14 @@
   display: grid;
   gap: 0.15rem;
   color: var(--lab-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .price-frontier figcaption small {
   color: var(--lab-subtle);
   font-family: var(--ui-font-sans);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   text-transform: none;
 }
@@ -665,9 +620,10 @@
 }
 
 .frontier-axis text {
-  fill: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 9px;
+  fill: var(--lab-muted);
+  font-variant-numeric: tabular-nums;
+  /* the chart is drawn at 520 units wide and shown at about 370px, so this lands near 12px */
+  font-size: 17px;
 }
 
 .pool-list {
@@ -679,33 +635,28 @@
 
 .pool-list > button {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  gap: 0.55rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.6rem;
   width: 100%;
-  min-height: 3.75rem;
+  min-height: 3.9rem;
   align-items: center;
-  padding: 0.55rem 0.7rem;
+  padding: 0.55rem 0.8rem;
   border: 0;
   border-bottom: 1px solid var(--lab-line);
   color: var(--lab-ink);
   cursor: pointer;
   text-align: left;
   background: transparent;
+  transition: background-color var(--ui-fast) ease;
 }
 
-.pool-list > button:hover {
+.pool-list > button:active {
   background: var(--lab-raised);
 }
 
 .pool-list > button:disabled {
   cursor: not-allowed;
   opacity: 0.34;
-}
-
-.pool-list > button > i {
-  width: 0.48rem;
-  height: 0.48rem;
-  border-radius: 50%;
 }
 
 .pool-list > button > span {
@@ -719,14 +670,14 @@
 }
 
 .pool-list b {
-  font-size: 0.65rem;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .pool-list small {
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .pool-list svg {
@@ -757,13 +708,13 @@
 
 .squad-validation b {
   color: var(--lab-ink);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .squad-validation small {
   color: var(--lab-subtle);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .position-counts {
@@ -776,8 +727,8 @@
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--lab-line);
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.6rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .position-counts b {
@@ -803,23 +754,26 @@
 
 .decision-panel > header {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
   margin-bottom: 0.8rem;
-  color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  text-transform: uppercase;
+  color: var(--lab-ink);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9375rem;
+  font-weight: 600;
 }
 
 .decision-panel > header small {
   color: var(--lab-subtle);
-  font-size: 0.58rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  text-align: right;
 }
 
 .decision-panel > p {
   color: var(--lab-subtle);
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -836,37 +790,43 @@
   cursor: pointer;
   text-align: left;
   background: transparent;
+  transition: background-color var(--ui-fast) ease;
 }
 
 .captaincy-lab > button > span {
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .captaincy-lab > button b,
 .captaincy-lab > button strong {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .captaincy-lab > button small {
   color: var(--lab-subtle);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
 }
 
 .captaincy-lab > button strong {
   color: var(--lab-cyan);
-  font-family: var(--ui-font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .captaincy-lab > button svg {
   color: var(--lab-amber);
 }
 
+.ownership-radar > div > small:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .ownership-radar > div {
   display: grid;
-  grid-template-columns: minmax(6rem, 0.8fr) minmax(5rem, 1fr) 2.5rem 2.8rem;
+  grid-template-columns: minmax(5.5rem, 0.9fr) minmax(3rem, 0.8fr) 2.9rem auto;
   gap: 0.5rem;
   min-height: 2.55rem;
   align-items: center;
@@ -880,14 +840,14 @@
 
 .ownership-radar b,
 .ownership-radar strong {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .ownership-radar small {
   color: var(--lab-subtle);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .ownership-radar > div > i {
@@ -905,8 +865,8 @@
   display: flex;
   gap: 0.4rem;
   margin-top: 0.75rem;
-  color: var(--lab-amber);
-  font-size: 0.62rem;
+  color: var(--lab-subtle);
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
@@ -920,7 +880,7 @@
   align-self: center;
   padding-right: 0.4rem;
   overflow: hidden;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -934,40 +894,37 @@
   padding-inline: 0.3rem;
   border-left: 1px solid var(--lab-line);
   color: var(--lab-muted);
-  font-family: var(--ui-font-mono);
-  font-size: 0.58rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
   text-align: center;
 }
 
 .fixture-run > div > span small {
   color: var(--lab-cyan);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
 }
 
 .squad-method {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 0.7rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem 2rem;
   align-items: start;
   padding-block: 1.3rem;
-  color: var(--lab-subtle);
+  color: var(--lab-muted);
 }
 
 .squad-method p {
   max-width: 55rem;
   margin: 0;
-  font-size: 0.68rem;
-  line-height: 1.55;
-}
-
-.squad-method strong {
-  color: var(--lab-muted);
-  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .squad-method > span {
-  font-family: var(--ui-font-mono);
-  font-size: 0.55rem;
+  color: var(--lab-subtle);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
 }
 
 .sr-only {
@@ -1036,12 +993,12 @@
   }
 
   .squad-lab-hero h1 {
-    font-size: clamp(4rem, 20vw, 6rem);
+    font-size: clamp(2.6rem, 13vw, 3.4rem);
   }
 
   .launch-readout {
-    grid-template-columns: auto 1fr;
     justify-items: start;
+    text-align: left;
   }
 
   .budget-rail {
@@ -1110,22 +1067,11 @@
   }
 
   .squad-method {
-    grid-template-columns: auto 1fr;
-  }
-
-  .squad-method > span {
-    grid-column: 2;
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 32rem) {
-  .squad-lab .suggest-squad {
-    width: 2.75rem;
-    padding: 0;
-    justify-content: center;
-    font-size: 0;
-  }
-
   .squad-player-card {
     width: calc(50% - 0.25rem);
   }
@@ -1143,6 +1089,38 @@
   }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .horizon-control button:not([aria-pressed="true"]):hover,
+  .pool-position-tabs button:not([aria-pressed="true"]):not(:disabled):hover {
+    color: var(--lab-ink);
+    background: var(--lab-raised);
+  }
+
+  .squad-lab .suggest-squad:hover {
+    border-color: #9ff0e2;
+    background: #9ff0e2;
+  }
+
+  .player-card-actions button:hover {
+    color: var(--lab-amber);
+    background: rgb(240 201 107 / 0.06);
+  }
+
+  .empty-position:hover {
+    border-color: var(--lab-cyan);
+    color: var(--lab-ink);
+    background: var(--lab-raised);
+  }
+
+  .pool-list > button:not(:disabled):hover {
+    background: var(--lab-raised);
+  }
+
+  .captaincy-lab > button:hover {
+    background: var(--lab-raised);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .squad-lab *,
   .squad-lab *::before,
@@ -1151,14 +1129,15 @@
     transition-duration: 0.01ms !important;
   }
 }
+
 .squad-stale {
   margin: 0;
-  padding: 0.65rem 1rem;
+  padding: 0.7rem 1rem;
   border-bottom: 1px solid rgb(240 201 107 / 28%);
   background: #2a2415;
   color: #f0c96b;
-  font:
-    500 0.78rem/1.4 "Geist Variable",
-    sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
   text-align: center;
 }

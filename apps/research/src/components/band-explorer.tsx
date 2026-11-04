@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { DataTable, type DataTableColumn } from "ui";
+import { PLOT_STYLE } from "viz";
 import type { ExplorerConfig } from "../content/explorers";
 import type { BandStat, GroupOption } from "../lib/explorer-queries";
 
@@ -30,6 +31,15 @@ function bandColumns(config: ExplorerConfig): Array<DataTableColumn<BandStat>> {
   ];
 }
 
+/** A few round tick values, so percentage labels never collide on a narrow chart. */
+function shareTicks(max: number, count = 4): number[] {
+  const steps = [0.05, 0.1, 0.2, 0.25, 0.5, 1];
+  const step = steps.find((candidate) => max / candidate <= count) ?? 1;
+  const ticks: number[] = [];
+  for (let value = 0; value <= max + 1e-9; value += step) ticks.push(Number(value.toFixed(2)));
+  return ticks;
+}
+
 function renderCharts(
   Plot: PlotModule,
   meanNode: HTMLElement,
@@ -38,35 +48,56 @@ function renderCharts(
 ) {
   const width = Math.max(240, Math.min(meanNode.clientWidth, 640));
   const domain = bands.map((band) => band.label);
+  // horizontal bars keep every band label readable instead of tilting them to fit
+  const shared = {
+    width,
+    height: domain.length * 40 + 36,
+    marginLeft: 116,
+    marginRight: 52,
+    marginBottom: 32,
+    style: PLOT_STYLE,
+    y: { domain, label: null, tickSize: 0, padding: 0.4 },
+  };
 
   meanNode.replaceChildren(
     Plot.plot({
-      width,
-      height: 240,
-      marginLeft: 44,
-      marginBottom: 44,
-      style: { background: "transparent", fontFamily: "inherit", fontSize: "10px" },
-      x: { domain, label: null, tickRotate: -18 },
-      y: { label: "Mean violations", grid: true },
+      ...shared,
+      x: { label: null, grid: true, ticks: 4 },
       marks: [
-        Plot.barY(bands, { x: "label", y: "meanViolations", fill: "var(--ui-accent)", rx: 2 }),
-        Plot.ruleY([0]),
+        Plot.barX(bands, { y: "label", x: "meanViolations", fill: "var(--ui-accent)", rx: 2 }),
+        Plot.text(bands, {
+          y: "label",
+          x: "meanViolations",
+          text: (band: BandStat) => band.meanViolations.toFixed(1),
+          textAnchor: "start",
+          dx: 6,
+          fill: "var(--ui-ink)",
+        }),
+        Plot.ruleX([0]),
       ],
     }),
   );
 
   zeroNode.replaceChildren(
     Plot.plot({
-      width,
-      height: 240,
-      marginLeft: 44,
-      marginBottom: 44,
-      style: { background: "transparent", fontFamily: "inherit", fontSize: "10px" },
-      x: { domain, label: null, tickRotate: -18 },
-      y: { label: "Violation-free share", grid: true, tickFormat: ".0%" },
+      ...shared,
+      x: {
+        label: null,
+        grid: true,
+        ticks: shareTicks(Math.max(...bands.map((band) => band.zeroShare))),
+        tickFormat: ".0%",
+      },
       marks: [
-        Plot.barY(bands, { x: "label", y: "zeroShare", fill: "var(--ui-accent-ink)", rx: 2 }),
-        Plot.ruleY([0]),
+        Plot.barX(bands, { y: "label", x: "zeroShare", fill: "var(--ui-accent)", rx: 2 }),
+        Plot.text(bands, {
+          y: "label",
+          x: "zeroShare",
+          text: (band: BandStat) => `${(band.zeroShare * 100).toFixed(1)}%`,
+          textAnchor: "start",
+          dx: 6,
+          fill: "var(--ui-ink)",
+        }),
+        Plot.ruleX([0]),
       ],
     }),
   );

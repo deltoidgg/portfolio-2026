@@ -13,6 +13,8 @@ const targets = [
     routes: [
       "/",
       "/projects",
+      "/projects/join-the-conversation",
+      "/projects/join-the-conversation?tab=technical",
       "/projects/fpl",
       "/projects/mockpit",
       "/projects/rewriter",

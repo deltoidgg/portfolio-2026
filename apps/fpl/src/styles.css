@@ -1,12 +1,14 @@
 @import "tailwindcss";
 @import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
-@import "@fontsource/barlow-condensed/500.css";
 @import "@fontsource/barlow-condensed/600.css";
 
 :root {
   --ui-font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
-  --ui-font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --ui-font-display: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --ui-fast: 150ms;
+  --ui-base: 240ms;
+  --ui-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ui-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   color-scheme: dark;
 }
 
@@ -35,12 +37,19 @@ button {
   -webkit-tap-highlight-color: transparent;
 }
 
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #75e5d3;
+  outline-offset: 2px;
+}
+
 .fpl-site-header {
   position: sticky;
   z-index: 50;
   top: 0;
   border-bottom: 1px solid #20333f;
-  background: rgb(7 16 24 / 0.9);
+  background: rgb(7 16 24 / 0.94);
   backdrop-filter: blur(16px);
 }
 
@@ -59,13 +68,13 @@ button {
   display: inline-flex;
   min-height: 2.75rem;
   align-items: center;
-  padding-inline: 0.55rem;
+  padding-inline: 0.65rem;
   color: #91a5ae;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   text-decoration: none;
+  transition: color var(--ui-fast) ease;
 }
 
-.fpl-site-header a:hover,
 .fpl-site-header a[aria-current="page"] {
   color: #edf5f5;
 }
@@ -83,7 +92,7 @@ button {
 
 .fpl-wordmark span {
   margin-left: 0.3rem;
-  color: #75e5d3;
+  color: #91a5ae;
   font-weight: 400;
 }
 
@@ -93,17 +102,26 @@ button {
   min-height: 5rem;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1rem 2rem;
   margin-inline: auto;
   padding: 1.5rem clamp(1rem, 2.2vw, 2.5rem);
-  color: #718b96;
-  font-family: var(--ui-font-mono);
-  font-size: 0.62rem;
+  color: #8aa0aa;
+  font-size: 0.8125rem;
+}
+
+.fpl-site-footer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
 }
 
 .fpl-site-footer a {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
   color: #91a5ae;
   text-underline-offset: 0.2rem;
+  transition: color var(--ui-fast) ease;
 }
 
 .fpl-message {
@@ -111,43 +129,51 @@ button {
   width: min(100% - 2rem, 42rem);
   min-height: calc(100vh - 8.5rem);
   place-content: center;
+  justify-items: start;
   gap: 1rem;
   margin-inline: auto;
 }
 
-.fpl-message p {
-  color: #75e5d3;
-  font-family: var(--ui-font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
 .fpl-message h1 {
   margin: 0;
-  font-family: "Barlow Condensed", sans-serif;
-  font-size: clamp(3rem, 10vw, 6rem);
-  font-weight: 500;
-  line-height: 0.9;
-  text-transform: uppercase;
+  font-family: var(--ui-font-display);
+  font-size: clamp(2.6rem, 7vw, 4rem);
+  font-weight: 600;
+  line-height: 1;
 }
 
-.fpl-message span {
+.fpl-message p {
   max-width: 32rem;
-  color: #91a5ae;
+  margin: 0;
+  color: #a4b5bd;
+  font-size: 1rem;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .fpl-message a,
 .fpl-message button {
+  display: inline-flex;
   width: fit-content;
-  min-height: 2.5rem;
-  padding: 0.65rem 0.8rem;
+  min-height: 2.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.65rem 1rem;
   border: 1px solid #38505e;
   color: #edf5f5;
   font: inherit;
   text-decoration: none;
+  cursor: pointer;
   background: #101f29;
+  transition:
+    background-color var(--ui-fast) ease,
+    border-color var(--ui-fast) ease,
+    transform var(--ui-fast) var(--ui-ease);
+}
+
+.fpl-message a:active,
+.fpl-message button:active {
+  transform: scale(0.97);
 }
 
 .fpl-skip-link {
@@ -165,18 +191,30 @@ button {
   transform: translateY(0);
 }
 
-@media (max-width: 36rem) {
-  .fpl-site-header nav {
-    align-items: flex-start;
+@media (hover: hover) and (pointer: fine) {
+  .fpl-site-header a:hover {
+    color: #edf5f5;
   }
 
+  .fpl-site-footer a:hover {
+    color: #edf5f5;
+  }
+
+  .fpl-message a:hover,
+  .fpl-message button:hover {
+    border-color: #75e5d3;
+    background: #16303b;
+  }
+}
+
+@media (max-width: 36rem) {
   .fpl-site-header nav > div a:nth-child(n + 4) {
     display: none;
   }
 
   .fpl-site-header a {
-    padding-inline: 0.4rem;
-    font-size: 0.68rem;
+    padding-inline: 0.5rem;
+    font-size: 0.8125rem;
   }
 
   .fpl-wordmark span {

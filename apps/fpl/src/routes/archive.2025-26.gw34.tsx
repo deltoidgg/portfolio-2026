@@ -5,13 +5,13 @@ import "../deadline-room.css";
 import { buildFplMetadata } from "../lib/metadata.ts";
 
 const description =
-  "Replay how market prices, availability, and source disagreement changed FPL forecasts before the 2025/26 Gameweek 34 deadline.";
+  "Replay how betting odds, team news and disagreement between sources moved FPL forecasts before the 2025/26 Gameweek 34 deadline.";
 
 export const Route = createFileRoute("/archive/2025-26/gw34")({
   loader: () => createDemoDeadlineRoom(),
   head: () =>
     buildFplMetadata({
-      title: "Deadline Intelligence Room, 2025/26 archive",
+      title: "Deadline room, 2025/26 GW34 archive",
       description,
       path: "/archive/2025-26/gw34",
     }),
