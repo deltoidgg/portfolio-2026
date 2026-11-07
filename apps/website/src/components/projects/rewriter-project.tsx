@@ -10,6 +10,7 @@ import {
   RewriterThemeParts,
   RewriterThemes,
 } from "./rewriter-figures";
+import { RewriterEvalLoop, RewriterJudgeScores, RewriterModelComparison } from "./rewriter-evals";
 import { RewriterLevels } from "./rewriter-levels";
 
 export function RewriterProject() {
@@ -45,6 +46,12 @@ export function RewriterProject() {
             detail: "Cloudflare, rewriting a page at a time, theming",
             content: <TechnicalTab />,
           },
+          {
+            id: "evals",
+            label: "Evals",
+            detail: "Checking the reading levels, a model as judge, comparing models",
+            content: <EvalsTab />,
+          },
         ]}
       />
 
@@ -52,8 +59,7 @@ export function RewriterProject() {
         <p>
           It&rsquo;s live with 103 public-domain books and all four themes. The job I still
           haven&rsquo;t done is testing with real readers at each level, so I don&rsquo;t claim the
-          age bands are right. There&rsquo;s an evaluation set that checks sentence length, reading
-          grade, names and added commentary, but that tests the text, not the reader.
+          age bands are right. The evaluation set and its judge test the text, not the reader.
         </p>
         <p>
           I also haven&rsquo;t measured the theme scenes on a range of real hardware. Headless
@@ -330,6 +336,137 @@ function TechnicalTab() {
         <p>
           The engine is about 13 kB gzipped and loads after the first spread is on screen. Nothing
           is drawn while the book is still, and without WebGL the pages just fade.
+        </p>
+      </ProjectSection>
+    </>
+  );
+}
+
+function EvalsTab() {
+  return (
+    <>
+      <ProjectSection id="evals-why" title="When 6 to 8 didn’t read like 6 to 8">
+        <p>
+          After the move to Cloudflare, the rewrites for ages 6 to 8 didn&rsquo;t feel right. They
+          were plainer than the original, but they still read like a book for older children, and I
+          thought the previous prompt had done a better job. Measured, the median reading grade at
+          that level was 3.9 on the Flesch-Kincaid scale, which is pitched at nine and
+          ten-year-olds.
+        </p>
+        <p>
+          Changing a prompt by feel and reading a page or two afterwards is a good way to go round
+          in circles, so I built the evaluation out properly first and let it steer the changes.
+        </p>
+      </ProjectSection>
+
+      <ProjectSection id="eval-set" title="A fixed set to measure against">
+        <p>
+          The set is 24 passages, four from each of six books: Emma, Frankenstein, Great
+          Expectations, The Jungle Book, The Odyssey and Treasure Island. From each book
+          there&rsquo;s one passage that&rsquo;s mostly dialogue, one descriptive, one archaic and
+          one dense. A run rewrites all of them at all four levels, 96 rewrites, through the real
+          prompt and the production model.
+        </p>
+        <p>
+          The set is picked once and committed, so every run is measured on exactly the same text.
+          Each run saves every rewrite in a report, so a saved run can be checked again with new
+          code without paying for the rewrites twice.
+        </p>
+      </ProjectSection>
+
+      <ProjectSection id="eval-checks" title="The first failures were mine">
+        <p>
+          The first layer is plain code: every paragraph present and clean, sentence length and the
+          share of long sentences, reading grade, proper names kept, and no added commentary like
+          &ldquo;In this passage&rdquo;. The new prompt brought ages 6 to 8 down to a median grade
+          of 2.4, at about nine words a sentence. The levels also stopped blurring together:
+          neighbouring levels now share 60%, 80% and 80% of their word pairs, down from 76%, 88% and
+          88%.
+        </p>
+        <p>
+          A lot of the early failures weren&rsquo;t the model&rsquo;s, though. The name check
+          counted the first word of a line of speech as a name, read &ldquo;Bagheera--born&rdquo; as
+          one word, and flagged Kipling&rsquo;s Leopard for becoming &ldquo;the leopard&rdquo;. A
+          strict sentence limit would have sent 35% of the paragraphs for ages 6 to 8 back to the
+          model, so most pages would have cost two requests and twice the wait.
+        </p>
+        <ProjectNote title="Hard and soft failures.">
+          A paragraph that&rsquo;s missing, empty or full of markup is never kept. A soft problem,
+          like a lost name or a sentence half as long again as the level allows, gets one corrective
+          turn and is then accepted, so it can&rsquo;t send a whole page back to the original. At
+          that threshold, about 3% of paragraphs go back.
+        </ProjectNote>
+      </ProjectSection>
+
+      <ProjectSection id="judge" title="A second model as the editor">
+        <p>
+          Once every check passed, the rewrites still didn&rsquo;t always read well, and the checks
+          couldn&rsquo;t say why. Sentence length can&rsquo;t tell you that a line is garbled or a
+          joke has gone. So a second model, gpt-oss-120b, reads every rewrite next to its original
+          and scores it out of 5 the way an editor of books for that age would: level fit,
+          faithfulness, flow and voice. It also quotes the worst faults, which is what makes the
+          scores useful. It&rsquo;s from a different lab from the DeepSeek model doing the
+          rewriting, so it isn&rsquo;t marking its own work.
+        </p>
+        <p>
+          The judge needed calibrating too. At first it marked the rewrites for 6 to 8 down for
+          losing Austen&rsquo;s formal style, which is the point of that level, and called a wedding
+          invented when it was in the original. Its instructions now say that changing the
+          author&rsquo;s words is the job, and to mark down only a change in meaning, confusing
+          writing or the wrong level. It&rsquo;s also noisy: one passage&rsquo;s score can move by a
+          point between runs. So every rewrite is judged twice and averaged, and I only kept a
+          change when the same passages scored better in both judgings.
+        </p>
+      </ProjectSection>
+
+      <ProjectSection id="loop" title="One change at a time">
+        <RewriterEvalLoop />
+        <p>
+          What worked was usually specific. The model often swapped a word or two in a phrase that
+          only makes sense in older English, so Austen&rsquo;s &ldquo;woman wore too amiable a form
+          in it&rdquo; became &ldquo;Women seemed too lovable there&rdquo;. A rule to say what such
+          a phrase means fixed most of those. Another keeps a character&rsquo;s opinion theirs,
+          instead of the narrator stating it as fact. And worked examples moved this model more than
+          rules did: a third example for ages 6 to 8 raised faithfulness by about a quarter of a
+          point in both judgings.
+        </p>
+        <p>
+          Plenty didn&rsquo;t work. Letting the model reason first scored no better and took 50
+          seconds a part instead of 10, at three times the cost. Telling ages 12 to 14 not to chop
+          up sentences overshot, and dense passages came back at 23 words a sentence. A third
+          example for ages 9 to 11 made things worse. All three were reverted.
+        </p>
+        <ProjectNote title="Not teaching to the test.">
+          Twice, I put phrases from the eval passages into the prompt&rsquo;s examples without
+          noticing. That lets the model score well by matching the examples rather than following
+          the rules, so a test now fails if any example in the prompt appears in the set.
+        </ProjectNote>
+      </ProjectSection>
+
+      <ProjectSection id="eval-results" title="What changed">
+        <RewriterJudgeScores />
+        <p>
+          The biggest gain is where it was needed. At ages 6 to 8, the passages that pass every
+          score went from 10 of 24 to 16, and level fit went from 3.92 to 4.42. The older levels
+          moved less, and ages 9 to 11 is within the noise. Flow is still the weakest score at the
+          three younger levels, because the judge still finds some passages choppy, so that&rsquo;s
+          next.
+        </p>
+      </ProjectSection>
+
+      <ProjectSection id="models" title="Trying other models">
+        <p>
+          With the prompt settled, I ran the same passages for ages 6 to 8 through the other text
+          models on Workers AI. Most of them think before they answer unless that&rsquo;s switched
+          off through their chat template, and two reject the usual setting outright, so the request
+          is now adjusted per model in one place, for live reading and batch rewrites alike.
+        </p>
+        <RewriterModelComparison />
+        <p>
+          None beat the model already in use by more than the judge&rsquo;s noise, and every one was
+          at least half as slow again. Gemma fits the age a little better but is less faithful.
+          DeepSeek V4 Pro matches the current model at three and a half times the wait. For someone
+          waiting on a page, speed decides it, so DeepSeek V4.1 Flash stays.
         </p>
       </ProjectSection>
     </>
