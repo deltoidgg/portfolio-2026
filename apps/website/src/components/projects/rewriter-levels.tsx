@@ -3,7 +3,7 @@ import { useId, useState } from "react";
 /**
  * The opening paragraph of Treasure Island, as written and as the production model rewrote it
  * for each level. Copied from Rewriter's home page demo (`passage.data.ts`, DeepSeek V4.1 Flash,
- * prompt `segments-v2`), which saves real output rather than asking a model on every visit.
+ * prompt `segments-v3`), which saves real output rather than asking a model on every visit.
  */
 const versions = [
   {
@@ -14,22 +14,22 @@ const versions = [
   {
     id: "advanced",
     label: "15 and up",
-    text: "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen have asked me to write down the whole story of Treasure Island, from beginning to end, keeping nothing back except the position of the island, and that only because there is still treasure there not yet dug up. So I take up my pen in the year of grace 17__ and go back to the time when my father kept the Admiral Benbow inn, and the brown old seaman with the sabre cut first came to lodge under our roof.",
+    text: "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen have asked me to write down the whole story of Treasure Island, from beginning to end, keeping nothing back except the location of the island, and that only because there is still treasure there that has not yet been taken. So I take up my pen in the year of grace 17__ and go back to the time when my father kept the Admiral Benbow inn, and the brown old seaman with the sabre cut first came to lodge under our roof.",
   },
   {
     id: "independent",
     label: "12 to 14",
-    text: "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen have asked me to write down the whole story of Treasure Island, from the beginning to the end. I am to keep nothing back except the bearings of the island, and that only because there is still treasure there that has not yet been taken. So I take up my pen in the year of grace 17__ and go back to the time when my father kept the Admiral Benbow inn, and the brown old seaman with the sabre cut first came to lodge under our roof.",
+    text: "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen have asked me to write down the whole story of Treasure Island, from beginning to end. I must keep nothing back except where the island lies, and only because there is still treasure there that has not been dug up. So I take up my pen in the year 17__ and go back to the time when my father kept the Admiral Benbow inn. That was when the brown old seaman with the sabre cut first came to lodge under our roof.",
   },
   {
     id: "developing",
     label: "9 to 11",
-    text: "Squire Trelawney, Dr. Livesey, and the rest of these gentlemen have asked me to write down the whole story of Treasure Island, from the beginning to the end. I must keep nothing back except where the island lies, and only because there is still treasure buried there. So I take up my pen in the year 17__ and go back to the time when my father kept the Admiral Benbow inn. That was when the brown old seaman with the sabre cut first came to lodge under our roof.",
+    text: "Squire Trelawney, Dr. Livesey, and the other gentlemen have asked me to write down the whole story of Treasure Island, from beginning to end. I must keep nothing back except where the island is, and only because there is still treasure buried there. So I take up my pen in the year 17__ and go back to the time when my father kept the Admiral Benbow inn. That was when the brown old seaman with the sabre cut first came to stay under our roof.",
   },
   {
     id: "early",
     label: "6 to 8",
-    text: "Squire Trelawney, Dr. Livesey, and the other gentlemen asked me to write down everything about Treasure Island. They want the whole story, from start to finish. I must not leave anything out, except where the island is. That stays a secret because there is still treasure buried there. So I pick up my pen in the year 17__ and go back to the time when my father ran the Admiral Benbow inn. That was when the brown old sailor with the sword scar first came to stay under our roof.",
+    text: "Squire Trelawney, Dr. Livesey, and the other gentlemen asked me to write down the whole story of Treasure Island. I must tell it all, from start to finish. I will hide only where the island is. I hide that because there is still treasure there. So I take up my pen. The year is 17__. I go back to the time when my father ran the Admiral Benbow inn. That was when the old brown sailor first came to stay with us. He had a scar from a sword cut on his face.",
   },
 ] as const;
 
