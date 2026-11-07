@@ -73,8 +73,8 @@ export function RewriterThemes() {
   );
 }
 
-/** Estimated source tokens in each part of a made-up chapter. */
-const parts = [1180, 1320, 1240, 640];
+/** Estimated source tokens in each part of a made-up chapter. The first part is kept short. */
+const parts = [460, 1180, 1320, 1240, 640];
 const total = parts.reduce((sum, part) => sum + part, 0);
 const starts = parts.map((_, index) => parts.slice(0, index).reduce((sum, part) => sum + part, 0));
 
@@ -86,7 +86,7 @@ const stateLabels: Record<PartState, string> = {
 };
 
 export function RewriterSegments() {
-  const [position, setPosition] = useState(10);
+  const [position, setPosition] = useState(5);
   const id = useId();
   const reached = (position / 100) * total;
   const current = Math.max(
@@ -134,9 +134,9 @@ export function RewriterSegments() {
           : `All ${parts.length} parts rewritten. They’re stored, so the next reader at this level gets them for free.`}
       </p>
       <figcaption>
-        A chapter split into parts of about a page. The split is planned when the book is compiled,
-        and it never cuts a paragraph in half. The chapter here is made up; the rule is the real
-        one.
+        A chapter split into parts of about a page, with a shorter first one so the opening arrives
+        sooner. The split is planned when the book is compiled, and it never cuts a paragraph in
+        half. The chapter here is made up; the rule is the real one.
       </figcaption>
     </figure>
   );
@@ -261,11 +261,12 @@ export function RewriterMissSteps() {
         },
         {
           title: "Ask the model",
-          detail: "Numbered plain-text paragraphs in, the same numbers back as JSON.",
+          detail: "Numbered plain-text paragraphs in, the same numbers streamed back as JSON.",
         },
         {
           title: "Check every paragraph",
-          detail: "Re-ask only for the ones that fail. Fail twice and it shows the original.",
+          detail:
+            "Each one as it arrives, then straight to the reader. Re-ask only for the ones that fail.",
         },
         {
           title: "Store it for good",

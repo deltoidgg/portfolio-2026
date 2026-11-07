@@ -193,6 +193,13 @@ function DesignTab() {
           above the page, so the real text changes at once and a screen reader never sees the
           animation. With reduced motion, it&rsquo;s a plain fade.
         </p>
+        <p>
+          That&rsquo;s for a part that&rsquo;s already stored. A part being rewritten for the first
+          time arrives a paragraph at a time, so the page changes a paragraph at a time too. The
+          paragraphs about to change step back to 60% opacity, a small bookmark-shaped mark breathes
+          in the margin beside the one being written, and each new paragraph fades in where its
+          original was. The pages re-measure quietly as each one lands.
+        </p>
       </ProjectSection>
 
       <ProjectSection id="turn" title="Pages that turn like paper">
@@ -253,8 +260,9 @@ function TechnicalTab() {
         <p>
           The first version rewrote a whole chapter in one request that could take 45 seconds, and
           kept the result in Redis for 30 days. Now each chapter is split into parts of about 1,200
-          tokens, roughly a page. A part is only rewritten when someone reaches it, plus one part
-          ahead so the next page is ready.
+          tokens, roughly a page. The first part is shorter, about 450 tokens and never more than
+          700, so the opening spread is ready sooner. A part is only rewritten when someone reaches
+          it, plus one part ahead so the next page is ready.
         </p>
         <RewriterSegments />
         <p>
@@ -275,10 +283,19 @@ function TechnicalTab() {
         <RewriterMissSteps />
         <p>
           Each paragraph is checked on its own. It can&rsquo;t be missing or empty, it has to stay
-          within a length range for its level, it has to keep every proper name and its speech
-          marks, and it can&rsquo;t contain markup or chatter like &ldquo;Here&rsquo;s the
-          rewrite&rdquo;. Only the paragraphs that fail go back for a second try, so one bad
-          paragraph doesn&rsquo;t cost the whole part.
+          within a length range for its level, it should keep its proper names and speech marks, and
+          it can&rsquo;t contain markup or chatter like &ldquo;Here&rsquo;s the rewrite&rdquo;. Only
+          the paragraphs that fail go back for a second try, so one bad paragraph doesn&rsquo;t cost
+          the whole part.
+        </p>
+        <p>
+          That also means a paragraph can be shown as soon as it&rsquo;s written. The answer streams
+          from Workers AI, each paragraph is picked out of the arriving JSON as its object closes,
+          and once it passes the same checks it goes straight to the reader, as NDJSON from the same
+          two routes when the browser asks with <code>Accept: application/x-ndjson</code>. The first
+          paragraph now arrives in about 3 seconds instead of 10 to 12, and the first spread is
+          complete in about 4. A paragraph that fails waits for the second try, so nothing on the
+          page is taken back unless the whole part fails.
         </p>
         <ProjectNote title="No HTML from the model.">
           The reply is escaped before it&rsquo;s stored, and the page rebuilds the paragraphs,
